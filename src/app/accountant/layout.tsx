@@ -22,6 +22,7 @@ const navItems = [
     href: "/accountant/projections",
   },
   { icon: "analytics", label: "Data Insights", href: "/accountant/insights" },
+  { icon: "settings", label: "Settings", href: "/accountant/settings" },
 ];
 
 export default function AccountantLayout({

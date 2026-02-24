@@ -24,6 +24,7 @@ const navItems = [
   { icon: "analytics", label: "FCR Insights", href: "/manager/fcr-insights" },
   { icon: 'payments', label: 'Fund Requests', href: '/manager/requests' },
   { icon: 'vaccines', label: 'Vaccinations', href: '/manager/vaccinations' },
+  { icon: 'settings', label: 'Settings', href: '/manager/settings' },
 ];
 
 export default function ManagerLayout({

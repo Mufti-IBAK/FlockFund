@@ -13,7 +13,7 @@ export default function AccountantAssets() {
         const supabase = createClient();
         const { data } = await supabase
           .from('fund_requests')
-          .select('*, flocks(flock_name, name), profiles(full_name)')
+          .select('*, flocks(flock_name, name), profiles!fund_requests_requester_id_fkey(full_name)')
           .eq('status', 'processed')
           .order('updated_at', { ascending: false });
         
