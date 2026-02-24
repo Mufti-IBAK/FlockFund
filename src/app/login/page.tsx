@@ -119,6 +119,7 @@ export default function LoginPage() {
           admin: "/admin",
           farm_manager: "/manager",
           keeper: "/keeper",
+          accountant: "/accountant",
           investor: "/investor",
         };
 

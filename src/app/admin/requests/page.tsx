@@ -8,6 +8,28 @@ export default function AdminFundRequests() {
 
   useEffect(() => {
     loadRequests();
+
+    // Realtime subscription
+    let channel: any = null;
+    async function subscribe() {
+      const { createClient } = await import('@/lib/supabase/client');
+      const supabase = createClient();
+      channel = supabase
+        .channel('admin-requests-sync')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'fund_requests' }, () => {
+          loadRequests();
+        })
+        .subscribe();
+    }
+    subscribe();
+
+    return () => {
+      if (channel) {
+        import('@/lib/supabase/client').then(({ createClient }) => {
+          createClient().removeChannel(channel);
+        });
+      }
+    };
   }, []);
 
   async function loadRequests() {
@@ -33,7 +55,7 @@ export default function AdminFundRequests() {
       const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();
 
-      const { error } = await supabase
+      const { data: requestData, error } = await supabase
         .from('fund_requests')
         .update({
           status: action,
@@ -41,9 +63,37 @@ export default function AdminFundRequests() {
           approved_by: user?.id,
           updated_at: new Date().toISOString()
         })
-        .eq('id', id);
+        .eq('id', id)
+        .select('requester_id, category, amount')
+        .single();
 
       if (error) throw error;
+
+      // Notify Requester
+      if (requestData) {
+        await supabase.from('notifications').insert({
+          user_id: requestData.requester_id,
+          title: action === 'approved' ? '✅ Request Approved' : '❌ Request Rejected',
+          message: `Your request for ₦${Number(requestData.amount).toLocaleString()} (${requestData.category}) has been ${action}.`,
+          type: 'system',
+          redirect_url: '/keeper/requests'
+        });
+
+        // If approved, notify Accountants
+        if (action === 'approved') {
+          const { data: accountants } = await supabase.from('profiles').select('id').eq('role', 'accountant');
+          if (accountants) {
+            const accNotifs = accountants.map(acc => ({
+              user_id: acc.id,
+              title: '💸 New Disbursement Pending',
+              message: `A fund request for ₦${Number(requestData.amount).toLocaleString()} has been approved and is ready for payment.`,
+              type: 'payment',
+              redirect_url: '/accountant/disbursements'
+            }));
+            await supabase.from('notifications').insert(accNotifs);
+          }
+        }
+      }
       loadRequests();
     } catch (err) {
       console.error(err);
