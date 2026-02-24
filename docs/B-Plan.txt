@@ -1,0 +1,474 @@
+Absolutely, Dr. Mufti — here is a **complete, development-ready product blueprint** for building the **Poultry Investment Cooperative (PIC) Web & Mobile Platform**.
+
+This is the kind of document your dev team needs to **fully understand the system**, its architecture, modules, workflows, user roles, backend logic, automations, and security requirements.
+
+I’ve structured it like a **Technical Product Specification (TPS)** so your developers can start building immediately.
+
+---
+
+# **POULTRY INVESTMENT COOPERATIVE (PIC) – FULL DIGITAL PLATFORM SPECIFICATION**
+
+### (For Developers, Product Managers & UI/UX Designers)
+
+---
+
+# **1. PRODUCT OVERVIEW**
+
+PIC is a digital poultry micro-investment platform where investors fund birds, PIC manages operations, and revenue is automatically calculated and disbursed per cycle.
+
+The platform must support:
+
+* Multiple user types (Investor, Manager, Veterinary Officer, Admin)
+* Zero offline interaction — all operations are digital
+* Investment cycle automation
+* Farm operation tracking
+* Sales tracking
+* Automated profit calculation
+* Wallet system & withdrawals
+
+---
+
+# **2. USER TYPES & PERMISSIONS**
+
+## **2.1 Investor**
+
+* Create account with verification
+* Browse investment packages (10, 20, 30 birds)
+* Invest via:
+
+  * Card, Transfer, USSD, Wallet Balance
+* Track active cycle(s)
+* View real-time:
+
+  * Bird health updates
+  * Stock growth
+  * Mortality reports (buffer-protected)
+* View financial simulation per cycle
+* Reinvest or withdraw profits
+* View statements, documents & contract (MoU)
+* Raise support tickets
+
+---
+
+## **2.2 Farm Manager**
+
+* Manage multiple batches
+* Update daily stock progress
+* Upload pictures/videos daily (optional but recommended)
+* Record:
+
+  * Feed usage
+  * Mortality
+  * Medic medication
+  * Daily expenses
+* Close out cycles
+* Trigger “Ready to Sell” stage
+* Trigger “Sold” stage
+* Access performance analytics
+
+---
+
+## **2.3 Veterinary Officer**
+
+* Daily/Weekly health status reporting
+* Approve medication proposals
+* Log disease/outbreak risk levels
+* Approve cycle readiness to sell
+* Provide professional oversight
+
+---
+
+## **2.4 Admin (System Owner)**
+
+* Oversee all users
+* Add/verify DOC suppliers
+* Set DOC cost per cycle
+* Set feed cost per cycle
+* Adjust platform fees and PIC margin
+* Approve or deny withdrawals
+* Handle escalated customer issues
+* Financial reconciliation dashboard
+* Manage push notifications & broadcasts
+
+---
+
+# **3. CORE PLATFORM MODULES**
+
+Below are the essential modules your developers must build.
+
+---
+
+## **3.1 Authentication & Onboarding**
+
+* Email, phone number, or social login
+* BVN verification optional (for high-level withdrawals)
+* KYC tiers
+* Password reset
+* Two-factor authentication (optional but recommended)
+
+---
+
+## **3.2 Investment Module**
+
+This is the heart of the system.
+
+Each cycle is represented as a “BATCH”.
+
+### Workflow:
+
+1. Investor selects tier (10, 20, or 30 birds)
+2. System computes cost dynamically based on:
+
+   * Current DOC price
+   * Current feed price
+   * Updated overhead
+3. Investor pays
+4. System generates:
+
+   * Investment ID
+   * MoU PDF
+   * Start Date
+   * End Date (28 days later)
+5. Investor sees countdown + progress bar
+6. System auto-calculates expected returns for:
+
+   * Target price (₦10,000)
+   * Market Floor (₦8,000)
+
+### Investment statuses:
+
+* **Pending Payment**
+* **Active**
+* **In Grow-Out**
+* **Ready to Sell**
+* **Sold**
+* **Completed / Payout Ready**
+* **Closed**
+
+---
+
+## **3.3 Farm Operations Module**
+
+The platform digitizes the farm for seamless oversight.
+
+### Daily Entry Fields:
+
+* Number of birds alive
+* Mortality count
+* Feed usage (grams & bag equivalent)
+* Medication administered
+* Pictures/videos of birds (if included)
+* Temperature & humidity (manual entry)
+* Notes by manager
+
+**Analytics generated:**
+
+* Mortality %
+* Feed conversion ratio (FCR)
+* Weekly growth curve
+* Veterinary notes summary
+
+---
+
+## **3.4 Veterinary Oversight Module**
+
+* Approve/reject health reports
+* Recommend treatments
+* Log diseases detected
+* Approve final health clearance for sale
+* Outbreak flagging system:
+
+  Levels: **Safe → Watch → Alert → Outbreak → Under Control**
+
+If **Alert/Outbreak**, system automatically:
+
+* Notifies all involved investors
+* Calculates risk effect
+* Triggers veterinary intervention log
+
+---
+
+## **3.5 Sales & Market Module**
+
+Manages the sale of birds at 4 weeks.
+
+Admin decides:
+
+* Sell price (₦10,000 target OR fallback to ₦8,000 floor)
+* Quantity sold
+* Buyer details
+* Transaction confirmation
+
+Once sale is confirmed:
+
+* Admin sets “Batch Sold”
+* System computes profit automatically:
+  Profit = Revenue – (Cost + PIC Margin)
+
+---
+
+## **3.6 Wallet & Payments System**
+
+### Investor Wallet:
+
+* Balance
+* Pending payouts
+* Withdrawal requests
+* Reinvestment button
+* Bank details
+* Transaction history
+
+### Features:
+
+* Automatic credit after cycle completion
+* Deduction on investment
+* Charges imposed automatically
+* Admin can bulk pay-out
+
+---
+
+## **3.7 Document System**
+
+Automatically generate downloadable PDFs:
+
+* Signed MoU
+* Receipt of investment
+* Statement of transactions
+* End-of-Cycle report
+
+  * Mortality
+  * Final revenue
+  * Profit calculation
+  * Vet report
+  * Manager report
+
+---
+
+## **3.8 Notifications Module**
+
+Must include:
+
+* SMS
+* Email
+* Push notification
+* WhatsApp API (optional for premium tier)
+
+Triggers:
+
+* Investment confirmation
+* Cycle updates
+* Manager reports
+* Vet updates
+* Sale completed
+* Payout ready
+* Withdrawal approved
+
+---
+
+# **4. SYSTEM ARCHITECTURE**
+
+To make development easy and scalable:
+
+## **4.1 Backend (Recommended)**
+
+* **Node.js (NestJS)** or **Django (Python)**
+* PostgreSQL or MongoDB
+* Redis for caching
+* Cloud storage (AWS S3 or Cloudinary)
+
+## **4.2 Frontend**
+
+**Web App:**
+
+* React (Next.js recommended)
+* TailwindCSS
+* Admin dashboard on same framework
+
+**Mobile App:**
+
+* React Native or Flutter
+
+---
+
+# **5. DATABASE MODELS (ERD BLUEPRINT)**
+
+### 1. Users
+
+### 2. KYC
+
+### 3. Investments
+
+### 4. Cycles / Batches
+
+### 5. DailyFarmUpdates
+
+### 6. VetReports
+
+### 7. Sales
+
+### 8. Wallet
+
+### 9. Transactions
+
+### 10. Notifications
+
+### 11. DOC Pricing Table
+
+### 12. Feed Pricing Table
+
+### 13. System Settings
+
+### 14. MoU Records
+
+Each model must include **timestamps, status fields, and user references**.
+
+---
+
+# **6. AUTOMATED SYSTEM LOGIC**
+
+## **6.1 Cycle Start Logic**
+
+* Starts once payment is confirmed
+* Assigns birds to batch
+* Links manager & vet
+
+---
+
+## **6.2 Daily Auto-Checks**
+
+* If no farm update after 24 hours → send reminder
+* If mortality > buffer → alert admin + investor
+* If feed usage abnormal → vet notified
+* If vet fails to approve weekly health → manager blocked from closing cycle
+* If cycle reaches Day 28 → auto-notify admin: “Ready to Sell”
+
+---
+
+## **6.3 Profit Computation Logic**
+
+```
+TotalRevenue = (BirdsSold * SalePrice)
+NetProfit = TotalRevenue - (TotalCost + PICMarginInclusive)
+InvestorProfit = NetProfit * InvestorProfitShare
+```
+
+**InvestorProfitShare stays fixed based on PIC margin.**
+
+---
+
+## **6.4 Withdrawal Logic**
+
+* Investor requests withdrawal
+* Admin approves
+* Automated debit from wallet
+* Bank payout using integrated API (Paystack/Monnify)
+
+---
+
+# **7. ADMIN DASHBOARD FEATURES**
+
+### **Overview Widgets**
+
+* Total investors
+* Total birds in system
+* Mortality overview
+* Current cycle profitability
+* Wallet balance
+* Pending withdrawals
+
+### **Farm Management**
+
+* Batch tracker
+* Mortality watch
+* Feed usage dashboard
+
+### **Financial Dashboard**
+
+* Sales & profit per batch
+* PIC operational margin report
+* Expense tracking
+
+### **Advanced Features**
+
+* Ability to freeze any user
+* Force-close cycle
+* Edit DOC/feed prices globally
+* Upload accounting sheets
+
+---
+
+# **8. SECURITY REQUIREMENTS**
+
+* Encrypted passwords (bcrypt/scrypt)
+* JWT Authentication
+* Role-based access control (RBAC)
+* SSL/HTTPS mandatory
+* Rate limiting
+* Sensitive data encryption
+* Audit logs for admin actions
+* Backup & recovery plan
+
+---
+
+# **9. UI/UX REQUIREMENTS**
+
+The platform must be:
+
+* Clean
+* Minimalistic
+* Mobile-first
+* Easy for non-tech investors
+
+### Core UI Flows:
+
+* Signup → Verify → Dashboard
+* Select package → Pay → Track cycle
+* View reports → Reinvest → Withdraw
+
+---
+
+# **10. DELIVERY ROADMAP FOR DEVELOPMENT TEAM**
+
+### **Phase 1 – Core MVP (4–6 weeks)**
+
+* Auth
+* Investment module
+* Dashboard (Investor + Admin)
+* Wallet & payments
+* Daily farm updates
+* Sales module
+* Payouts
+
+### **Phase 2 – Operational Automation (3–4 weeks)**
+
+* Vet module
+* Notifications
+* MoU generator
+* Reports system
+
+### **Phase 3 – Scaling & Mobile App (6–8 weeks)**
+
+* Mobile app
+* Advanced analytics
+* 3rd-party integrations
+* Multi-location farm support
+
+---
+
+# **11. FINAL DELIVERY EXPECTATION**
+
+Your dev team must deliver:
+
+1. **Responsive website**
+2. **Android + iOS mobile app**
+3. **Admin dashboard**
+4. **Stable backend with automated processes**
+5. **Accounting-ready reporting**
+6. **High security infrastructure**
+7. **Integrations with payment gateways**
+8. **Automated document generation**
+
+---
+
+
+

@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Investor Portfolio Dashboard | FlockFund</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Plus+Jakarta+Sans:wght@600;700;800&amp;family=JetBrains+Mono:wght@500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#19382d",
+                        "background-light": "#FDFBF7",
+                        "background-dark": "#151d1a",
+                        "charcoal": "#1E1E1E",
+                        "teal-accent": "#2D9CDB",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"],
+                        "heading": ["Plus Jakarta Sans", "sans-serif"],
+                        "mono": ["JetBrains Mono", "monospace"],
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.75rem",
+                        "lg": "2rem",
+                        "xl": "3rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #FDFBF7;
+        }
+        h1, h2, h3 {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        .metric-value {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .sidebar-item-active {
+            background-color: #19382d;
+            color: white;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+    </style>
+</head>
+<body class="bg-background-light text-slate-900 overflow-x-hidden">
+<div class="flex h-screen overflow-hidden">
+<!-- Sidebar -->
+<aside class="w-64 bg-charcoal flex flex-col h-full text-white shrink-0">
+<div class="p-8 flex items-center gap-3">
+<div class="size-10 bg-primary rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined text-white">agriculture</span>
+</div>
+<div>
+<h1 class="text-xl font-extrabold tracking-tight">FlockFund</h1>
+<p class="text-[10px] uppercase tracking-widest text-slate-400 font-bold">Premium Agritech</p>
+</div>
+</div>
+<nav class="flex-1 px-4 space-y-2 mt-4">
+<a class="flex items-center gap-3 px-4 py-3 rounded-full sidebar-item-active transition-all group" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="text-sm font-medium">Portfolio</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-full text-slate-400 hover:bg-white/5 hover:text-white transition-all group" href="#">
+<span class="material-symbols-outlined">sensors</span>
+<span class="text-sm font-medium">Farm Feed</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-full text-slate-400 hover:bg-white/5 hover:text-white transition-all group" href="#">
+<span class="material-symbols-outlined">storefront</span>
+<span class="text-sm font-medium">Market</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-full text-slate-400 hover:bg-white/5 hover:text-white transition-all group" href="#">
+<span class="material-symbols-outlined">insights</span>
+<span class="text-sm font-medium">Analytics</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-full text-slate-400 hover:bg-white/5 hover:text-white transition-all group" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="text-sm font-medium">Settings</span>
+</a>
+</nav>
+<div class="p-6">
+<button class="w-full bg-primary hover:bg-primary/90 text-white rounded-full py-4 flex items-center justify-center gap-2 font-bold text-sm shadow-xl transition-all">
+<span class="material-symbols-outlined text-lg">add_circle</span>
+                    New Investment
+                </button>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 overflow-y-auto bg-background-light">
+<!-- Header -->
+<header class="flex items-center justify-between px-10 py-6 sticky top-0 bg-background-light/80 backdrop-blur-md z-10 border-b border-slate-100">
+<div class="flex items-center gap-8 w-1/2">
+<div class="relative w-full max-w-md">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">search</span>
+<input class="w-full bg-white border-none rounded-full pl-12 pr-4 py-2.5 text-sm focus:ring-2 focus:ring-primary/20 placeholder:text-slate-400 shadow-sm" placeholder="Search flocks, reports, or farm updates..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<button class="relative p-2 text-slate-500 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-2 right-2 size-2 bg-red-500 rounded-full border-2 border-white"></span>
+</button>
+<div class="flex items-center gap-3 pl-6 border-l border-slate-200">
+<div class="text-right">
+<p class="text-sm font-bold">Julian Vane</p>
+<p class="text-xs text-slate-500">Platinum Member</p>
+</div>
+<div class="size-10 rounded-full bg-primary/10 border border-primary/20 overflow-hidden shadow-inner">
+<img alt="User Profile" class="w-full h-full object-cover" data-alt="Portrait of a professional investor avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBA1NOJ3Mz_erzSRaoqXTJcsOZXvotxuQPTW6fqCuCT8a50NHzqylida8qv9YHJ80-P5WUaZsp7Sy-_xGuCCnZ44PwbS9mqo9m-YSkFaOne35Mqz-0o08ZqW_0Xwb1kRAmNRhyzymmtX2fZg3EuN3xys-5-i5iS3aSPctsezt_k9avt1YT6fn47tv-gufCMZlymuQZdXgiqR7E7p0ILxleoUxZ1ZmRlSbd8AAMCXJst_zg8KS9JRZSqkgVh7A5Lrj0jhSU8oI0axUaM"/>
+</div>
+</div>
+</div>
+</header>
+<div class="p-10 max-w-7xl mx-auto space-y-8">
+<!-- Hero Portfolio Card -->
+<section class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+<div class="lg:col-span-2 bg-white rounded-xl p-8 shadow-sm border border-slate-100 flex flex-col justify-between min-h-[320px]">
+<div class="flex justify-between items-start">
+<div>
+<h3 class="text-slate-500 text-sm font-semibold uppercase tracking-wider">Total Portfolio Valuation</h3>
+<p class="text-5xl font-mono font-bold mt-2 text-primary">€14,250.60</p>
+<div class="flex items-center gap-2 mt-2 text-emerald-600 font-bold">
+<span class="material-symbols-outlined">trending_up</span>
+<span>+12.5% this month</span>
+</div>
+</div>
+<div class="bg-primary/5 p-4 rounded-xl border border-primary/10">
+<p class="text-xs font-bold text-primary/60 uppercase">Bird Inventory</p>
+<p class="text-2xl font-mono font-bold text-primary">1,250</p>
+</div>
+</div>
+<!-- Sparkline placeholder -->
+<div class="mt-8 h-32 w-full relative">
+<svg class="w-full h-full preserve-3d" viewbox="0 0 400 100">
+<defs>
+<lineargradient id="gradient" x1="0%" x2="0%" y1="0%" y2="100%">
+<stop offset="0%" style="stop-color:#2D9CDB;stop-opacity:0.2"></stop>
+<stop offset="100%" style="stop-color:#2D9CDB;stop-opacity:0"></stop>
+</lineargradient>
+</defs>
+<path d="M0,80 Q50,70 100,40 T200,60 T300,20 T400,10 V100 H0 Z" fill="url(#gradient)"></path>
+<path d="M0,80 Q50,70 100,40 T200,60 T300,20 T400,10" fill="none" stroke="#2D9CDB" stroke-linecap="round" stroke-width="4"></path>
+</svg>
+</div>
+</div>
+<!-- Right Quick Stats -->
+<div class="flex flex-col gap-4">
+<div class="bg-charcoal text-white rounded-xl p-6 flex flex-col justify-center flex-1">
+<p class="text-slate-400 text-xs font-bold uppercase tracking-widest">Projected Annual Yield</p>
+<p class="text-3xl font-mono font-bold mt-1 text-white">€16,800.00</p>
+<p class="text-sm text-emerald-400 mt-2">Next harvest: 12 days</p>
+</div>
+<div class="bg-white rounded-xl p-6 border border-slate-100 shadow-sm flex-1">
+<div class="flex items-center justify-between">
+<p class="text-slate-500 text-xs font-bold uppercase tracking-widest">Global Ranking</p>
+<span class="material-symbols-outlined text-amber-500">emoji_events</span>
+</div>
+<p class="text-3xl font-heading font-bold mt-1">#42<span class="text-sm text-slate-400 font-normal ml-2">/ 1,204</span></p>
+<div class="mt-4 flex gap-1">
+<div class="h-1 flex-1 bg-amber-400 rounded-full"></div>
+<div class="h-1 flex-1 bg-amber-400 rounded-full"></div>
+<div class="h-1 flex-1 bg-amber-400 rounded-full"></div>
+<div class="h-1 flex-1 bg-slate-100 rounded-full"></div>
+</div>
+</div>
+</div>
+</section>
+<!-- Active Investments Grid -->
+<section>
+<div class="flex items-center justify-between mb-6">
+<h2 class="text-2xl font-heading font-extrabold text-charcoal">Active Flocks</h2>
+<button class="text-primary text-sm font-bold flex items-center gap-1 hover:underline">
+                            View All Assets <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</button>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+<!-- Flock Card 1 -->
+<div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 group hover:shadow-md transition-all">
+<div class="flex justify-between items-start mb-4">
+<div class="bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-tighter">Healthy</div>
+<span class="material-symbols-outlined text-slate-300 group-hover:text-primary transition-colors cursor-pointer">videocam</span>
+</div>
+<h4 class="font-heading font-bold text-lg">Flock #204 - Premium</h4>
+<p class="text-slate-500 text-xs mb-6">Location: Barn A, Sector 4</p>
+<div class="space-y-4">
+<div>
+<div class="flex justify-between text-xs mb-1 font-bold">
+<span class="text-slate-400">Growth Progress</span>
+<span class="text-primary">85%</span>
+</div>
+<div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+<div class="bg-primary h-full w-[85%] rounded-full"></div>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-4 border-t border-slate-50 pt-4">
+<div>
+<p class="text-[10px] text-slate-400 uppercase font-bold">Avg Weight</p>
+<p class="font-mono text-sm font-bold">2.45kg</p>
+</div>
+<div>
+<p class="text-[10px] text-slate-400 uppercase font-bold">Days Left</p>
+<p class="font-mono text-sm font-bold">04</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Flock Card 2 -->
+<div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 group hover:shadow-md transition-all">
+<div class="flex justify-between items-start mb-4">
+<div class="bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-tighter">Healthy</div>
+<span class="material-symbols-outlined text-slate-300 group-hover:text-primary transition-colors cursor-pointer">videocam</span>
+</div>
+<h4 class="font-heading font-bold text-lg">Flock #211 - Heritage</h4>
+<p class="text-slate-500 text-xs mb-6">Location: Barn C, Sector 2</p>
+<div class="space-y-4">
+<div>
+<div class="flex justify-between text-xs mb-1 font-bold">
+<span class="text-slate-400">Growth Progress</span>
+<span class="text-primary">42%</span>
+</div>
+<div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+<div class="bg-primary h-full w-[42%] rounded-full"></div>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-4 border-t border-slate-50 pt-4">
+<div>
+<p class="text-[10px] text-slate-400 uppercase font-bold">Avg Weight</p>
+<p class="font-mono text-sm font-bold">1.12kg</p>
+</div>
+<div>
+<p class="text-[10px] text-slate-400 uppercase font-bold">Days Left</p>
+<p class="font-mono text-sm font-bold">22</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Flock Card 3 -->
+<div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 group hover:shadow-md transition-all">
+<div class="flex justify-between items-start mb-4">
+<div class="bg-amber-50 text-amber-700 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-tighter">Check Required</div>
+<span class="material-symbols-outlined text-slate-300 group-hover:text-primary transition-colors cursor-pointer">videocam</span>
+</div>
+<h4 class="font-heading font-bold text-lg">Flock #215 - Broiler</h4>
+<p class="text-slate-500 text-xs mb-6">Location: Barn B, Sector 1</p>
+<div class="space-y-4">
+<div>
+<div class="flex justify-between text-xs mb-1 font-bold">
+<span class="text-slate-400">Growth Progress</span>
+<span class="text-primary">12%</span>
+</div>
+<div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+<div class="bg-primary h-full w-[12%] rounded-full"></div>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-4 border-t border-slate-50 pt-4">
+<div>
+<p class="text-[10px] text-slate-400 uppercase font-bold">Avg Weight</p>
+<p class="font-mono text-sm font-bold">0.34kg</p>
+</div>
+<div>
+<p class="text-[10px] text-slate-400 uppercase font-bold">Days Left</p>
+<p class="font-mono text-sm font-bold">38</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+<!-- Farm Activity Feed -->
+<div class="lg:col-span-2 space-y-6">
+<h2 class="text-2xl font-heading font-extrabold text-charcoal">Farm Activity Feed</h2>
+<div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+<div class="p-6 border-b border-slate-50 flex items-center justify-between bg-slate-50/30">
+<div class="flex gap-4">
+<div class="flex items-center gap-1.5 px-3 py-1 bg-white rounded-full border border-slate-100 shadow-sm">
+<span class="size-2 bg-emerald-500 rounded-full animate-pulse"></span>
+<span class="text-[10px] font-bold text-slate-600 uppercase">Live Telemetry</span>
+</div>
+<div class="flex items-center gap-3 text-xs text-slate-500 font-medium">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">thermostat</span> 24°C</span>
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">humidity_mid</span> 60%</span>
+</div>
+</div>
+<span class="text-[10px] text-slate-400 font-mono">Last update: 2m ago</span>
+</div>
+<div class="divide-y divide-slate-50">
+<div class="p-6 flex gap-4 hover:bg-slate-50/50 transition-colors">
+<div class="size-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-primary text-xl">scale</span>
+</div>
+<div>
+<p class="text-sm font-bold text-slate-800">Batch Weight Recorded</p>
+<p class="text-xs text-slate-500 mt-0.5">Automated scales in Barn A registered an average increase of +45g in Flock #204. Optimal growth curve maintained.</p>
+<p class="text-[10px] text-slate-400 mt-2 font-semibold">12:30 PM • IOT SENSOR #A-102</p>
+</div>
+</div>
+<div class="p-6 flex gap-4 hover:bg-slate-50/50 transition-colors">
+<div class="size-10 rounded-full bg-blue-50 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-blue-600 text-xl">water_drop</span>
+</div>
+<div>
+<p class="text-sm font-bold text-slate-800">Automated Hydration Check</p>
+<p class="text-xs text-slate-500 mt-0.5">Water consumption levels are within normal range for the current temperature profile (24°C).</p>
+<p class="text-[10px] text-slate-400 mt-2 font-semibold">11:15 AM • HYDRA-SYSTEM V2</p>
+</div>
+</div>
+<div class="p-6 flex gap-4 hover:bg-slate-50/50 transition-colors">
+<div class="size-10 rounded-full bg-amber-50 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-amber-600 text-xl">inventory_2</span>
+</div>
+<div>
+<p class="text-sm font-bold text-slate-800">Feed Delivery Confirmed</p>
+<p class="text-xs text-slate-500 mt-0.5">400kg of premium high-protein broiler feed delivered and loaded into silos 1 &amp; 2.</p>
+<p class="text-[10px] text-slate-400 mt-2 font-semibold">09:00 AM • LOGISTICS DEPT</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Badges & Leaderboard -->
+<div class="space-y-6">
+<h2 class="text-2xl font-heading font-extrabold text-charcoal">Investor Status</h2>
+<div class="bg-white rounded-xl shadow-sm border border-slate-100 p-6 flex flex-col items-center text-center">
+<div class="size-24 bg-gradient-to-tr from-amber-400 to-yellow-200 rounded-full flex items-center justify-center shadow-lg mb-4 ring-8 ring-amber-50">
+<span class="material-symbols-outlined text-4xl text-amber-900">workspace_premium</span>
+</div>
+<h4 class="font-heading font-bold text-lg">Platinum Tier</h4>
+<p class="text-slate-500 text-xs mt-1">Sustainability Pioneer &amp; Early Adopter</p>
+<div class="flex gap-2 mt-6">
+<div class="size-10 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center grayscale opacity-50 hover:grayscale-0 hover:opacity-100 transition-all cursor-help" title="First Harvest">
+<span class="material-symbols-outlined text-sm">agriculture</span>
+</div>
+<div class="size-10 rounded-full bg-emerald-50 border border-emerald-100 flex items-center justify-center" title="Eco Friendly">
+<span class="material-symbols-outlined text-emerald-600 text-sm">eco</span>
+</div>
+<div class="size-10 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center" title="Data Maven">
+<span class="material-symbols-outlined text-blue-600 text-sm">analytics</span>
+</div>
+<div class="size-10 rounded-full bg-amber-50 border border-amber-100 flex items-center justify-center" title="Whale Investor">
+<span class="material-symbols-outlined text-amber-600 text-sm">savings</span>
+</div>
+</div>
+<div class="w-full mt-8 text-left">
+<p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">Top Investors this Week</p>
+<div class="space-y-3">
+<div class="flex items-center justify-between text-xs">
+<div class="flex items-center gap-2">
+<span class="font-bold text-slate-400">01</span>
+<div class="size-6 rounded-full bg-slate-200"></div>
+<span class="font-semibold">Sarah M.</span>
+</div>
+<span class="font-mono text-emerald-600">+14.2%</span>
+</div>
+<div class="flex items-center justify-between text-xs">
+<div class="flex items-center gap-2">
+<span class="font-bold text-slate-400">02</span>
+<div class="size-6 rounded-full bg-slate-200"></div>
+<span class="font-semibold">David K.</span>
+</div>
+<span class="font-mono text-emerald-600">+13.8%</span>
+</div>
+<div class="flex items-center justify-between text-xs bg-primary/5 -mx-2 px-2 py-1.5 rounded-lg border border-primary/10">
+<div class="flex items-center gap-2">
+<span class="font-bold text-primary">42</span>
+<div class="size-6 rounded-full bg-primary/20 flex items-center justify-center text-[10px] font-bold text-primary">Y</div>
+<span class="font-bold text-primary italic">You</span>
+</div>
+<span class="font-mono font-bold text-primary">+12.5%</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Footer -->
+<footer class="mt-20 px-10 py-12 bg-charcoal text-slate-400 flex flex-col md:flex-row justify-between items-center gap-6">
+<div class="flex items-center gap-3">
+<div class="size-8 bg-primary rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined text-white text-sm">agriculture</span>
+</div>
+<span class="text-white font-heading font-bold">FlockFund</span>
+</div>
+<div class="flex gap-8 text-xs font-medium uppercase tracking-widest">
+<a class="hover:text-white transition-colors" href="#">Privacy</a>
+<a class="hover:text-white transition-colors" href="#">Terms</a>
+<a class="hover:text-white transition-colors" href="#">Farm Policy</a>
+<a class="hover:text-white transition-colors" href="#">Contact Support</a>
+</div>
+<p class="text-[10px] font-mono">© 2024 FlockFund Premium Agritech. All rights reserved.</p>
+</footer>
+</main>
+</div>
+</body></html>

@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Keeper Daily Report Portal | FlockFund</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#19382d",
+                        "background-light": "#f6f7f7",
+                        "background-dark": "#151d1a",
+                        "accent-amber": "#d97706",
+                        "accent-green": "#059669",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "1rem",
+                        "lg": "1.5rem",
+                        "xl": "3rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .form-card {
+            border-radius: 24px;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: rgba(25, 56, 45, 0.1);
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen">
+<!-- Top Navigation Bar -->
+<header class="sticky top-0 z-50 bg-white/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-primary/10 px-6 lg:px-12 py-4">
+<div class="max-w-7xl mx-auto flex items-center justify-between">
+<div class="flex items-center gap-10">
+<div class="flex items-center gap-3">
+<div class="bg-primary p-2 rounded-lg text-white">
+<span class="material-symbols-outlined leading-none">agriculture</span>
+</div>
+<h1 class="text-xl font-extrabold tracking-tight text-primary">FlockFund</h1>
+</div>
+<nav class="hidden md:flex items-center gap-8">
+<a class="text-sm font-semibold text-primary/60 hover:text-primary transition-colors" href="#">Overview</a>
+<a class="text-sm font-semibold text-primary border-b-2 border-primary pb-1" href="#">Keeper Portal</a>
+<a class="text-sm font-semibold text-primary/60 hover:text-primary transition-colors" href="#">Analytics</a>
+<a class="text-sm font-semibold text-primary/60 hover:text-primary transition-colors" href="#">Resources</a>
+</nav>
+</div>
+<div class="flex items-center gap-6">
+<div class="hidden sm:flex flex-col items-end">
+<span class="text-xs font-bold uppercase tracking-widest text-primary/40">Active Batch</span>
+<span class="text-sm font-bold text-primary">Day 24 • House A7</span>
+</div>
+<div class="h-10 w-10 rounded-full border-2 border-primary/20 p-0.5 overflow-hidden">
+<img alt="Keeper Profile Picture" class="w-full h-full object-cover rounded-full" data-alt="Portrait of a professional farm keeper" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDo2KPgyre3rPQCpcRG47m3Bpn4JHblsu0OMbnikxmeOZD6eLUlLjclsIOwT-4W8lWLU-mi5THvO51tHzTwsRzzdWjuiZOKp2TAPq1px8-YqrPgMRw-5fCgHQkYl18vm6f9OINSW97qEICDk2HIuK57IlAulQcGYgKVFZhTSD2EBbVVaTahFPOO8s6ORE2mKO-sf7ipQrWfsxM4CoGvGEQiI6nd4NH1PU5MSFGa7lFAkPHGfUc_SnLBIoKYq1fYMJjnP3k2-bNj67OM"/>
+</div>
+</div>
+</div>
+</header>
+<main class="max-w-7xl mx-auto px-6 lg:px-12 py-10">
+<!-- Page Header -->
+<div class="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
+<div>
+<h2 class="text-3xl font-black text-primary tracking-tight mb-2">Daily Keeper Report</h2>
+<p class="text-primary/60 max-w-lg">Submit your daily operational metrics to maintain batch transparency and compliance. All data is securely logged to the investor ledger.</p>
+</div>
+<div class="flex gap-3">
+<button class="flex items-center gap-2 px-5 py-2.5 rounded-full border border-primary/20 text-primary font-bold text-sm bg-white hover:bg-primary/5 transition-all">
+<span class="material-symbols-outlined text-lg">history</span>
+                    Previous Logs
+                </button>
+<button class="flex items-center gap-2 px-5 py-2.5 rounded-full bg-primary text-white font-bold text-sm shadow-lg shadow-primary/20 hover:scale-[1.02] transition-all">
+<span class="material-symbols-outlined text-lg">download</span>
+                    Guidebook
+                </button>
+</div>
+</div>
+<!-- Main Form Container -->
+<section class="form-card bg-white dark:bg-slate-900 shadow-xl shadow-primary/5 p-8 lg:p-12 mb-12 border border-primary/5">
+<div class="flex items-center gap-3 mb-8 border-b border-slate-100 pb-6">
+<span class="material-symbols-outlined text-primary bg-primary/10 p-2 rounded-full">edit_note</span>
+<h3 class="text-xl font-bold text-primary">Report Submission: <span class="font-normal opacity-60">Today, Oct 24</span></h3>
+</div>
+<form class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8">
+<!-- Health Metrics -->
+<div class="space-y-6">
+<h4 class="text-sm font-black uppercase tracking-widest text-primary/40 flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">health_metrics</span>
+                        Health Metrics
+                    </h4>
+<div class="space-y-2">
+<label class="block text-sm font-bold text-primary">Mortality Count</label>
+<div class="relative">
+<input class="w-full bg-background-light border-none rounded-xl py-4 px-5 focus:ring-2 focus:ring-primary/20 text-lg font-semibold text-primary placeholder:text-primary/20 transition-all" placeholder="0" type="number"/>
+<span class="absolute right-5 top-1/2 -translate-y-1/2 text-xs font-bold text-primary/40 uppercase">Birds</span>
+</div>
+<p class="text-[11px] text-primary/40 italic">Note: Any count &gt;5 requires a secondary supervisor notification.</p>
+</div>
+<div class="space-y-2">
+<label class="block text-sm font-bold text-primary">Clinical Signs &amp; Observations</label>
+<textarea class="w-full bg-background-light border-none rounded-xl py-4 px-5 focus:ring-2 focus:ring-primary/20 text-sm font-medium text-primary placeholder:text-primary/20 transition-all resize-none" placeholder="Describe bird behavior, activity levels, or any unusual signs..." rows="4"></textarea>
+</div>
+</div>
+<!-- Environment & Nutrition -->
+<div class="space-y-6">
+<h4 class="text-sm font-black uppercase tracking-widest text-primary/40 flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">thermostat</span>
+                        Environment &amp; Nutrition
+                    </h4>
+<div class="space-y-4">
+<div class="flex justify-between items-end">
+<label class="block text-sm font-bold text-primary">Barn Temperature (°C)</label>
+<span class="text-2xl font-black text-primary">28.4°</span>
+</div>
+<div class="relative h-2 w-full bg-primary/10 rounded-full">
+<div class="absolute top-0 left-0 h-full w-[65%] bg-primary rounded-full"></div>
+<div class="absolute top-1/2 left-[65%] -translate-y-1/2 w-5 h-5 bg-primary border-4 border-white rounded-full shadow-md"></div>
+</div>
+<div class="flex justify-between text-[10px] font-bold text-primary/30 uppercase tracking-tighter">
+<span>20° Min</span>
+<span>Optimal: 26-30°</span>
+<span>35° Max</span>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-4 pt-2">
+<div class="space-y-2">
+<label class="block text-sm font-bold text-primary">Feed Consumption</label>
+<div class="relative">
+<input class="w-full bg-background-light border-none rounded-xl py-4 px-5 focus:ring-2 focus:ring-primary/20 font-semibold text-primary" placeholder="450" type="number"/>
+<span class="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-bold text-primary/40 uppercase">kg</span>
+</div>
+</div>
+<div class="space-y-2">
+<label class="block text-sm font-bold text-primary">Water Intake</label>
+<div class="relative">
+<input class="w-full bg-background-light border-none rounded-xl py-4 px-5 focus:ring-2 focus:ring-primary/20 font-semibold text-primary" placeholder="1200" type="number"/>
+<span class="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-bold text-primary/40 uppercase">Ltrs</span>
+</div>
+</div>
+</div>
+<div class="pt-4">
+<button class="w-full py-5 bg-primary text-white rounded-full font-black text-lg shadow-xl shadow-primary/30 hover:shadow-2xl hover:scale-[1.01] active:scale-[0.99] transition-all flex items-center justify-center gap-3" type="submit">
+<span class="material-symbols-outlined">verified</span>
+                            Submit Report to Ledger
+                        </button>
+</div>
+</div>
+</form>
+</section>
+<!-- My Reports Table Section -->
+<section class="space-y-6">
+<div class="flex items-center justify-between">
+<h3 class="text-xl font-extrabold text-primary tracking-tight">Recent Activity Log</h3>
+<div class="flex items-center gap-2 text-xs font-bold text-primary/40 uppercase">
+<span class="w-2 h-2 rounded-full bg-accent-green"></span> Live Ledger Status: Syncing
+                </div>
+</div>
+<div class="overflow-hidden bg-white rounded-lg border border-primary/5 shadow-sm">
+<table class="w-full text-left">
+<thead>
+<tr class="border-b border-primary/5 bg-background-light/50">
+<th class="px-6 py-4 text-xs font-black uppercase tracking-widest text-primary/40">Report Date</th>
+<th class="px-6 py-4 text-xs font-black uppercase tracking-widest text-primary/40">Batch Day</th>
+<th class="px-6 py-4 text-xs font-black uppercase tracking-widest text-primary/40">Mortality</th>
+<th class="px-6 py-4 text-xs font-black uppercase tracking-widest text-primary/40">Feed Vol.</th>
+<th class="px-6 py-4 text-xs font-black uppercase tracking-widest text-primary/40">House Temp</th>
+<th class="px-6 py-4 text-xs font-black uppercase tracking-widest text-primary/40">Status</th>
+<th class="px-6 py-4 text-xs font-black uppercase tracking-widest text-primary/40">Action</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-primary/5">
+<tr class="hover:bg-primary/5 transition-colors group">
+<td class="px-6 py-5">
+<span class="block text-sm font-bold text-primary">Oct 23, 2023</span>
+<span class="text-[10px] text-primary/40">Submitted at 18:42</span>
+</td>
+<td class="px-6 py-5 text-sm font-bold text-primary/60 italic">Day 23</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-2">
+<span class="text-sm font-bold text-primary">02</span>
+<span class="w-12 h-1 bg-primary/5 rounded-full relative overflow-hidden">
+<span class="absolute top-0 left-0 h-full w-1/3 bg-accent-green"></span>
+</span>
+</div>
+</td>
+<td class="px-6 py-5 text-sm font-bold text-primary">442 kg</td>
+<td class="px-6 py-5 text-sm font-bold text-primary">28.1°C</td>
+<td class="px-6 py-5">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-accent-green/10 text-accent-green text-[10px] font-black uppercase tracking-widest">
+<span class="w-1 h-1 rounded-full bg-accent-green"></span> Approved
+                                </span>
+</td>
+<td class="px-6 py-5">
+<button class="text-primary/40 group-hover:text-primary transition-colors">
+<span class="material-symbols-outlined">visibility</span>
+</button>
+</td>
+</tr>
+<tr class="hover:bg-primary/5 transition-colors group">
+<td class="px-6 py-5">
+<span class="block text-sm font-bold text-primary">Oct 22, 2023</span>
+<span class="text-[10px] text-primary/40">Submitted at 17:15</span>
+</td>
+<td class="px-6 py-5 text-sm font-bold text-primary/60 italic">Day 22</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-2">
+<span class="text-sm font-bold text-primary">04</span>
+<span class="w-12 h-1 bg-primary/5 rounded-full relative overflow-hidden">
+<span class="absolute top-0 left-0 h-full w-2/3 bg-accent-amber"></span>
+</span>
+</div>
+</td>
+<td class="px-6 py-5 text-sm font-bold text-primary">438 kg</td>
+<td class="px-6 py-5 text-sm font-bold text-primary">27.9°C</td>
+<td class="px-6 py-5">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-accent-amber/10 text-accent-amber text-[10px] font-black uppercase tracking-widest">
+<span class="w-1 h-1 rounded-full bg-accent-amber"></span> Pending
+                                </span>
+</td>
+<td class="px-6 py-5">
+<button class="text-primary/40 group-hover:text-primary transition-colors">
+<span class="material-symbols-outlined">visibility</span>
+</button>
+</td>
+</tr>
+<tr class="hover:bg-primary/5 transition-colors group">
+<td class="px-6 py-5">
+<span class="block text-sm font-bold text-primary">Oct 21, 2023</span>
+<span class="text-[10px] text-primary/40">Submitted at 19:10</span>
+</td>
+<td class="px-6 py-5 text-sm font-bold text-primary/60 italic">Day 21</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-2">
+<span class="text-sm font-bold text-primary">00</span>
+<span class="w-12 h-1 bg-primary/5 rounded-full relative overflow-hidden">
+<span class="absolute top-0 left-0 h-full w-0 bg-accent-green"></span>
+</span>
+</div>
+</td>
+<td class="px-6 py-5 text-sm font-bold text-primary">435 kg</td>
+<td class="px-6 py-5 text-sm font-bold text-primary">28.5°C</td>
+<td class="px-6 py-5">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-accent-green/10 text-accent-green text-[10px] font-black uppercase tracking-widest">
+<span class="w-1 h-1 rounded-full bg-accent-green"></span> Approved
+                                </span>
+</td>
+<td class="px-6 py-5">
+<button class="text-primary/40 group-hover:text-primary transition-colors">
+<span class="material-symbols-outlined">visibility</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="px-6 py-4 bg-background-light/30 border-t border-primary/5 flex items-center justify-between">
+<p class="text-xs font-bold text-primary/40 uppercase tracking-widest">Showing last 3 submissions</p>
+<button class="text-sm font-black text-primary hover:underline">View All Logs</button>
+</div>
+</div>
+</section>
+</main>
+<footer class="max-w-7xl mx-auto px-6 lg:px-12 py-12 border-t border-primary/5 mt-12 flex flex-col md:flex-row justify-between items-center gap-6">
+<div class="flex items-center gap-2 opacity-30 grayscale">
+<span class="material-symbols-outlined text-lg">shield</span>
+<span class="text-[10px] font-black uppercase tracking-widest">Encrypted Ag-Fintech Network</span>
+</div>
+<div class="flex gap-8 text-[11px] font-bold text-primary/40 uppercase tracking-widest">
+<a class="hover:text-primary transition-colors" href="#">Compliance</a>
+<a class="hover:text-primary transition-colors" href="#">Privacy</a>
+<a class="hover:text-primary transition-colors" href="#">Technical Support</a>
+</div>
+<p class="text-[11px] font-bold text-primary/20 tracking-tighter">© 2024 FlockFund International. All Rights Reserved.</p>
+</footer>
+</body></html>

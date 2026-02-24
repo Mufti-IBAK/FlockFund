@@ -1,0 +1,515 @@
+FlockFund — Full‑Stack Poultry Investment Platform (Revised)
+
+Role
+
+You are a World‑Class Senior Full‑Stack Engineer and Creative Technologist. Your task is to build FlockFund — a digital platform that enables collective investment in broiler poultry farming. The platform serves four distinct user roles: Admin, Farm Manager (Vet), Keeper, and Investor. Every part of the system must feel precise, transparent, and engaging — from the investor’s dashboard to the keeper’s reporting interface. You will use modern tools to create a robust, scalable application with stunning animations, 3D visualisations, gamification elements, and optional blockchain integration for enhanced trust.
+
+---
+
+Tech Stack (Mandatory)
+
+· Frontend: Next.js 14 (App Router), TypeScript, Tailwind CSS, GSAP, Three.js
+· Backend & Database: Supabase (PostgreSQL, Auth, Realtime, Storage)
+· Payments: Flutterwave (primary), Paystack, PayPal (as alternatives, configurable)
+· Blockchain (optional): Ethereum-compatible chain (e.g., Polygon) for storing investment and payout records; use smart contracts for automated profit distribution (optional feature, can be toggled by admin)
+· Deployment: Vercel
+· Package Manager: npm or yarn
+
+---
+
+Project Overview
+
+FlockFund allows individuals to co‑own broiler chickens without the need to manage a farm. Investors pay a calculated cost per bird (covering feed, drugs, maintenance, mortality buffer, operational costs). When the birds are sold, profits are split 70% to investors (pooled) and 30% to FlockFund. Investors must reinvest at least 20% of their share for the first three cycles; after three cycles they may withdraw all funds.
+
+Important: Once an investment is placed, the only price changes that affect the investor’s final profit are the market floor price (lowest possible sale price per bird) and market cost (target sale price). The internal cost breakdown (feed, drugs, etc.) is used for farm management and data analytics but does not retroactively alter the profit calculation for existing investments. This ensures predictability for investors.
+
+All key financial metrics must be editable by an Admin via a dashboard. A Farm Manager (Vet) oversees farm health and approves reports submitted by a Keeper (the person handling daily farm activities). Approved reports become visible to investors in real time.
+
+The platform will also collect detailed farm data (feed usage, bird weights at different ages, feed conversion ratio, etc.) for potential monetisation (anonymised and aggregated). Gamification elements will encourage investor engagement and community building. Optional blockchain integration can provide immutable records of investments and profit distributions.
+
+---
+
+User Roles & Permissions
+
+Role Capabilities
+Admin Full control: manage all settings (cost breakdown, market prices, profit distribution rules), view all reports, manage users, trigger profit calculations, adjust reinvestment rules, configure payment gateways, toggle blockchain features, view data monetisation analytics.
+Farm Manager (Vet) View pending keeper reports, approve/reject them, add veterinary notes, monitor health trends, receive alerts for critical issues. Can also record additional health data.
+Keeper Submit daily farm reports (mortality, clinical signs, temperature, feed/water status, feed consumed, weight samples of birds). View own report history.
+Investor View current investments, projected returns, real‑time farm activity (approved reports), market updates, reinvestment status, withdrawal eligibility. Participate in community features (leaderboards, badges, forums).
+
+---
+
+Database Schema (Supabase)
+
+You will create the following tables in Supabase. Use snake_case for column names and enable Row Level Security (RLS) with appropriate policies. New/updated tables are marked with [NEW].
+
+profiles (unchanged)
+
+· id (uuid, references auth.users)
+· role (text, check: 'admin', 'farm_manager', 'keeper', 'investor')
+· full_name (text)
+· created_at (timestamp)
+
+settings (updated)
+
+Singleton table for global editable parameters.
+
+· id (integer, primary key, default 1 with a check constraint to ensure only one row)
+· cost_per_bird (numeric) — total to own one bird
+· cost_breakdown (jsonb) — e.g., {"feed": 3000, "drugs": 500, "maintenance": 800, "mortality_buffer": 700, "operational": 1000, "services": 1000}
+· market_floor_price (numeric) — minimum sale price per bird (affects profit)
+· market_cost (numeric) — typical sale price used for projections (affects profit)
+· investor_share_percentage (integer, default 70)
+· flockfund_share_percentage (integer, default 30)
+· reinvest_percentage (integer, default 20) — % of investor profit that must be reinvested in first 3 rounds
+· rounds_before_withdrawal (integer, default 3)
+· payment_gateway (text) — 'flutterwave', 'paystack', 'paypal'
+· payment_gateway_config (jsonb) — encrypted API keys, webhook secrets (store securely)
+· blockchain_enabled (boolean, default false)
+· blockchain_network (text, nullable) — e.g., 'polygon', 'ethereum'
+· blockchain_contract_address (text, nullable) — address of deployed profit‑sharing contract
+· data_monetization_enabled (boolean, default false) — whether to collect detailed farm data for monetisation
+· updated_at (timestamp)
+
+flocks (unchanged)
+
+· id (uuid)
+· name (text) — e.g., "Batch 1 – March 2026"
+· start_date (date)
+· expected_end_date (date)
+· total_birds (integer)
+· status (text) — 'active', 'completed', 'cancelled'
+· created_at (timestamp)
+
+investments (updated)
+
+Links investors to flocks.
+
+· id (uuid)
+· investor_id (uuid, references profiles.id)
+· flock_id (uuid, references flocks.id)
+· birds_owned (integer)
+· cost_paid (numeric) — total amount paid (birds_owned * cost_per_bird at time of investment)
+· round_count (integer, default 0) — number of completed cycles for this investment
+· payment_gateway_used (text) — which gateway was used for this investment
+· payment_transaction_id (text) — reference from payment gateway
+· blockchain_tx_hash (text, nullable) — if blockchain enabled, hash of investment record transaction
+· created_at (timestamp)
+
+farm_reports (updated)
+
+Submitted by keepers, approved by farm manager.
+
+· id (uuid)
+· flock_id (uuid, references flocks.id)
+· reporter_id (uuid, references profiles.id) — the keeper
+· report_date (date)
+· mortality_count (integer)
+· clinical_signs (text) — description
+· temperature (numeric)
+· feed_available (boolean)
+· water_available (boolean)
+· feed_consumed_kg (numeric, nullable) — total feed consumed that day (for data monetisation)
+· weight_samples (jsonb, nullable) — e.g., [{"bird_id": "sample1", "weight_kg": 1.2}, ...] (for growth tracking)
+· additional_notes (text)
+· status (text) — 'pending', 'approved', 'rejected'
+· approved_by (uuid, references profiles.id, nullable) — farm manager who approved
+· vet_notes (text, nullable) — added by farm manager upon approval/rejection
+· created_at (timestamp)
+· updated_at (timestamp)
+
+market_updates (unchanged)
+
+Logs changes to market prices (for investor notifications).
+
+· id (uuid)
+· field (text) — e.g., 'market_floor_price', 'market_cost'
+· old_value (numeric)
+· new_value (numeric)
+· changed_by (uuid, references profiles.id)
+· created_at (timestamp)
+
+profit_cycles (unchanged)
+
+Calculated when a flock is sold.
+
+· id (uuid)
+· flock_id (uuid, references flocks.id)
+· total_revenue (numeric)
+· total_cost (numeric)
+· total_profit (numeric)
+· investor_pool (numeric) — 70% of profit
+· flockfund_share (numeric) — 30% of profit
+· calculated_at (timestamp)
+
+investor_payouts (updated)
+
+Tracks profit distribution and reinvestment per investor per cycle.
+
+· id (uuid)
+· investment_id (uuid, references investments.id)
+· cycle_id (uuid, references profit_cycles.id)
+· gross_profit_share (numeric) — investor’s portion of pool based on birds_owned
+· reinvested_amount (numeric) — automatically added to next investment
+· withdrawable_amount (numeric) — amount available after reinvestment
+· round_number (integer) — which cycle this is for that investment
+· blockchain_tx_hash (text, nullable) — if blockchain enabled, hash of payout transaction
+· created_at (timestamp)
+
+feed_logs [NEW]
+
+Detailed feed usage per flock (for data monetisation).
+
+· id (uuid)
+· flock_id (uuid, references flocks.id)
+· report_date (date)
+· feed_type (text) — e.g., 'starter', 'grower', 'finisher'
+· quantity_kg (numeric)
+· cost_per_kg (numeric) — can be pulled from cost_breakdown or entered manually
+· created_at (timestamp)
+
+weight_records [NEW]
+
+Individual bird weight samples (for growth curves, FCR calculations).
+
+· id (uuid)
+· flock_id (uuid, references flocks.id)
+· sample_date (date)
+· bird_identifier (text) — e.g., tag or sample ID
+· weight_kg (numeric)
+· age_days (integer) — calculated from flock start date
+· created_at (timestamp)
+
+fcr_calculations [NEW]
+
+Automatically computed Feed Conversion Ratio for each flock over time.
+
+· id (uuid)
+· flock_id (uuid, references flocks.id)
+· period_start (date)
+· period_end (date)
+· total_feed_kg (numeric)
+· total_weight_gain_kg (numeric)
+· fcr (numeric) — feed / gain
+· created_at (timestamp)
+
+badges [NEW]
+
+Gamification: badges earned by investors.
+
+· id (uuid)
+· name (text) — e.g., "Early Bird", "Reinvestment Champion"
+· description (text)
+· icon_url (text) — stored in Supabase Storage
+· criteria (jsonb) — e.g., {"min_rounds": 3, "min_investment": 100000}
+
+investor_badges [NEW]
+
+Junction table linking investors to earned badges.
+
+· id (uuid)
+· investor_id (uuid, references profiles.id)
+· badge_id (uuid, references badges.id)
+· earned_at (timestamp)
+
+community_posts [NEW]
+
+Simple forum/discussion for investors.
+
+· id (uuid)
+· author_id (uuid, references profiles.id)
+· title (text)
+· content (text)
+· created_at (timestamp)
+· updated_at (timestamp)
+
+post_comments [NEW]
+
+· id (uuid)
+· post_id (uuid, references community_posts.id)
+· author_id (uuid, references profiles.id)
+· content (text)
+· created_at (timestamp)
+
+---
+
+Authentication & Authorization
+
+· Use Supabase Auth with email/password sign‑up.
+· After sign‑up, create a corresponding row in profiles with the role set by admin (default role for new sign‑ups can be 'investor' — but admins must be created manually or via a seed).
+· Implement RLS policies so that users can only access data they are permitted to see.
+· Use Next.js middleware to protect routes based on role (e.g., /admin/* only for admin, /manager/* for farm manager, etc.).
+
+---
+
+Core Business Logic
+
+Cost Calculation
+
+· The total cost to own one bird is the sum of components stored in settings.cost_breakdown.
+· Admin can edit each component via the admin dashboard; the total is recalculated automatically.
+
+Profit Calculation per Bird
+
+· When a flock is sold, the system uses the market_floor_price (or actual sale price entered by admin) to compute revenue.
+· profit_per_bird = sale_price - cost_per_bird
+· Total profit for the flock = profit_per_bird * total_birds.
+· Investor pool = total_profit * (investor_share_percentage / 100).
+· Each investor’s share = (investor_pool / total_birds) * birds_owned.
+
+Reinvestment Rule
+
+· For the first rounds_before_withdrawal cycles, reinvest_percentage of the investor’s profit is automatically added to their next investment (i.e., they own more birds in the next flock).
+· After the required rounds, the investor can choose to withdraw any portion of their withdrawable amount.
+· The system must track round count per investment.
+
+Admin Dashboard Editable Fields
+
+· Cost breakdown components (feed, drugs, maintenance, mortality buffer, operational, services)
+· Market floor price and market cost
+· Investor / FlockFund split percentages
+· Reinvestment percentage
+· Number of rounds before withdrawal
+· Payment gateway selection and configuration
+· Blockchain enable/disable and contract address
+· Data monetisation toggle
+
+Data Monetisation
+
+· When enabled, the system collects:
+  · Daily feed consumption (feed_consumed_kg in farm reports)
+  · Weight samples (weight_samples in farm reports, or separate weight_records)
+  · Feed conversion ratio calculated automatically from feed logs and weight gains
+· Anonymised, aggregated data can be exposed via an API (protected) for potential sale to feed companies, researchers, etc.
+· Admin can view analytics dashboards showing trends in FCR, growth rates, etc.
+
+---
+
+Payment Integration
+
+· Use Flutterwave as the primary gateway; also support Paystack and PayPal as alternatives.
+· Admin selects the active gateway in settings and provides API keys (encrypted in payment_gateway_config).
+· When an investor makes an investment:
+  1. System creates a pending investment record.
+  2. Redirects to the chosen gateway’s checkout.
+  3. Webhook from gateway updates the investment status to paid and stores transaction ID.
+  4. On success, the investment becomes active.
+· All payment logic must be idempotent and handle webhook retries.
+
+---
+
+Blockchain Integration (Optional)
+
+· If enabled, the system can:
+  · Record each investment as a transaction on a public blockchain (store hash in investments.blockchain_tx_hash).
+  · Deploy a smart contract that automates profit distribution according to the rules (investor shares, reinvestment).
+  · When a profit cycle is calculated, the contract can be invoked to distribute funds to investor wallets (if they have connected wallets).
+· Admin must provide a contract address and network.
+· For simplicity initially, this can be a one‑way record‑keeping feature (not mandatory for funds movement).
+· Investors can view their investment on a block explorer via the stored hash.
+
+---
+
+Gamification & Community Building
+
+· Badges: Investors earn badges for milestones (e.g., first investment, reinvested 3 times, referred a friend, invested in multiple flocks). Badges appear on their profile.
+· Leaderboards: Show top investors by total birds owned, total reinvested, or longest participation. Use GSAP to animate ranking changes.
+· Community Forum: A simple discussion board where investors can ask questions, share experiences, and interact. Posts and comments are stored in community_posts and post_comments.
+· Referral System: Investors get a unique referral link. When a new investor signs up using the link and makes an investment, the referrer earns a badge or a small bonus (configurable).
+· Notifications: Real‑time alerts for new badges, forum replies, and investment milestones.
+
+---
+
+Pages & Components
+
+Public Site (unauthenticated)
+
+· Homepage (/)
+  · Hero with 3D chicken/farm model (Three.js).
+  · Value proposition, current cost to own a bird.
+  · CTA: "Start Investing" → signup.
+  · GSAP scroll animations for stats.
+· How It Works (/how-it-works)
+  · Step‑by‑step with interactive cards.
+· Sign Up / Login
+  · Supabase Auth UI or custom forms.
+  · During signup, collect name; role defaults to 'investor'.
+
+Authenticated Dashboards (role‑based)
+
+Layout
+
+All dashboards share a common layout with a sidebar (collapsible) containing navigation and user menu. Use GSAP for sidebar transitions.
+
+Admin Dashboard (/admin)
+
+· Overview: Key metrics (total investors, active flocks, current cost per bird).
+· Settings Page: Form to edit all settings fields. On save, update table and create market_updates for price changes.
+· Flock Management: CRUD for flocks, mark as completed → triggers profit calculation.
+· User Management: List users, change roles, deactivate.
+· Reports Overview: View all farm reports with filters (status, date).
+· Profit Cycles: View past profit calculations and trigger manual recalculation.
+· Payment Gateways: Configure active gateway and credentials.
+· Blockchain Settings: Enable/disable, set network and contract address.
+· Data Monetisation: View analytics (FCR trends, growth charts), toggle data collection.
+· Gamification: Create/edit badges, view leaderboards.
+· 3D Visualisation: Globe with active flock markers (Three.js).
+
+Farm Manager Dashboard (/manager)
+
+· Pending Reports: List keeper reports needing approval; expand to see details, add vet notes, approve/reject.
+· Approved Reports: History with filters.
+· Health Trends: Charts (Recharts) for mortality, temperature, feed consumption, weight gains.
+· Notifications: Real‑time alerts for critical reports.
+· Data Insights: View FCR calculations, growth curves (if data monetisation enabled).
+
+Keeper Dashboard (/keeper)
+
+· Submit Report: Form with fields for mortality, clinical signs, temperature, feed/water status, feed consumed (kg), weight samples (can add multiple entries).
+· My Reports: List of submitted reports with status and vet notes.
+· Quick Stats: Today’s temperature, feed/water status from latest report.
+
+Investor Dashboard (/investor)
+
+· Portfolio Summary: Total birds owned, current value (based on market_cost), projected profit.
+· Active Investments: List of flocks with birds owned, round count, status.
+· Farm Activity Feed: Real‑time updates of approved farm reports (mortality, temperature, feed consumed, weights). Animate new entries with GSAP.
+· Market Updates Feed: Show changes to market floor price/cost.
+· Reinvestment Status: For each investment, show rounds completed/required.
+· Withdrawal Interface: If eligible, button to request withdrawal (placeholder).
+· Badges & Leaderboard: Display earned badges, link to leaderboard.
+· Community Forum: Access to discussions.
+· Referral Link: Unique link to share.
+· Blockchain Records: If enabled, show transaction hashes with links to block explorer.
+· 3D Visual: Interactive chart of projected growth (Three.js).
+
+Community Forum (/community)
+
+· List of posts with pagination.
+· Create new post (authenticated investors only).
+· View post with comments, add comment.
+· Real‑time updates using Supabase Realtime.
+
+---
+
+Real‑time Features
+
+· Use Supabase Realtime to subscribe to farm_reports (approved only), market_updates, investor_badges, community_posts, post_comments.
+· Investor dashboard updates automatically.
+· Farm manager dashboard gets instant notifications for new pending reports.
+
+---
+
+Animation & 3D Requirements
+
+· GSAP
+  · Page transitions (fade, slide).
+  · Scroll‑triggered animations on public pages (stats counting, cards staggering).
+  · Dashboard micro‑interactions: hover effects, loading states.
+  · Real‑time feed items animate in with slide/fade.
+  · Leaderboard ranking changes animate smoothly.
+· Three.js
+  · Homepage hero: Stylised low‑poly chicken or farm scene, slow rotation.
+  · Admin dashboard: 3D globe with markers for active flocks.
+  · Investor dashboard: 3D bar chart or “investment garden” where plants grow with profit.
+  · Load Three.js components dynamically to reduce initial bundle.
+
+---
+
+Deployment & Environment
+
+· Deploy to Vercel with environment variables:
+  · NEXT_PUBLIC_SUPABASE_URL
+  · NEXT_PUBLIC_SUPABASE_ANON_KEY
+  · SUPABASE_SERVICE_ROLE_KEY
+  · FLUTTERWAVE_PUBLIC_KEY, FLUTTERWAVE_SECRET_KEY (etc. for other gateways)
+  · ENCRYPTION_KEY for encrypting payment config in database
+  · (Optional) BLOCKCHAIN_PRIVATE_KEY for contract interactions
+· Set up webhook endpoints for payment gateways.
+· Use Supabase migrations for schema.
+
+---
+
+Development Phases
+
+Phase 1: Foundation
+
+· Next.js setup, Supabase client, auth.
+· Database schema (run SQL).
+· Role‑based routing middleware.
+
+Phase 2: Public Site & Animations
+
+· Homepage with GSAP and Three.js hero.
+· Signup/login.
+· How It Works page.
+
+Phase 3: Admin Dashboard
+
+· Settings page (editable fields).
+· Flock CRUD.
+· User management.
+· Profit calculation trigger.
+
+Phase 4: Farm Manager & Keeper Dashboards
+
+· Keeper report submission (extended with feed/weight fields).
+· Farm Manager approval workflow.
+· Real‑time notifications.
+
+Phase 5: Investor Dashboard
+
+· Portfolio overview.
+· Real‑time farm activity and market updates.
+· Reinvestment status and withdrawal UI.
+· Badges, leaderboard, forum.
+· Referral system.
+· Three.js visualisation.
+
+Phase 6: Payments & Blockchain
+
+· Integrate Flutterwave (with Paystack/PayPal alternatives).
+· Webhook handling.
+· Optional blockchain recording (store tx hashes).
+· Admin configuration for gateways and blockchain.
+
+Phase 7: Data Monetisation
+
+· Collect feed logs, weight records.
+· Compute FCR automatically.
+· Admin analytics dashboard.
+· (Optional) Expose API for data buyers.
+
+Phase 8: Polish & Testing
+
+· RLS policies verification.
+· Load testing.
+· Error boundaries, loading states.
+· Mobile responsiveness.
+· Deploy to Vercel.
+
+---
+
+Quality Checklist (Self‑Enforced)
+
+· All tables have RLS enabled and policies tested.
+· Role‑based access control works on client and server.
+· GSAP animations smooth, no layout shift.
+· Three.js components performant, degrade gracefully.
+· Real‑time subscriptions cleaned up on unmount.
+· Admin can modify all financial parameters; changes reflect immediately.
+· Profit calculation logic correct and idempotent.
+· Payment gateway integration tested with sandbox.
+· Blockchain hashes stored correctly (if enabled).
+· Gamification badges awarded correctly based on criteria.
+· Community forum functional with real‑time updates.
+· Data monetisation fields collected and aggregated.
+· Mobile responsive: dashboards stack, sidebar collapsible.
+· No hard‑coded secrets; all in environment variables.
+
+---
+
+Execution Directive
+
+You are building a comprehensive platform that combines agricultural investment with cutting‑edge technology, transparency, and community engagement. Every component must feel purposeful, every animation delightful, and every data point accurate. If any part of the implementation feels generic or incomplete, refine it until it meets the high standard of FlockFund. The final product should inspire trust and excitement in investors while providing powerful tools for farm management and opening avenues for data monetisation.
+

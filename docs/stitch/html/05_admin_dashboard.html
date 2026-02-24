@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>FlockFund Admin | System &amp; Operations</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;family=Inter:wght@300;400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "charcoal": "#1E1E1E",
+                        "primary": "#19382d",
+                        "accent": "#E6B450",
+                        "background-light": "#F9F6F0",
+                        "surface": "#FFFFFF",
+                        "border-color": "#E5E7EB"
+                    },
+                    fontFamily: {
+                        "sans": ["Inter", "sans-serif"],
+                        "display": ["'Plus Jakarta Sans'", "sans-serif"],
+                        "mono": ["'JetBrains Mono'", "monospace"],
+                    },
+                },
+            },
+        }
+    </script>
+<style type="text/tailwindcss">
+        @layer base {
+            body { @apply font-sans bg-background-light text-charcoal; }
+            h1, h2, h3, h4 { @apply font-display; }
+            .tech-data { @apply font-mono text-xs tracking-tight; }
+        }
+        .sidebar-item-active {
+            @apply bg-white/10 text-accent border-r-4 border-accent;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #E6B450;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden">
+<aside class="w-64 bg-charcoal text-white flex flex-col shrink-0">
+<div class="p-6 flex items-center gap-3 border-b border-white/10">
+<div class="bg-accent text-charcoal p-1.5 rounded-lg">
+<span class="material-symbols-outlined text-xl block">eco</span>
+</div>
+<h1 class="text-lg font-extrabold tracking-tight">FlockFund <span class="text-[10px] uppercase text-accent block -mt-1 tracking-[0.2em]">Admin</span></h1>
+</div>
+<nav class="flex-1 py-6 space-y-1 overflow-y-auto custom-scrollbar">
+<a class="flex items-center gap-3 px-6 py-3 text-sm font-medium opacity-60 hover:opacity-100 transition-all" href="#">
+<span class="material-symbols-outlined text-xl">dashboard</span> Overview
+            </a>
+<a class="flex items-center gap-3 px-6 py-3 text-sm font-medium sidebar-item-active transition-all" href="#">
+<span class="material-symbols-outlined text-xl">settings</span> System Settings
+            </a>
+<a class="flex items-center gap-3 px-6 py-3 text-sm font-medium opacity-60 hover:opacity-100 transition-all" href="#">
+<span class="material-symbols-outlined text-xl">nest_multi_room</span> Flocks
+            </a>
+<a class="flex items-center gap-3 px-6 py-3 text-sm font-medium opacity-60 hover:opacity-100 transition-all" href="#">
+<span class="material-symbols-outlined text-xl">group</span> Users
+            </a>
+<a class="flex items-center gap-3 px-6 py-3 text-sm font-medium opacity-60 hover:opacity-100 transition-all" href="#">
+<span class="material-symbols-outlined text-xl">analytics</span> Reports
+            </a>
+<a class="flex items-center gap-3 px-6 py-3 text-sm font-medium opacity-60 hover:opacity-100 transition-all" href="#">
+<span class="material-symbols-outlined text-xl">database</span> Data Monetisation
+            </a>
+</nav>
+<div class="p-6 border-t border-white/10">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center text-accent font-bold text-xs">JD</div>
+<div class="overflow-hidden">
+<p class="text-xs font-bold truncate">Julian Draxler</p>
+<p class="text-[10px] opacity-50 truncate">Senior Operations</p>
+</div>
+</div>
+</div>
+</aside>
+<main class="flex-1 flex flex-col overflow-hidden">
+<header class="h-16 bg-white border-b border-border-color flex items-center justify-between px-8">
+<div class="flex items-center gap-4">
+<h2 class="text-xl font-bold">Admin System &amp; Operations</h2>
+<span class="px-2 py-0.5 bg-green-100 text-green-700 text-[10px] font-bold rounded uppercase tracking-wider">Node Live</span>
+</div>
+<div class="flex items-center gap-6">
+<div class="relative">
+<span class="material-symbols-outlined text-gray-400">notifications</span>
+<span class="absolute top-0 right-0 w-2 h-2 bg-accent rounded-full border-2 border-white"></span>
+</div>
+<div class="h-8 w-[1px] bg-border-color"></div>
+<div class="flex items-center gap-2">
+<span class="tech-data text-gray-500">ETH_MAINNET:</span>
+<span class="tech-data font-bold">0x4F2...9aC1</span>
+</div>
+</div>
+</header>
+<div class="flex-1 overflow-y-auto p-8 custom-scrollbar">
+<div class="mb-8">
+<div class="flex border-b border-border-color gap-8">
+<button class="pb-4 border-b-2 border-primary text-primary font-bold text-sm">System Configuration</button>
+<button class="pb-4 border-b-2 border-transparent text-gray-400 font-medium text-sm hover:text-charcoal transition-colors">Cost Breakdowns</button>
+<button class="pb-4 border-b-2 border-transparent text-gray-400 font-medium text-sm hover:text-charcoal transition-colors">API Management</button>
+<button class="pb-4 border-b-2 border-transparent text-gray-400 font-medium text-sm hover:text-charcoal transition-colors">Security &amp; Blockchain</button>
+</div>
+<div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-6">
+<div class="bg-white p-6 rounded-xl border border-border-color shadow-sm">
+<p class="text-[10px] uppercase font-bold text-gray-400 tracking-widest mb-4">Blockchain Protocol</p>
+<div class="flex items-center justify-between">
+<span class="text-sm font-semibold">Immutable Ledger Sync</span>
+<button class="w-10 h-5 bg-primary rounded-full relative transition-all">
+<span class="absolute right-1 top-1 w-3 h-3 bg-white rounded-full"></span>
+</button>
+</div>
+<p class="tech-data mt-4 text-gray-400">Sync Frequency: 600ms</p>
+</div>
+<div class="bg-white p-6 rounded-xl border border-border-color shadow-sm">
+<p class="text-[10px] uppercase font-bold text-gray-400 tracking-widest mb-4">Service Status</p>
+<div class="flex items-center justify-between">
+<span class="text-sm font-semibold">External API Access</span>
+<button class="w-10 h-5 bg-gray-200 rounded-full relative transition-all">
+<span class="absolute left-1 top-1 w-3 h-3 bg-white rounded-full shadow-sm"></span>
+</button>
+</div>
+<p class="tech-data mt-4 text-gray-400">Last Ping: 4 mins ago</p>
+</div>
+<div class="bg-white p-6 rounded-xl border border-border-color shadow-sm">
+<p class="text-[10px] uppercase font-bold text-gray-400 tracking-widest mb-4">Operational Margin</p>
+<div class="flex items-center justify-between">
+<span class="text-2xl font-bold">12.5%</span>
+<span class="material-symbols-outlined text-green-500">trending_up</span>
+</div>
+<p class="text-xs text-gray-500 mt-2">Target: 15.0%</p>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-12 gap-8">
+<div class="col-span-12 lg:col-span-8">
+<div class="bg-white rounded-2xl border border-border-color shadow-sm overflow-hidden">
+<div class="p-6 border-b border-border-color flex justify-between items-center bg-gray-50/50">
+<h3 class="font-bold text-lg">Flock Management</h3>
+<button class="bg-primary text-white px-4 py-2 rounded-lg text-xs font-bold flex items-center gap-2 hover:bg-primary/90 transition-all">
+<span class="material-symbols-outlined text-sm">add</span> New Flock
+                            </button>
+</div>
+<table class="w-full text-left">
+<thead class="bg-gray-50 text-[10px] uppercase text-gray-400 font-bold tracking-wider">
+<tr>
+<th class="px-6 py-4">Flock ID</th>
+<th class="px-6 py-4">Breed</th>
+<th class="px-6 py-4">Lifecycle</th>
+<th class="px-6 py-4 text-right">FCR (Current)</th>
+<th class="px-6 py-4 text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-border-color">
+<tr class="hover:bg-gray-50 transition-colors">
+<td class="px-6 py-4">
+<p class="tech-data font-bold">FLK-2024-089</p>
+<p class="text-[10px] text-gray-400">Location: Farm-01</p>
+</td>
+<td class="px-6 py-4 text-sm font-medium">Ross 308</td>
+<td class="px-6 py-4">
+<div class="w-32 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+<div class="bg-accent h-full w-[75%]"></div>
+</div>
+<p class="text-[10px] mt-1 text-gray-500">Day 34 of 42</p>
+</td>
+<td class="px-6 py-4 text-right tech-data">1.52</td>
+<td class="px-6 py-4 text-right">
+<button class="text-primary hover:text-accent font-bold text-[10px] uppercase underline decoration-2 underline-offset-4 tracking-wider">Trigger Profit</button>
+</td>
+</tr>
+<tr class="hover:bg-gray-50 transition-colors">
+<td class="px-6 py-4">
+<p class="tech-data font-bold">FLK-2024-092</p>
+<p class="text-[10px] text-gray-400">Location: Farm-04</p>
+</td>
+<td class="px-6 py-4 text-sm font-medium">Cobb 500</td>
+<td class="px-6 py-4">
+<div class="w-32 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+<div class="bg-accent h-full w-[20%]"></div>
+</div>
+<p class="text-[10px] mt-1 text-gray-500">Day 08 of 42</p>
+</td>
+<td class="px-6 py-4 text-right tech-data">1.48</td>
+<td class="px-6 py-4 text-right">
+<button class="text-gray-300 cursor-not-allowed font-bold text-[10px] uppercase tracking-wider">Trigger Profit</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="mt-8 grid grid-cols-2 gap-8">
+<div class="bg-white p-6 rounded-2xl border border-border-color shadow-sm">
+<h3 class="font-bold text-lg mb-4 flex items-center justify-between">
+                                Badge Editor
+                                <span class="material-symbols-outlined text-gray-300">workspace_premium</span>
+</h3>
+<div class="space-y-4">
+<div class="flex items-center gap-4 p-3 border border-dashed border-border-color rounded-xl">
+<div class="size-10 bg-accent/20 rounded-full flex items-center justify-center text-accent">
+<span class="material-symbols-outlined">star</span>
+</div>
+<div class="flex-1">
+<p class="text-sm font-bold">Early Harvest Pro</p>
+<p class="text-[10px] text-gray-400">Requirement: 5 successful harvests</p>
+</div>
+<button class="text-gray-400 hover:text-charcoal"><span class="material-symbols-outlined text-sm">edit</span></button>
+</div>
+<div class="flex items-center gap-4 p-3 border border-dashed border-border-color rounded-xl">
+<div class="size-10 bg-primary/20 rounded-full flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">shield</span>
+</div>
+<div class="flex-1">
+<p class="text-sm font-bold">ESG Champion</p>
+<p class="text-[10px] text-gray-400">Requirement: 100% organic feed</p>
+</div>
+<button class="text-gray-400 hover:text-charcoal"><span class="material-symbols-outlined text-sm">edit</span></button>
+</div>
+</div>
+</div>
+<div class="bg-white p-6 rounded-2xl border border-border-color shadow-sm">
+<h3 class="font-bold text-lg mb-4 flex items-center justify-between">
+                                Leaderboard Preview
+                                <span class="material-symbols-outlined text-gray-300">leaderboard</span>
+</h3>
+<div class="space-y-3">
+<div class="flex items-center justify-between text-sm">
+<div class="flex items-center gap-3">
+<span class="font-mono text-gray-400 text-xs">01</span>
+<span class="font-bold">Henric V.</span>
+</div>
+<span class="tech-data text-primary">$45,200</span>
+</div>
+<div class="flex items-center justify-between text-sm">
+<div class="flex items-center gap-3">
+<span class="font-mono text-gray-400 text-xs">02</span>
+<span class="font-bold">Sofia K.</span>
+</div>
+<span class="tech-data text-primary">$38,910</span>
+</div>
+<div class="flex items-center justify-between text-sm">
+<div class="flex items-center gap-3">
+<span class="font-mono text-gray-400 text-xs">03</span>
+<span class="font-bold">Marcus T.</span>
+</div>
+<span class="tech-data text-primary">$31,105</span>
+</div>
+<div class="mt-4 pt-4 border-t border-border-color">
+<button class="w-full py-2 bg-gray-50 text-gray-500 rounded-lg text-xs font-bold hover:bg-gray-100">Refresh Feed</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="col-span-12 lg:col-span-4">
+<div class="bg-charcoal text-white rounded-2xl p-6 shadow-xl sticky top-0">
+<div class="flex items-center gap-2 mb-6">
+<span class="material-symbols-outlined text-accent">monitoring</span>
+<h3 class="font-bold">External API Metrics</h3>
+</div>
+<div class="space-y-8">
+<div>
+<div class="flex justify-between items-end mb-4">
+<div>
+<p class="text-[10px] text-gray-400 uppercase tracking-widest">Aggregated FCR</p>
+<p class="text-3xl font-display font-bold">1.54</p>
+</div>
+<div class="text-right">
+<p class="text-[10px] text-green-400 font-bold">+2.4%</p>
+<p class="text-[8px] text-gray-500 uppercase">vs Last Quarter</p>
+</div>
+</div>
+<div class="flex items-end gap-1 h-24">
+<div class="bg-accent/20 hover:bg-accent w-full h-[40%] transition-all rounded-t"></div>
+<div class="bg-accent/20 hover:bg-accent w-full h-[65%] transition-all rounded-t"></div>
+<div class="bg-accent/20 hover:bg-accent w-full h-[55%] transition-all rounded-t"></div>
+<div class="bg-accent/20 hover:bg-accent w-full h-[85%] transition-all rounded-t"></div>
+<div class="bg-accent/20 hover:bg-accent w-full h-[70%] transition-all rounded-t"></div>
+<div class="bg-accent/20 hover:bg-accent w-full h-[95%] transition-all rounded-t"></div>
+</div>
+</div>
+<div class="pt-6 border-t border-white/10">
+<p class="text-[10px] text-gray-400 uppercase tracking-widest mb-4">Growth Rates (Daily)</p>
+<div class="space-y-4">
+<div class="flex items-center justify-between">
+<span class="text-xs">Pharma Corp A</span>
+<span class="tech-data text-accent">ACTIVE_WEBHOOK</span>
+</div>
+<div class="flex items-center justify-between">
+<span class="text-xs">AgriData Global</span>
+<span class="tech-data text-accent">STREAMING</span>
+</div>
+<div class="flex items-center justify-between">
+<span class="text-xs">BioSynth Labs</span>
+<span class="tech-data text-gray-500">PENDING_KEY</span>
+</div>
+</div>
+</div>
+<div class="bg-white/5 rounded-xl p-4">
+<div class="flex items-center justify-between mb-2">
+<span class="text-[10px] font-bold uppercase tracking-widest text-accent">Revenue Yield</span>
+<span class="material-symbols-outlined text-sm">payments</span>
+</div>
+<p class="text-2xl font-display font-bold">$12,482.00</p>
+<p class="text-[10px] text-gray-400 mt-1">This month from data licensing</p>
+</div>
+</div>
+<button class="w-full mt-8 py-3 bg-white text-charcoal rounded-xl text-sm font-bold hover:bg-accent transition-colors">
+                            Manage API Buyers
+                        </button>
+</div>
+</div>
+</div>
+</div>
+</main>
+
+</body></html>
