@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
+import { RecentActivityFeed } from "@/components/RecentActivityFeed";
 
 export default function ManagerDashboard() {
   const [stats, setStats] = useState({
@@ -123,7 +124,7 @@ export default function ManagerDashboard() {
         ))}
       </div>
 
-      <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-sm">
+      <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-sm mb-8">
         <h2 className="text-sm font-heading font-bold text-primary uppercase tracking-wider mb-4">
           Quick Actions
         </h2>
@@ -160,6 +161,8 @@ export default function ManagerDashboard() {
           </a>
         </div>
       </div>
+
+      <RecentActivityFeed limit={5} />
     </div>
   );
 }

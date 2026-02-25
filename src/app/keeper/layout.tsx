@@ -9,6 +9,7 @@ import { NotificationBell } from "@/components/NotificationBell";
 
 const navItems = [
   { icon: "dashboard", label: "Dashboard", href: "/keeper" },
+  { icon: "shopping_cart", label: "Invest", href: "/investor/invest" },
   { icon: "add_circle", label: "New Report", href: "/keeper/new-report" },
   { icon: "assignment", label: "My Reports", href: "/keeper/reports" },
   { icon: "payments", label: "Fund Requests", href: "/keeper/requests" },

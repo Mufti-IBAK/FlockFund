@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
+import { RecentActivityFeed } from "@/components/RecentActivityFeed";
 
 /* ── helpers ── */
 function formatNaira(n: number): string {
@@ -43,7 +44,6 @@ interface ActivityItem {
 export default function AdminOverview() {
   const contentRef = useRef<HTMLDivElement>(null);
   const [kpis, setKpis] = useState<KPI[]>([]);
-  const [activity, setActivity] = useState<ActivityItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   /* ── data loader ── */
@@ -250,56 +250,6 @@ export default function AdminOverview() {
             color: "from-rose-500/20 to-pink-500/20",
           },
         ]);
-
-        /* ── build activity feed ── */
-        const items: ActivityItem[] = [];
-
-        (recentInvestorsRes.data || []).forEach((p) => {
-          items.push({
-            icon: "person_add",
-            text: "New investor registered",
-            detail: p.full_name || "Anonymous",
-            time: timeAgo(p.created_at),
-            color: "text-emerald-500",
-            sortDate: new Date(p.created_at).getTime(),
-          });
-        });
-
-        (recentInvestmentsRes.data || []).forEach((inv) => {
-          items.push({
-            icon: "payments",
-            text: "Investment payment received",
-            detail: `₦${(inv.amount_invested || 0).toLocaleString()} · ${inv.birds_owned || 0} birds`,
-            time: timeAgo(inv.created_at),
-            color: "text-accent",
-            sortDate: new Date(inv.created_at).getTime(),
-          });
-        });
-
-        (recentReportsRes.data || []).forEach((r) => {
-          if (r.mortality_count > 0) {
-            items.push({
-              icon: "warning",
-              text: "Mortality alert",
-              detail: `${r.mortality_count} bird${r.mortality_count > 1 ? "s" : ""} reported`,
-              time: timeAgo(r.created_at),
-              color: "text-rose-500",
-              sortDate: new Date(r.created_at).getTime(),
-            });
-          } else {
-            items.push({
-              icon: "assignment",
-              text: "Farm report submitted",
-              detail: `${r.status === "approved" ? "Approved" : "Pending review"} · 0 mortality`,
-              time: timeAgo(r.created_at),
-              color: "text-sky-500",
-              sortDate: new Date(r.created_at).getTime(),
-            });
-          }
-        });
-
-        items.sort((a, b) => b.sortDate - a.sortDate);
-        setActivity(items.slice(0, 10));
       } catch (err) {
         console.error("Admin dashboard load error:", err);
       } finally {
@@ -340,7 +290,7 @@ export default function AdminOverview() {
       );
     });
     return () => ctx.revert();
-  }, [loading, kpis, activity]);
+  }, [loading, kpis]);
 
   /* ── loading skeleton ── */
   if (loading) {
@@ -405,53 +355,7 @@ export default function AdminOverview() {
       </div>
 
       {/* Recent Activity */}
-      <div className="bg-white rounded-2xl border border-slate-200/80 overflow-hidden shadow-sm">
-        <div className="p-5 border-b border-slate-100 flex items-center justify-between">
-          <h2 className="text-sm font-heading font-bold text-primary uppercase tracking-wider">
-            Recent Activity
-          </h2>
-          <span className="text-xs text-slate-400 font-bold">
-            {activity.length} events
-          </span>
-        </div>
-        {activity.length === 0 ? (
-          <div className="p-12 text-center">
-            <span className="material-symbols-outlined text-5xl text-slate-200 mb-3">
-              monitoring
-            </span>
-            <p className="text-sm text-slate-400">
-              No recent activity yet. Events will appear here as the platform is
-              used.
-            </p>
-          </div>
-        ) : (
-          <div className="divide-y divide-slate-50">
-            {activity.map((item, i) => (
-              <div
-                key={i}
-                className="activity-row flex items-center gap-4 p-4 hover:bg-slate-50/50 transition-colors duration-300 cursor-default"
-              >
-                <div className="w-9 h-9 rounded-lg bg-slate-100 flex items-center justify-center">
-                  <span
-                    className={`material-symbols-outlined text-lg ${item.color}`}
-                  >
-                    {item.icon}
-                  </span>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-primary truncate">
-                    {item.text}
-                  </p>
-                  <p className="text-xs text-slate-400">{item.detail}</p>
-                </div>
-                <span className="text-[10px] text-slate-300 font-mono whitespace-nowrap">
-                  {item.time}
-                </span>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+      <RecentActivityFeed limit={10} />
     </div>
   );
 }

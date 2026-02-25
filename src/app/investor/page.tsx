@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
+import { RecentActivityFeed } from "@/components/RecentActivityFeed";
 
 interface Investment {
   id: string;
@@ -40,13 +41,15 @@ export default function InvestorPortfolio() {
         const [invResult, setResult] = await Promise.all([
           supabase
             .from("investments")
-            .select(`
+            .select(
+              `
               *,
               flocks (
                 selling_price_per_bird,
                 cost_per_bird
               )
-            `)
+            `,
+            )
             .eq("investor_id", user.id)
             .in("status", ["active", "completed"])
             .order("created_at", { ascending: false }),
@@ -121,13 +124,14 @@ export default function InvestorPortfolio() {
     (s, inv) => s + (inv.amount_invested || 0),
     0,
   );
-  
+
   // Per-investment valuation: (birds_owned * flock price)
   const estimatedValue = investments.reduce((s, inv) => {
-    const price = inv.flocks?.selling_price_per_bird || settings.selling_price_per_bird;
-    return s + (inv.birds_owned * price);
+    const price =
+      inv.flocks?.selling_price_per_bird || settings.selling_price_per_bird;
+    return s + inv.birds_owned * price;
   }, 0);
-  
+
   const projectedProfit = estimatedValue - totalInvested;
 
   return (
@@ -242,7 +246,10 @@ export default function InvestorPortfolio() {
             <p className="text-sm text-slate-400 mb-4">
               No investments yet. Start your poultry investment journey!
             </p>
-            <a href="/investor/invest" className="px-6 py-3 bg-accent text-primary rounded-xl font-bold text-sm uppercase tracking-wider shadow-lg shadow-accent/20 hover:scale-[1.02] transition-all inline-block">
+            <a
+              href="/investor/invest"
+              className="px-6 py-3 bg-accent text-primary rounded-xl font-bold text-sm uppercase tracking-wider shadow-lg shadow-accent/20 hover:scale-[1.02] transition-all inline-block"
+            >
               + Invest Now
             </a>
           </div>
@@ -313,6 +320,10 @@ export default function InvestorPortfolio() {
             ))}
           </div>
         )}
+      </div>
+
+      <div className="mt-8">
+        <RecentActivityFeed limit={5} />
       </div>
     </div>
   );

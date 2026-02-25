@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
+import { RecentActivityFeed } from "@/components/RecentActivityFeed";
 
 export default function KeeperDashboard() {
   const contentRef = useRef<HTMLDivElement>(null);
@@ -119,7 +120,7 @@ export default function KeeperDashboard() {
 
       {/* Quick Actions */}
       <h2 className="text-sm font-heading font-bold text-primary uppercase tracking-wider mb-4">Quick Actions</h2>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         {[
           { icon: 'add_circle', label: 'New Report', href: '/keeper/new-report', color: 'bg-primary text-white' },
           { icon: 'history', label: 'My Reports', href: '/keeper/reports', color: 'bg-sky-500 text-white' },
@@ -141,6 +142,8 @@ export default function KeeperDashboard() {
           )
         ))}
       </div>
+
+      <RecentActivityFeed limit={5} />
     </div>
   );
 }

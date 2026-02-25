@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import gsap from "gsap";
+import { RecentActivityFeed } from "@/components/RecentActivityFeed";
 
 export default function AccountantOverview() {
   const [loading, setLoading] = useState(true);
@@ -122,7 +123,7 @@ export default function AccountantOverview() {
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-sm">
           <h2 className="text-sm font-bold text-primary uppercase tracking-wider mb-6">
             Cash Flow Analytics
@@ -188,6 +189,8 @@ export default function AccountantOverview() {
           </div>
         </div>
       </div>
+
+      <RecentActivityFeed limit={5} />
     </div>
   );
 }

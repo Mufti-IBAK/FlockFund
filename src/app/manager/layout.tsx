@@ -6,6 +6,8 @@ import { CollapsibleSidebar } from "@/components/CollapsibleSidebar";
 
 const navItems = [
   { icon: "dashboard", label: "Overview", href: "/manager" },
+  { icon: "shopping_cart", label: "Invest", href: "/investor/invest" },
+  { icon: "egg_alt", label: "Flocks", href: "/manager/flocks" },
   {
     icon: "pending_actions",
     label: "Pending Reports",
@@ -22,9 +24,9 @@ const navItems = [
     href: "/manager/health-trends",
   },
   { icon: "analytics", label: "FCR Insights", href: "/manager/fcr-insights" },
-  { icon: 'payments', label: 'Fund Requests', href: '/manager/requests' },
-  { icon: 'vaccines', label: 'Vaccinations', href: '/manager/vaccinations' },
-  { icon: 'settings', label: 'Settings', href: '/manager/settings' },
+  { icon: "payments", label: "Fund Requests", href: "/manager/requests" },
+  { icon: "vaccines", label: "Vaccinations", href: "/manager/vaccinations" },
+  { icon: "settings", label: "Settings", href: "/manager/settings" },
 ];
 
 export default function ManagerLayout({
