@@ -16,9 +16,7 @@ const navItems = [
   },
   { icon: "military_tech", label: "Badges", href: "/investor/badges" },
   { icon: "leaderboard", label: "Leaderboard", href: "/investor/leaderboard" },
-  { icon: "forum", label: "Community", href: "/investor/community" },
-  { icon: "view_in_ar", label: "3D View", href: "/investor/visualization" },
-  { icon: "share", label: "Referrals", href: "/investor/referrals" },
+  { icon: "history", label: "History", href: "/investor/history" },
   { icon: "settings", label: "Settings", href: "/investor/settings" },
 ];
 

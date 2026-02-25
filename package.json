@@ -15,27 +15,13 @@
     "@supabase/supabase-js": "^2.49.1",
     "@supabase/ssr": "^0.5.2",
     "gsap": "^3.12.5",
-    "three": "^0.170.0",
-    "@react-three/fiber": "^8.17.10",
-    "@react-three/drei": "^9.117.0",
     "recharts": "^2.14.1"
-  },
-  "overrides": {
-    "@react-three/drei": {
-      "react": "$react",
-      "react-dom": "$react-dom"
-    },
-    "@react-three/fiber": {
-      "react": "$react",
-      "react-dom": "$react-dom"
-    }
   },
   "devDependencies": {
     "typescript": "^5.7.3",
     "@types/node": "^22.10.5",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
-    "@types/three": "^0.170.0",
     "tailwindcss": "^3.4.17",
     "postcss": "^8.4.49",
     "autoprefixer": "^10.4.20",
