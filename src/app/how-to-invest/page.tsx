@@ -245,6 +245,12 @@ export default function HowToInvestPage() {
               Returns
             </Link>
             <Link
+              href="/risk-management"
+              className="text-xs font-bold text-slate-400 uppercase tracking-widest hover:text-primary transition-colors"
+            >
+              Risk Management
+            </Link>
+            <Link
               href="/about"
               className="text-xs font-bold text-slate-400 uppercase tracking-widest hover:text-primary transition-colors"
             >

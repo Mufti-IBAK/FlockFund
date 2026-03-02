@@ -6,14 +6,14 @@ import Link from "next/link";
 
 /* ───── ROI Calculator (interactive) ───── */
 function ROICalculator({ settings }: { settings: any }) {
-  const [birds, setBirds] = useState(settings.min_birds_per_investment || 10);
+  const [birds, setBirds] = useState(settings?.min_birds_per_investment || 10);
 
-  const costPerBird = settings.cost_per_bird || 4250;
-  const targetPrice = settings.selling_price_per_bird || 10000;
-  const floorPrice = settings.market_floor_price || 8000;
-  const investorSharePct = settings.investor_share_percentage || 70;
+  const costPerBird = settings?.cost_per_bird || 4250;
+  const targetPrice = settings?.selling_price_per_bird || 10000;
+  const floorPrice = settings?.market_floor_price || 8000;
+  const investorSharePct = settings?.investor_share_percentage || 70;
   const investorShare = investorSharePct / 100;
-  const cycleDays = settings.cycle_duration_days || 28;
+  const cycleDays = settings?.cycle_duration_days || 28;
 
   const totalCost = birds * costPerBird;
   const targetRevenue = birds * targetPrice;
@@ -272,19 +272,25 @@ export default function ReturnsPage() {
           <div className="hidden md:flex items-center gap-6">
             <Link
               href="/how-it-works"
-              className="text-xs font-bold text-slate-400 uppercase tracking-widest hover:text-primary transition-colors"
+              className="text-white/50 text-xs font-bold uppercase tracking-widest hover:text-accent transition-colors duration-300"
             >
               How It Works
             </Link>
             <Link
               href="/returns"
-              className="text-xs font-bold text-accent uppercase tracking-widest"
+              className="text-accent text-xs font-bold uppercase tracking-widest hover:text-accent transition-colors duration-300"
             >
               Returns
             </Link>
             <Link
+              href="/risk-management"
+              className="text-white/50 text-xs font-bold uppercase tracking-widest hover:text-accent transition-colors duration-300"
+            >
+              Risk Management
+            </Link>
+            <Link
               href="/about"
-              className="text-xs font-bold text-slate-400 uppercase tracking-widest hover:text-primary transition-colors"
+              className="text-white/50 text-xs font-bold uppercase tracking-widest hover:text-accent transition-colors duration-300"
             >
               About
             </Link>
