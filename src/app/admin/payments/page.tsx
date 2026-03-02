@@ -249,48 +249,98 @@ export default function AdminPayments() {
             </p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <div className="divide-y divide-slate-50 min-w-[800px] xl:min-w-0">
-              {/* Header */}
-              <div className="grid grid-cols-7 gap-4 px-5 py-3 bg-slate-50/50 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                <span>Investor</span>
-                <span>Type</span>
-                <span>Amount</span>
-                <span>Gateway</span>
-                <span>Reference</span>
-                <span>Status</span>
-                <span>Date</span>
-              </div>
-              {allEntries.map((entry) => (
-                <div
-                  key={entry.id}
-                  className="grid grid-cols-2 grid-cols-7 gap-3 md:gap-4 px-4 md:px-5 py-3 items-center hover:bg-slate-50/50 transition-colors"
-                >
-                  <span className="text-sm font-bold text-primary col-span-1 truncate">
-                    {entry.investor}
-                  </span>
-                  <span className="text-xs text-slate-500">{entry.type}</span>
-                  <span className="text-sm font-mono font-bold text-primary">
-                    {formatNaira(entry.amount)}
-                  </span>
-                  <span className="text-xs text-slate-500 capitalize">
-                    {entry.gateway}
-                  </span>
-                  <span className="text-[10px] text-slate-400 font-mono truncate">
-                    {entry.reference}
-                  </span>
-                  <span
-                    className={`text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full inline-block w-fit ${STATUS_COLORS[entry.status] || "bg-slate-100 text-slate-500"}`}
-                  >
-                    {entry.status}
-                  </span>
-                  <span className="text-[10px] text-slate-400">
-                    {new Date(entry.date).toLocaleDateString()}
-                  </span>
+          <>
+            <div className="hidden md:block overflow-x-auto">
+              <div className="divide-y divide-slate-50 min-w-[800px] xl:min-w-0">
+                {/* Header */}
+                <div className="grid grid-cols-7 gap-4 px-5 py-3 bg-slate-50/50 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                  <span>Investor</span>
+                  <span>Type</span>
+                  <span>Amount</span>
+                  <span>Gateway</span>
+                  <span>Reference</span>
+                  <span>Status</span>
+                  <span>Date</span>
                 </div>
-              ))}
+                {allEntries.map((entry) => (
+                  <div
+                    key={entry.id}
+                    className="grid grid-cols-2 grid-cols-7 gap-3 md:gap-4 px-4 md:px-5 py-3 items-center hover:bg-slate-50/50 transition-colors"
+                  >
+                    <span className="text-sm font-bold text-primary col-span-1 truncate">
+                      {entry.investor}
+                    </span>
+                    <span className="text-xs text-slate-500">{entry.type}</span>
+                    <span className="text-sm font-mono font-bold text-primary">
+                      {formatNaira(entry.amount)}
+                    </span>
+                    <span className="text-xs text-slate-500 capitalize">
+                      {entry.gateway}
+                    </span>
+                    <span className="text-[10px] text-slate-400 font-mono truncate">
+                      {entry.reference}
+                    </span>
+                    <span
+                      className={`text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full inline-block w-fit ${STATUS_COLORS[entry.status] || "bg-slate-100 text-slate-500"}`}
+                    >
+                      {entry.status}
+                    </span>
+                    <span className="text-[10px] text-slate-400">
+                      {new Date(entry.date).toLocaleDateString()}
+                    </span>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
+
+            <div className="grid grid-cols-1 md:hidden gap-4 p-4">
+               {allEntries.map((entry) => (
+                  <div key={entry.id} className="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm flex flex-col gap-3 relative">
+                    <div className="flex justify-between items-start mb-1">
+                      <div>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">
+                          {new Date(entry.date).toLocaleDateString()}
+                        </p>
+                        <h3 className="font-bold text-primary text-sm line-clamp-1">
+                          {entry.investor}
+                        </h3>
+                      </div>
+                      <div className="text-right">
+                        <span
+                          className={`text-[9px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-md ${STATUS_COLORS[entry.status] || "bg-slate-100 text-slate-500"}`}
+                        >
+                          {entry.status}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3 mt-1">
+                      <div className="bg-slate-50 rounded-xl p-3">
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Type</p>
+                        <p className="text-xs font-bold text-slate-700">{entry.type}</p>
+                      </div>
+                      <div className="bg-slate-50 rounded-xl p-3">
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Amount</p>
+                        <p className="font-mono font-bold text-primary text-sm">
+                          {formatNaira(entry.amount)}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="bg-slate-50 rounded-xl p-3 flex flex-col gap-1.5 mt-1">
+                      <div className="flex justify-between items-center">
+                         <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Gateway</span>
+                         <span className="text-xs text-slate-600 font-medium capitalize">{entry.gateway}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                         <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Ref</span>
+                         <span className="text-[10px] text-slate-500 font-mono truncate max-w-[150px] text-right">{entry.reference}</span>
+                      </div>
+                    </div>
+                  </div>
+               ))}
+            </div>
+          </>
         )}
       </div>
     </div>

@@ -63,8 +63,9 @@ export default function AdminCommunity() {
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
-        <table className="w-full text-left border-collapse">
+      <div className="bg-transparent md:bg-white md:rounded-2xl md:border md:border-slate-200/80 md:shadow-sm overflow-hidden">
+        {/* Desktop Table View */}
+        <table className="hidden md:table w-full text-left border-collapse">
           <thead>
             <tr className="bg-slate-50 border-b border-slate-100">
               <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Author</th>
@@ -120,6 +121,50 @@ export default function AdminCommunity() {
             )}
           </tbody>
         </table>
+
+        {/* Mobile Cards View */}
+        <div className="grid grid-cols-1 md:hidden gap-4">
+            {loading ? (
+              <div className="py-20 text-center bg-white rounded-2xl border border-slate-100 shadow-sm">
+                <div className="w-8 h-8 border-2 border-accent/20 border-t-accent rounded-full animate-spin mx-auto" />
+              </div>
+            ) : posts.length === 0 ? (
+              <div className="py-10 text-center text-slate-400 text-sm bg-white rounded-2xl border border-slate-100 shadow-sm">
+                No community posts found.
+              </div>
+            ) : (
+              posts.map((p) => (
+                <div key={p.id} className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm flex flex-col gap-3 relative">
+                  <div className="flex justify-between items-start mb-2">
+                    <div className="flex items-center gap-2">
+                      <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-[10px]">
+                        {p.profiles?.full_name?.charAt(0) || '?'}
+                      </div>
+                      <span className="text-xs font-bold text-primary">{p.profiles?.full_name || 'Unknown'}</span>
+                    </div>
+                    <span className="text-[10px] text-slate-400 font-medium whitespace-nowrap">
+                      {new Date(p.created_at).toLocaleDateString()}
+                    </span>
+                  </div>
+
+                  <div>
+                    <h3 className="text-sm font-bold text-primary leading-snug">{p.title}</h3>
+                    <p className="text-xs text-slate-500 mt-1 line-clamp-3 leading-relaxed">{p.content}</p>
+                  </div>
+                  
+                  <div className="mt-2 flex justify-end">
+                    <button
+                      onClick={() => handleDeletePost(p.id)}
+                      className="px-3 py-1.5 flex items-center gap-1.5 border border-rose-200 text-rose-500 bg-rose-50/50 rounded-lg text-[10px] font-bold tracking-wider uppercase"
+                    >
+                      <span className="material-symbols-outlined text-sm">delete</span>
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
+        </div>
       </div>
     </div>
   );

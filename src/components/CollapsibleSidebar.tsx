@@ -67,7 +67,7 @@ export function CollapsibleSidebar({ navItems, roleLabel, basePath }: Props) {
     <>
       {/* Logo */}
       <div
-        className={`p-4 flex items-center gap-3 ${collapsed ? "justify-center" : ""}`}
+        className={`p-4 flex items-center gap-3 ${collapsed && !mobileOpen ? "justify-center" : "justify-start"}`}
       >
         <div className="w-9 h-9 rounded-lg bg-accent/20 flex items-center justify-center flex-shrink-0">
           <span
@@ -78,7 +78,7 @@ export function CollapsibleSidebar({ navItems, roleLabel, basePath }: Props) {
           </span>
         </div>
         {(!collapsed || mobileOpen) && (
-          <div className="min-w-0">
+          <div className="min-w-0 flex flex-col items-start text-left">
             <span className="text-white font-heading font-extrabold text-base tracking-tight block">
               FlockFund
             </span>
@@ -90,7 +90,9 @@ export function CollapsibleSidebar({ navItems, roleLabel, basePath }: Props) {
       </div>
 
       {/* Nav — no scroll, fit screen */}
-      <div className={`${collapsed ? "px-2" : "px-3"} mt-1 flex-1`}>
+      <div
+        className={`${collapsed && !mobileOpen ? "px-2" : "px-3"} mt-1 flex-1`}
+      >
         <nav className="space-y-0.5">
           {navItems.map((item) => {
             const isActive =
@@ -100,7 +102,7 @@ export function CollapsibleSidebar({ navItems, roleLabel, basePath }: Props) {
               <div key={item.href} className="relative group">
                 <Link
                   href={item.href}
-                  className={`nav-item flex items-center gap-3 ${collapsed ? "justify-center px-2" : "px-3"} py-2.5 rounded-lg text-sm font-medium transition-all duration-200
+                  className={`nav-item flex items-center gap-3 ${collapsed && !mobileOpen ? "justify-center px-2" : "justify-start px-3"} py-2.5 rounded-lg text-sm font-medium transition-all duration-200
                     ${isActive ? "bg-white/10 text-accent" : "text-white/40 hover:text-white/70 hover:bg-white/[0.04]"}`}
                 >
                   <span
@@ -111,7 +113,7 @@ export function CollapsibleSidebar({ navItems, roleLabel, basePath }: Props) {
                   {(!collapsed || mobileOpen) && item.label}
                 </Link>
                 {/* Tooltip on hover when collapsed */}
-                {collapsed && (
+                {collapsed && !mobileOpen && (
                   <div className="absolute left-full top-1/2 -translate-y-1/2 ml-2 px-2.5 py-1.5 bg-primary text-white text-xs font-bold rounded-lg shadow-lg opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-200 whitespace-nowrap z-[60]">
                     {item.label}
                     <div className="absolute right-full top-1/2 -translate-y-1/2 w-0 h-0 border-y-4 border-y-transparent border-r-4 border-r-primary" />

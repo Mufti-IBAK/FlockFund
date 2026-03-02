@@ -186,41 +186,78 @@ export default function AdminData() {
             </p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <div className="divide-y divide-slate-50 min-w-[800px] xl:min-w-0">
-              <div className="grid grid-cols-5 gap-4 px-5 py-3 bg-slate-50/50 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                <span>Week</span>
-                <span>Avg Weight (kg)</span>
-                <span>Total Feed (kg)</span>
-                <span>FCR</span>
-                <span>Calculated</span>
-              </div>
-              {fcrData.map((f) => (
-                <div
-                  key={f.id}
-                  className="grid grid-cols-5 gap-4 px-5 py-4 items-center hover:bg-slate-50/50 transition-colors"
-                >
-                  <span className="font-mono text-sm font-bold text-primary">
-                    Week {f.week_number}
-                  </span>
-                  <span className="font-mono text-sm text-primary">
-                    {f.avg_weight_kg?.toFixed(2)} kg
-                  </span>
-                  <span className="font-mono text-sm text-primary">
-                    {f.total_feed_kg?.toFixed(1)} kg
-                  </span>
-                  <span
-                    className={`font-mono text-sm font-bold ${f.fcr < 2 ? "text-emerald-600" : f.fcr < 2.5 ? "text-amber-600" : "text-rose-600"}`}
+          <>
+            <div className="hidden md:block overflow-x-auto">
+              <div className="divide-y divide-slate-50 min-w-[800px] xl:min-w-0">
+                <div className="grid grid-cols-5 gap-4 px-5 py-3 bg-slate-50/50 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                  <span>Week</span>
+                  <span>Avg Weight (kg)</span>
+                  <span>Total Feed (kg)</span>
+                  <span>FCR</span>
+                  <span>Calculated</span>
+                </div>
+                {fcrData.map((f) => (
+                  <div
+                    key={f.id}
+                    className="grid grid-cols-5 gap-4 px-5 py-4 items-center hover:bg-slate-50/50 transition-colors"
                   >
-                    {f.fcr?.toFixed(2)}
-                  </span>
-                  <span className="text-xs text-slate-400">
-                    {new Date(f.calculated_at).toLocaleDateString()}
-                  </span>
+                    <span className="font-mono text-sm font-bold text-primary">
+                      Week {f.week_number}
+                    </span>
+                    <span className="font-mono text-sm text-primary">
+                      {f.avg_weight_kg?.toFixed(2)} kg
+                    </span>
+                    <span className="font-mono text-sm text-primary">
+                      {f.total_feed_kg?.toFixed(1)} kg
+                    </span>
+                    <span
+                      className={`font-mono text-sm font-bold ${f.fcr < 2 ? "text-emerald-600" : f.fcr < 2.5 ? "text-amber-600" : "text-rose-600"}`}
+                    >
+                      {f.fcr?.toFixed(2)}
+                    </span>
+                    <span className="text-xs text-slate-400">
+                      {new Date(f.calculated_at).toLocaleDateString()}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:hidden gap-4 p-4">
+              {fcrData.map((f) => (
+                <div key={f.id} className="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm flex flex-col gap-3 relative">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h3 className="font-bold text-primary text-sm flex items-center gap-1.5">
+                        <span className="material-symbols-outlined text-sm text-accent">monitoring</span>
+                        Week {f.week_number}
+                      </h3>
+                      <p className="text-[10px] text-slate-400 font-medium tracking-wider uppercase mt-1">
+                        {new Date(f.calculated_at).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                       <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">FCR</p>
+                       <p className={`font-mono text-xl font-black ${f.fcr < 2 ? "text-emerald-600" : f.fcr < 2.5 ? "text-amber-600" : "text-rose-600"}`}>
+                         {f.fcr?.toFixed(2)}
+                       </p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3 mt-1">
+                    <div className="bg-slate-50 rounded-xl p-3">
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Avg Weight</p>
+                      <p className="font-mono font-bold text-primary text-sm">{f.avg_weight_kg?.toFixed(2)} kg</p>
+                    </div>
+                    <div className="bg-slate-50 rounded-xl p-3">
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Total Feed</p>
+                      <p className="font-mono font-bold text-primary text-sm">{f.total_feed_kg?.toFixed(1)} kg</p>
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>
-          </div>
+          </>
         )}
       </div>
     </div>

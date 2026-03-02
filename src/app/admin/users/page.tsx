@@ -167,78 +167,154 @@ export default function AdminUsers() {
             </p>
           </div>
         ) : (
-          <div className="divide-y divide-slate-50">
-            {/* Header */}
-            <div className="grid grid-cols-5 gap-4 px-5 py-3 bg-slate-50/50 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-              <span>User</span>
-              <span>Role</span>
-              <span>Joined</span>
-              <span>ID</span>
-              <span>Actions</span>
-            </div>
-            {filteredUsers.map((user) => (
-              <div
-                key={user.id}
-                className="user-row grid grid-cols-5 gap-4 px-5 py-4 items-center hover:bg-slate-50/50 transition-colors duration-300"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary/80 to-emerald-700 flex items-center justify-center text-white font-bold text-sm uppercase flex-shrink-0">
-                    {(user.full_name || "?").charAt(0)}
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-sm font-bold text-primary truncate">
-                      {user.full_name || "Unnamed"}
-                    </p>
-                  </div>
+          <>
+            <div className="hidden md:block overflow-x-auto">
+              <div className="divide-y divide-slate-50 min-w-[800px] xl:min-w-0">
+                {/* Header */}
+                <div className="grid grid-cols-5 gap-4 px-5 py-3 bg-slate-50/50 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                  <span>User</span>
+                  <span>Role</span>
+                  <span>Joined</span>
+                  <span>ID</span>
+                  <span>Actions</span>
                 </div>
+                {filteredUsers.map((user) => (
+                  <div
+                    key={user.id}
+                    className="user-row grid grid-cols-5 gap-4 px-5 py-4 items-center hover:bg-slate-50/50 transition-colors duration-300"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary/80 to-emerald-700 flex items-center justify-center text-white font-bold text-sm uppercase flex-shrink-0">
+                        {(user.full_name || "?").charAt(0)}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-bold text-primary truncate">
+                          {user.full_name || "Unnamed"}
+                        </p>
+                      </div>
+                    </div>
 
-                <div>
-                  {editingId === user.id ? (
-                    <select
-                      className="text-xs bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 font-bold text-primary focus:ring-2 focus:ring-accent/20"
-                      defaultValue={user.role}
-                      onChange={(e) => changeRole(user.id, e.target.value)}
-                      onBlur={() => setEditingId(null)}
-                      autoFocus
-                    >
-                      {ROLES.map((r) => (
-                        <option key={r} value={r}>
-                          {ROLE_LABELS[r]}
-                        </option>
-                      ))}
-                    </select>
-                  ) : (
-                    <span
-                      className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full ${ROLE_COLORS[user.role] || "bg-slate-100 text-slate-600"}`}
-                    >
-                      {ROLE_LABELS[user.role] || user.role}
+                    <div>
+                      {editingId === user.id ? (
+                        <select
+                          className="text-xs bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 font-bold text-primary focus:ring-2 focus:ring-accent/20"
+                          defaultValue={user.role}
+                          onChange={(e) => changeRole(user.id, e.target.value)}
+                          onBlur={() => setEditingId(null)}
+                          autoFocus
+                        >
+                          {ROLES.map((r) => (
+                            <option key={r} value={r}>
+                              {ROLE_LABELS[r]}
+                            </option>
+                          ))}
+                        </select>
+                      ) : (
+                        <span
+                          className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full ${ROLE_COLORS[user.role] || "bg-slate-100 text-slate-600"}`}
+                        >
+                          {ROLE_LABELS[user.role] || user.role}
+                        </span>
+                      )}
+                    </div>
+
+                    <span className="text-xs text-slate-500">
+                      {new Date(user.created_at).toLocaleDateString()}
                     </span>
-                  )}
-                </div>
+                    <span className="text-[10px] text-slate-300 font-mono truncate">
+                      {user.id.slice(0, 8)}…
+                    </span>
 
-                <span className="text-xs text-slate-500">
-                  {new Date(user.created_at).toLocaleDateString()}
-                </span>
-                <span className="text-[10px] text-slate-300 font-mono truncate">
-                  {user.id.slice(0, 8)}…
-                </span>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() =>
+                          setEditingId(editingId === user.id ? null : user.id)
+                        }
+                        className="text-xs font-bold text-accent hover:text-primary transition-colors flex items-center gap-1"
+                      >
+                        <span className="material-symbols-outlined text-sm">
+                          {editingId === user.id ? "close" : "edit"}
+                        </span>
+                        {editingId === user.id ? "Cancel" : "Change Role"}
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
 
-                <div className="flex items-center gap-2">
+            <div className="grid grid-cols-1 md:hidden gap-4 p-4">
+              {filteredUsers.map((user) => (
+                <div
+                  key={user.id}
+                  className="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm flex flex-col gap-4 relative"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary/80 to-emerald-700 flex items-center justify-center text-white font-bold text-sm uppercase flex-shrink-0 shadow-sm">
+                      {(user.full_name || "?").charAt(0)}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-sm font-bold text-primary truncate">
+                        {user.full_name || "Unnamed"}
+                      </h3>
+                      <p className="text-[10px] text-slate-400 font-mono mt-0.5 truncate">
+                        ID: {user.id.slice(0, 12)}...
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="bg-slate-50 rounded-xl p-3 flex flex-col gap-2.5">
+                    <div className="flex justify-between items-center">
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                        Role
+                      </span>
+                      {editingId === user.id ? (
+                        <select
+                          className="text-xs bg-white border border-slate-200 rounded-md px-2 py-1 font-bold text-primary focus:ring-2 focus:ring-accent/20"
+                          defaultValue={user.role}
+                          onChange={(e) => changeRole(user.id, e.target.value)}
+                          onBlur={() => setEditingId(null)}
+                          autoFocus
+                        >
+                          {ROLES.map((r) => (
+                            <option key={r} value={r}>
+                              {ROLE_LABELS[r]}
+                            </option>
+                          ))}
+                        </select>
+                      ) : (
+                        <span
+                          className={`text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md ${ROLE_COLORS[user.role] || "bg-slate-100 text-slate-600"}`}
+                        >
+                          {ROLE_LABELS[user.role] || user.role}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                        Joined
+                      </span>
+                      <span className="text-xs text-slate-600 font-bold">
+                        {new Date(user.created_at).toLocaleDateString()}
+                      </span>
+                    </div>
+                  </div>
+
                   <button
                     onClick={() =>
                       setEditingId(editingId === user.id ? null : user.id)
                     }
-                    className="text-xs font-bold text-accent hover:text-primary transition-colors flex items-center gap-1"
+                    className="w-full py-2 bg-slate-50 hover:bg-slate-100 rounded-lg text-xs font-bold text-accent transition-colors flex items-center justify-center gap-1.5"
                   >
-                    <span className="material-symbols-outlined text-sm">
+                    <span className="material-symbols-outlined text-[14px]">
                       {editingId === user.id ? "close" : "edit"}
                     </span>
-                    {editingId === user.id ? "Cancel" : "Change Role"}
+                    {editingId === user.id ? "Cancel Editing" : "Manage Role"}
                   </button>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          </>
         )}
       </div>
     </div>

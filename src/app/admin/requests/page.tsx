@@ -143,105 +143,180 @@ export default function AdminFundRequests() {
             No pending fund requests.
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-slate-50 border-b border-slate-100">
-                  <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                    Date
-                  </th>
-                  <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                    Requester
-                  </th>
-                  <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                    Flock
-                  </th>
-                  <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                    Category
-                  </th>
-                  <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                    Amount
-                  </th>
-                  <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                    Description
-                  </th>
-                  <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider text-right">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-50">
-                {requests.map((req) => (
-                  <tr
-                    key={req.id}
-                    className="hover:bg-slate-50/50 transition-all"
-                  >
-                    <td className="px-6 py-4 text-[11px] text-slate-400 font-mono">
-                      {new Date(req.created_at).toLocaleDateString()}
-                    </td>
-                    <td className="px-6 py-4">
-                      <p className="text-sm font-bold text-primary">
-                        {req.profiles?.full_name}
+          <>
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-slate-50 border-b border-slate-100">
+                    <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                      Date
+                    </th>
+                    <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                      Requester
+                    </th>
+                    <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                      Flock
+                    </th>
+                    <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                      Category
+                    </th>
+                    <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                      Amount
+                    </th>
+                    <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                      Description
+                    </th>
+                    <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider text-right">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-50">
+                  {requests.map((req) => (
+                    <tr
+                      key={req.id}
+                      className="hover:bg-slate-50/50 transition-all"
+                    >
+                      <td className="px-6 py-4 text-[11px] text-slate-400 font-mono">
+                        {new Date(req.created_at).toLocaleDateString()}
+                      </td>
+                      <td className="px-6 py-4">
+                        <p className="text-sm font-bold text-primary">
+                          {req.profiles?.full_name}
+                        </p>
+                        <p className="text-[10px] text-slate-400 uppercase tracking-tight">
+                          {req.profiles?.role?.replace("_", " ")}
+                        </p>
+                      </td>
+                      <td className="px-6 py-4 text-sm font-medium text-slate-600">
+                        {req.flocks?.flock_name || req.flocks?.name}
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className="px-2 py-0.5 rounded bg-slate-100 text-[10px] font-bold text-slate-500 uppercase">
+                          {req.category}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 font-mono font-bold text-primary text-sm">
+                        ₦{Number(req.amount).toLocaleString()}
+                      </td>
+                      <td className="px-6 py-4 text-xs text-slate-500 max-w-xs truncate">
+                        {req.description}
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        {req.status === "pending" ? (
+                          <div className="flex justify-end gap-2">
+                            <button
+                              onClick={() => handleAction(req.id, "rejected")}
+                              className="w-8 h-8 rounded-lg border border-rose-200 text-rose-500 hover:bg-rose-50 flex items-center justify-center transition-all"
+                              title="Reject"
+                            >
+                              <span className="material-symbols-outlined text-base">
+                                close
+                              </span>
+                            </button>
+                            <button
+                              onClick={() => handleAction(req.id, "approved")}
+                              className="w-8 h-8 rounded-lg bg-emerald-500 text-white shadow-md shadow-emerald-500/20 hover:scale-[1.05] flex items-center justify-center transition-all"
+                              title="Approve"
+                            >
+                              <span className="material-symbols-outlined text-base">
+                                check
+                              </span>
+                            </button>
+                          </div>
+                        ) : (
+                          <span
+                            className={`text-[10px] font-bold uppercase tracking-widest ${
+                              req.status === "approved"
+                                ? "text-emerald-500"
+                                : req.status === "processed"
+                                  ? "text-sky-500"
+                                  : "text-rose-400"
+                            }`}
+                          >
+                            {req.status}
+                          </span>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="grid grid-cols-1 md:hidden gap-4 p-4">
+              {requests.map((req) => (
+                <div key={req.id} className="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm flex flex-col gap-3 relative">
+                  <div className="flex justify-between items-start mb-1">
+                    <div>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">
+                        {new Date(req.created_at).toLocaleDateString()}
                       </p>
+                      <h3 className="font-bold text-primary text-sm">
+                        {req.profiles?.full_name}
+                      </h3>
                       <p className="text-[10px] text-slate-400 uppercase tracking-tight">
                         {req.profiles?.role?.replace("_", " ")}
                       </p>
-                    </td>
-                    <td className="px-6 py-4 text-sm font-medium text-slate-600">
-                      {req.flocks?.flock_name || req.flocks?.name}
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className="px-2 py-0.5 rounded bg-slate-100 text-[10px] font-bold text-slate-500 uppercase">
-                        {req.category}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 font-mono font-bold text-primary text-sm">
-                      ₦{Number(req.amount).toLocaleString()}
-                    </td>
-                    <td className="px-6 py-4 text-xs text-slate-500 max-w-xs truncate">
-                      {req.description}
-                    </td>
-                    <td className="px-6 py-4 text-right">
+                    </div>
+                    <div>
                       {req.status === "pending" ? (
-                        <div className="flex justify-end gap-2">
-                          <button
-                            onClick={() => handleAction(req.id, "rejected")}
-                            className="w-8 h-8 rounded-lg border border-rose-200 text-rose-500 hover:bg-rose-50 flex items-center justify-center transition-all"
-                            title="Reject"
-                          >
-                            <span className="material-symbols-outlined text-base">
-                              close
-                            </span>
-                          </button>
-                          <button
-                            onClick={() => handleAction(req.id, "approved")}
-                            className="w-8 h-8 rounded-lg bg-emerald-500 text-white shadow-md shadow-emerald-500/20 hover:scale-[1.05] flex items-center justify-center transition-all"
-                            title="Approve"
-                          >
-                            <span className="material-symbols-outlined text-base">
-                              check
-                            </span>
-                          </button>
-                        </div>
+                        <span className="px-2 py-1 rounded-md text-[9px] font-bold uppercase tracking-wider bg-amber-100 text-amber-700">
+                          Pending
+                        </span>
                       ) : (
                         <span
-                          className={`text-[10px] font-bold uppercase tracking-widest ${
-                            req.status === "approved"
-                              ? "text-emerald-500"
-                              : req.status === "processed"
-                                ? "text-sky-500"
-                                : "text-rose-400"
-                          }`}
-                        >
-                          {req.status}
-                        </span>
+                            className={`px-2 py-1 rounded-md text-[9px] font-bold uppercase tracking-wider ${
+                              req.status === "approved"
+                                ? "bg-emerald-100 text-emerald-700"
+                                : req.status === "processed"
+                                  ? "bg-sky-100 text-sky-700"
+                                  : "bg-rose-100 text-rose-700"
+                            }`}
+                          >
+                            {req.status}
+                          </span>
                       )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3 mt-1">
+                    <div className="bg-slate-50 rounded-xl p-3">
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Flock & Category</p>
+                      <p className="text-xs font-bold text-slate-700">{req.flocks?.flock_name || req.flocks?.name}</p>
+                      <p className="text-[10px] text-slate-500 uppercase mt-1">{req.category}</p>
+                    </div>
+                    <div className="bg-slate-50 rounded-xl p-3">
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Amount</p>
+                      <p className="font-mono font-bold text-primary text-sm">₦{Number(req.amount).toLocaleString()}</p>
+                    </div>
+                  </div>
+
+                  <div className="bg-slate-50 rounded-xl p-3">
+                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Description</p>
+                     <p className="text-xs text-slate-600 italic leading-snug">{req.description}</p>
+                  </div>
+
+                  {req.status === "pending" && (
+                    <div className="flex items-center gap-3 mt-2">
+                       <button
+                         onClick={() => handleAction(req.id, "rejected")}
+                         className="flex-1 py-3 bg-rose-50 text-rose-600 text-xs font-bold uppercase tracking-wider border border-rose-200 rounded-xl active:scale-[0.98] transition-all"
+                       >
+                         Reject
+                       </button>
+                       <button
+                         onClick={() => handleAction(req.id, "approved")}
+                         className="flex-1 py-3 bg-emerald-500 text-white text-xs font-bold uppercase tracking-wider shadow-lg shadow-emerald-500/20 rounded-xl active:scale-[0.98] transition-all"
+                       >
+                         Approve
+                       </button>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </>
         )}
       </div>
     </div>

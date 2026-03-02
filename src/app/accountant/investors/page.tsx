@@ -112,59 +112,110 @@ export default function AccountantInvestorsPage() {
           </div>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse min-w-[800px]">
-            <thead>
-              <tr className="bg-slate-50 border-b border-slate-100 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                <th className="p-4 pl-6">Investor</th>
-                <th className="p-4">Bank Details</th>
-                <th className="p-4">Active Birds</th>
-                <th className="p-4">Total Invested</th>
-                <th className="p-4 pr-6 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {loading ? (
-                <tr>
-                  <td colSpan={5} className="p-8 text-center text-slate-400 animate-pulse">
-                    Loading investors...
-                  </td>
-                </tr>
-              ) : investors.length === 0 ? (
-                <tr>
-                  <td colSpan={5} className="p-8 text-center text-slate-400">
-                    No investors found.
-                  </td>
-                </tr>
-              ) : (
-                investors.map((inv) => (
-                  <tr
-                    key={inv.id}
-                    className="border-b border-slate-50 hover:bg-slate-50/50 transition-colors group"
-                  >
-                    <td className="p-4 pl-6">
-                      <p className="font-bold text-sm text-primary">
-                        {inv.full_name || "Unnamed Investor"}
-                      </p>
-                      <p className="text-xs text-slate-400">{inv.email}</p>
-                    </td>
-                    <td className="p-4">
-                      {inv.bank_name && inv.account_number ? (
-                        <div>
-                          <p className="text-xs font-medium text-slate-700">
-                            {inv.bank_name}
-                          </p>
-                          <p className="text-[10px] text-slate-400 font-mono">
-                            {inv.account_number}
-                          </p>
+        {loading ? (
+          <div className="p-8 text-center text-slate-400 animate-pulse">
+            Loading investors...
+          </div>
+        ) : investors.length === 0 ? (
+          <div className="p-8 text-center text-slate-400">
+            No investors found.
+          </div>
+        ) : (
+          <>
+            {/* Desktop Table View */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full text-left border-collapse min-w-[800px]">
+                <thead>
+                  <tr className="bg-slate-50 border-b border-slate-100 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                    <th className="p-4 pl-6">Investor</th>
+                    <th className="p-4">Bank Details</th>
+                    <th className="p-4">Active Birds</th>
+                    <th className="p-4">Total Invested</th>
+                    <th className="p-4 pr-6 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {investors.map((inv) => (
+                    <tr
+                      key={inv.id}
+                      className="border-b border-slate-50 hover:bg-slate-50/50 transition-colors group"
+                    >
+                      <td className="p-4 pl-6">
+                        <p className="font-bold text-sm text-primary">
+                          {inv.full_name || "Unnamed Investor"}
+                        </p>
+                        <p className="text-xs text-slate-400">{inv.email}</p>
+                      </td>
+                      <td className="p-4">
+                        {inv.bank_name && inv.account_number ? (
+                          <div>
+                            <p className="text-xs font-medium text-slate-700">
+                              {inv.bank_name}
+                            </p>
+                            <p className="text-[10px] text-slate-400 font-mono">
+                              {inv.account_number}
+                            </p>
+                          </div>
+                        ) : (
+                          <span className="text-[10px] font-bold text-rose-500 bg-rose-50 px-2 py-1 rounded-md">
+                            Missing Bank Info
+                          </span>
+                        )}
+                      </td>
+                      <td className="p-4">
+                        <div className="flex items-center gap-1.5">
+                          <span className="material-symbols-outlined text-accent text-sm">
+                            egg_alt
+                          </span>
+                          <span className="font-bold text-sm text-slate-700">
+                            {inv.total_birds || 0}
+                          </span>
                         </div>
-                      ) : (
-                        <span className="text-[10px] font-bold text-rose-500 bg-rose-50 px-2 py-1 rounded-md">
-                          Missing Bank Info
-                        </span>
-                      )}
-                    </td>
-                    <td className="p-4">
+                      </td>
+                      <td className="p-4 text-sm font-mono font-bold text-primary">
+                        ₦{(inv.total_invested || 0).toLocaleString()}
+                      </td>
+                      <td className="p-4 pr-6 text-right">
+                        <button
+                          onClick={() => setSelectedInvestor(inv)}
+                          disabled={!inv.bank_name}
+                          className={`px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all
+                            ${
+                              inv.bank_name
+                                ? "bg-primary text-white hover:bg-emerald-900 shadow-lg shadow-primary/20"
+                                : "bg-slate-100 text-slate-400 cursor-not-allowed"
+                            }`}
+                        >
+                          Disburse
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile Cards View */}
+            <div className="grid grid-cols-1 md:hidden gap-4 p-4">
+              {investors.map((inv) => (
+                <div
+                  key={inv.id}
+                  className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm flex flex-col gap-4 relative"
+                >
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h3 className="font-bold text-primary">
+                        {inv.full_name || "Unnamed Investor"}
+                      </h3>
+                      <p className="text-xs text-slate-400">{inv.email}</p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="bg-slate-50 rounded-xl p-3">
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">
+                        Active Birds
+                      </p>
                       <div className="flex items-center gap-1.5">
                         <span className="material-symbols-outlined text-accent text-sm">
                           egg_alt
@@ -173,30 +224,55 @@ export default function AccountantInvestorsPage() {
                           {inv.total_birds || 0}
                         </span>
                       </div>
-                    </td>
-                    <td className="p-4 text-sm font-mono font-bold text-primary">
-                      ₦{(inv.total_invested || 0).toLocaleString()}
-                    </td>
-                    <td className="p-4 pr-6 text-right">
-                      <button
-                        onClick={() => setSelectedInvestor(inv)}
-                        disabled={!inv.bank_name}
-                        className={`px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all
-                          ${
-                            inv.bank_name
-                              ? "bg-primary text-white hover:bg-emerald-900 shadow-lg shadow-primary/20"
-                              : "bg-slate-100 text-slate-400 cursor-not-allowed"
-                          }`}
-                      >
-                        Disburse
-                      </button>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+                    </div>
+                    <div className="bg-slate-50 rounded-xl p-3">
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">
+                        Total Invested
+                      </p>
+                      <p className="text-sm font-mono font-bold text-primary">
+                        ₦{(inv.total_invested || 0).toLocaleString()}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="bg-slate-50 rounded-xl p-3">
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">
+                      Bank Details
+                    </p>
+                    {inv.bank_name && inv.account_number ? (
+                      <div>
+                        <p className="text-xs font-medium text-slate-700">
+                          {inv.bank_name}
+                        </p>
+                        <p className="text-xs text-slate-400 font-mono">
+                          {inv.account_number}
+                        </p>
+                      </div>
+                    ) : (
+                      <span className="text-[10px] font-bold text-rose-500 bg-rose-50 px-2 py-1 rounded-md">
+                        Missing Bank Info
+                      </span>
+                    )}
+                  </div>
+
+                  <button
+                    onClick={() => setSelectedInvestor(inv)}
+                    disabled={!inv.bank_name}
+                    className={`w-full py-3 rounded-xl text-xs font-bold uppercase tracking-wider transition-all
+                      ${
+                        inv.bank_name
+                          ? "bg-primary text-white shadow-lg shadow-primary/20"
+                          : "bg-slate-100 text-slate-400 cursor-not-allowed"
+                      }`}
+                  >
+                    Disburse
+                  </button>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+
       </div>
 
       {/* Disbursement Modal */}

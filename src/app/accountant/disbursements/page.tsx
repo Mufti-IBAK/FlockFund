@@ -141,89 +141,149 @@ Proceed with real-time transfer?`;
             <p className="text-slate-400 text-sm">No pending disbursements at this time.</p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-slate-50 border-b border-slate-100">
-                  <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                    Req. Date
-                  </th>
-                  <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                    Recipient / Bank
-                  </th>
-                  <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                    Purpose / Flock
-                  </th>
-                  <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                    Amount
-                  </th>
-                  <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider text-right">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-50">
-                {requests.map((req) => (
-                  <tr
-                    key={req.id}
-                    className="hover:bg-slate-50/50 transition-all group"
-                  >
-                    <td className="px-6 py-4 text-[11px] text-slate-400 font-mono">
-                      {new Date(req.created_at).toLocaleDateString()}
-                    </td>
-                    <td className="px-6 py-4">
-                      <p className="text-sm font-bold text-primary">
-                        {req.profiles?.full_name}
+          <>
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-slate-50 border-b border-slate-100">
+                    <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                      Req. Date
+                    </th>
+                    <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                      Recipient / Bank
+                    </th>
+                    <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                      Purpose / Flock
+                    </th>
+                    <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                      Amount
+                    </th>
+                    <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider text-right">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-50">
+                  {requests.map((req) => (
+                    <tr
+                      key={req.id}
+                      className="hover:bg-slate-50/50 transition-all group"
+                    >
+                      <td className="px-6 py-4 text-[11px] text-slate-400 font-mono">
+                        {new Date(req.created_at).toLocaleDateString()}
+                      </td>
+                      <td className="px-6 py-4">
+                        <p className="text-sm font-bold text-primary">
+                          {req.profiles?.full_name}
+                        </p>
+                        {req.profiles?.bank_name ? (
+                          <p className="text-[10px] font-mono text-emerald-600 font-bold uppercase">
+                            {req.profiles.bank_name} • {req.profiles.account_number}
+                          </p>
+                        ) : (
+                          <p className="text-[10px] text-rose-500 font-bold uppercase flex items-center gap-1">
+                            <span className="material-symbols-outlined text-xs">warning</span>
+                            No Bank Details
+                          </p>
+                        )}
+                      </td>
+                      <td className="px-6 py-4">
+                        <p className="text-xs font-bold text-slate-500">
+                          {req.category.toUpperCase()}
+                        </p>
+                        <p className="text-[10px] text-slate-400 italic">
+                          Flock: {req.flocks?.flock_name || req.flocks?.name}
+                        </p>
+                      </td>
+                      <td className="px-6 py-4 font-mono font-bold text-primary text-sm">
+                        ₦{Number(req.amount).toLocaleString()}
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          <button
+                            onClick={() => handleManualProcess(req.id)}
+                            className="px-3 py-1.5 border border-slate-200 text-slate-400 text-[9px] font-bold uppercase tracking-wider rounded-lg hover:bg-slate-50 transition-all"
+                          >
+                            Manual
+                          </button>
+                          <button
+                            onClick={() => handleAutomatedPay(req)}
+                            disabled={payingId === req.id || !req.profiles?.bank_name}
+                            className="px-4 py-1.5 bg-accent text-primary text-[9px] font-bold uppercase tracking-wider rounded-lg shadow-lg shadow-accent/20 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:grayscale flex items-center gap-1.5"
+                          >
+                            {payingId === req.id ? (
+                              <div className="w-2.5 h-2.5 border border-primary/20 border-t-primary rounded-full animate-spin" />
+                            ) : (
+                              <span className="material-symbols-outlined text-xs">bolt</span>
+                            )}
+                            {payingId === req.id ? "Paying..." : "Pay via Flutterwave"}
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="grid grid-cols-1 md:hidden gap-4 p-4">
+              {requests.map((req) => (
+                <div key={req.id} className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm flex flex-col gap-4 relative">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">
+                         {new Date(req.created_at).toLocaleDateString()}
                       </p>
+                      <h3 className="font-bold text-primary text-sm">
+                        {req.profiles?.full_name}
+                      </h3>
                       {req.profiles?.bank_name ? (
-                        <p className="text-[10px] font-mono text-emerald-600 font-bold uppercase">
-                          {req.profiles.bank_name} • {req.profiles.account_number}
+                        <p className="text-[10px] font-mono text-emerald-600 font-bold uppercase mt-1">
+                          {req.profiles.bank_name} •<br/>{req.profiles.account_number}
                         </p>
                       ) : (
-                        <p className="text-[10px] text-rose-500 font-bold uppercase flex items-center gap-1">
+                        <p className="text-[10px] text-rose-500 font-bold uppercase flex items-center gap-1 mt-1">
                           <span className="material-symbols-outlined text-xs">warning</span>
                           No Bank Details
                         </p>
                       )}
-                    </td>
-                    <td className="px-6 py-4">
-                      <p className="text-xs font-bold text-slate-500">
-                        {req.category.toUpperCase()}
-                      </p>
-                      <p className="text-[10px] text-slate-400 italic">
-                        Flock: {req.flocks?.flock_name || req.flocks?.name}
-                      </p>
-                    </td>
-                    <td className="px-6 py-4 font-mono font-bold text-primary text-sm">
-                      ₦{Number(req.amount).toLocaleString()}
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <button
-                          onClick={() => handleManualProcess(req.id)}
-                          className="px-3 py-1.5 border border-slate-200 text-slate-400 text-[9px] font-bold uppercase tracking-wider rounded-lg hover:bg-slate-50 transition-all"
-                        >
-                          Manual
-                        </button>
-                        <button
-                          onClick={() => handleAutomatedPay(req)}
-                          disabled={payingId === req.id || !req.profiles?.bank_name}
-                          className="px-4 py-1.5 bg-accent text-primary text-[9px] font-bold uppercase tracking-wider rounded-lg shadow-lg shadow-accent/20 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:grayscale flex items-center gap-1.5"
-                        >
-                          {payingId === req.id ? (
-                            <div className="w-2.5 h-2.5 border border-primary/20 border-t-primary rounded-full animate-spin" />
-                          ) : (
-                            <span className="material-symbols-outlined text-xs">bolt</span>
-                          )}
-                          {payingId === req.id ? "Paying..." : "Pay via Flutterwave"}
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                    </div>
+                    <div className="text-right">
+                       <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Amount</p>
+                       <p className="font-mono font-bold text-primary text-sm">₦{Number(req.amount).toLocaleString()}</p>
+                    </div>
+                  </div>
+
+                  <div className="bg-slate-50 rounded-xl p-3">
+                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Purpose / Flock</p>
+                     <p className="text-xs font-bold text-slate-700">{req.category.toUpperCase()}</p>
+                     <p className="text-[10px] text-slate-500 italic">Flock: {req.flocks?.flock_name || req.flocks?.name}</p>
+                  </div>
+
+                  <div className="flex flex-col gap-2 mt-2">
+                    <button
+                      onClick={() => handleAutomatedPay(req)}
+                      disabled={payingId === req.id || !req.profiles?.bank_name}
+                      className="w-full py-3 bg-accent text-primary text-xs font-bold uppercase tracking-wider rounded-xl shadow-lg shadow-accent/20 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:grayscale flex items-center justify-center gap-1.5"
+                    >
+                      {payingId === req.id ? (
+                        <div className="w-3 h-3 border-2 border-primary/20 border-t-primary rounded-full animate-spin" />
+                      ) : (
+                        <span className="material-symbols-outlined text-sm">bolt</span>
+                      )}
+                      {payingId === req.id ? "Paying..." : "Pay via Flutterwave"}
+                    </button>
+                    <button
+                      onClick={() => handleManualProcess(req.id)}
+                      className="w-full py-3 border border-slate-200 text-slate-500 text-xs font-bold uppercase tracking-wider rounded-xl hover:bg-slate-50 transition-all"
+                    >
+                      Process Manually
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
         )}
       </div>
 

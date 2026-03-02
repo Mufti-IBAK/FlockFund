@@ -6,7 +6,7 @@ import { CollapsibleSidebar } from "@/components/CollapsibleSidebar";
 
 const navItems = [
   { icon: "dashboard", label: "Overview", href: "/admin" },
-  { icon: "shopping_cart", label: "Invest", href: "/investor/invest" },
+  { icon: "shopping_cart", label: "Invest", href: "/admin/invest" },
   { icon: "group", label: "Investors", href: "/admin/investors" },
   { icon: "egg_alt", label: "Flocks", href: "/admin/flocks" },
   { icon: "groups", label: "Users", href: "/admin/users" },

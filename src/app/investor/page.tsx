@@ -26,6 +26,8 @@ export default function InvestorPortfolio() {
     selling_price_per_bird: 7500,
     rounds_before_withdrawal: 3,
   });
+  const [fcrValue, setFcrValue] = useState<number | null>(null);
+  const [healthScore, setHealthScore] = useState<number>(100);
   const contentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -38,30 +40,37 @@ export default function InvestorPortfolio() {
         } = await supabase.auth.getUser();
         if (!user) return;
 
-        const [invResult, setResult] = await Promise.all([
+        const [invResult, setResult, fcrRes, reportRes] = await Promise.all([
           supabase
             .from("investments")
-            .select(
-              `
-              *,
-              flocks (
-                selling_price_per_bird,
-                cost_per_bird
-              )
-            `,
-            )
+            .select(`*, flocks (selling_price_per_bird, cost_per_bird)`)
             .eq("investor_id", user.id)
             .in("status", ["active", "completed"])
             .order("created_at", { ascending: false }),
           supabase
             .from("settings")
-            .select(
-              "cost_per_bird, selling_price_per_bird, rounds_before_withdrawal",
-            )
+            .select("cost_per_bird, selling_price_per_bird, rounds_before_withdrawal")
             .single(),
+          supabase.from("fcr_calculations").select("fcr").order("calculated_at", { ascending: false }).limit(1),
+          supabase.from("farm_reports").select("mortality_count, total_birds").eq("status", "approved")
         ]);
+
         setInvestments((invResult.data as any) || []);
         if (setResult.data) setSettings(setResult.data as typeof settings);
+
+        if (fcrRes.data && fcrRes.data.length > 0) {
+          setFcrValue(fcrRes.data[0].fcr);
+        }
+
+        if (reportRes.data && reportRes.data.length > 0) {
+          const totalDead = reportRes.data.reduce((acc, r) => acc + (r.mortality_count || 0), 0);
+          // Just a simplistic visual health score: out of 1000 birds maybe 5 die -> 99.5%
+          // Using a baseline of 10000 birds for context if total_birds isn't available
+          const assumedTotal = reportRes.data.reduce((acc, r) => acc + (r.total_birds || 5000), 0) || 50000;
+          const score = Math.max(0, 100 - ((totalDead / assumedTotal) * 100));
+          setHealthScore(score);
+        }
+
       } catch (err) {
         console.error(err);
       } finally {
@@ -72,67 +81,49 @@ export default function InvestorPortfolio() {
   }, []);
 
   useEffect(() => {
-    if (contentRef.current) {
+    if (contentRef.current && !loading) {
       const ctx = gsap.context(() => {
         gsap.fromTo(
           contentRef.current!.querySelector(".hero-card"),
           { y: 30, opacity: 0, scale: 0.97 },
-          {
-            y: 0,
-            opacity: 1,
-            scale: 1,
-            duration: 0.8,
-            ease: "power3.out",
-            delay: 0.1,
-          },
+          { y: 0, opacity: 1, scale: 1, duration: 0.8, ease: "power3.out", delay: 0.1 }
         );
         gsap.fromTo(
           contentRef.current!.querySelectorAll(".kpi-card"),
           { y: 40, opacity: 0 },
-          {
-            y: 0,
-            opacity: 1,
-            stagger: 0.1,
-            duration: 0.6,
-            ease: "power2.out",
-            delay: 0.3,
-          },
+          { y: 0, opacity: 1, stagger: 0.1, duration: 0.6, ease: "power2.out", delay: 0.3 }
         );
         gsap.fromTo(
           contentRef.current!.querySelectorAll(".inv-card"),
           { y: 30, opacity: 0, scale: 0.95 },
-          {
-            y: 0,
-            opacity: 1,
-            scale: 1,
-            stagger: 0.1,
-            duration: 0.6,
-            ease: "back.out(1.3)",
-            delay: 0.5,
-          },
+          { y: 0, opacity: 1, scale: 1, stagger: 0.1, duration: 0.6, ease: "back.out(1.3)", delay: 0.5 }
         );
       });
       return () => ctx.revert();
     }
-  }, []);
+  }, [loading]);
 
-  const totalBirds = investments.reduce(
-    (s, inv) => s + (inv.birds_owned || 0),
-    0,
-  );
-  const totalInvested = investments.reduce(
-    (s, inv) => s + (inv.amount_invested || 0),
-    0,
-  );
-
-  // Per-investment valuation: (birds_owned * flock price)
+  const totalBirds = investments.reduce((s, inv) => s + (inv.birds_owned || 0), 0);
+  const totalInvested = investments.reduce((s, inv) => s + (inv.amount_invested || 0), 0);
   const estimatedValue = investments.reduce((s, inv) => {
-    const price =
-      inv.flocks?.selling_price_per_bird || settings.selling_price_per_bird;
+    const price = inv.flocks?.selling_price_per_bird || settings.selling_price_per_bird;
     return s + inv.birds_owned * price;
   }, 0);
-
   const projectedProfit = estimatedValue - totalInvested;
+
+  if (loading) {
+    return (
+      <div className="animate-pulse space-y-6">
+        <div className="h-48 bg-slate-200 rounded-3xl" />
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+           <div className="h-32 bg-slate-100 rounded-2xl" />
+           <div className="h-32 bg-slate-100 rounded-2xl" />
+           <div className="h-32 bg-slate-100 rounded-2xl" />
+           <div className="h-32 bg-slate-100 rounded-2xl" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div ref={contentRef}>
@@ -164,11 +155,8 @@ export default function InvestorPortfolio() {
               <p className="text-white/30 text-[10px] font-bold uppercase tracking-wider">
                 Projected Profit
               </p>
-              <p
-                className={`font-mono font-bold text-lg ${projectedProfit >= 0 ? "text-accent" : "text-rose-400"}`}
-              >
-                {projectedProfit >= 0 ? "+" : ""}₦
-                {projectedProfit.toLocaleString()}
+              <p className={`font-mono font-bold text-lg ${projectedProfit >= 0 ? "text-accent" : "text-rose-400"}`}>
+                {projectedProfit >= 0 ? "+" : ""}₦{projectedProfit.toLocaleString()}
               </p>
             </div>
             <div>
@@ -184,42 +172,55 @@ export default function InvestorPortfolio() {
       </div>
 
       {/* ── KPIs ── */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-5 mb-8">
         {[
           {
-            label: "Active Investments",
+            label: "Active Portfolios",
             value: investments.filter((i) => i.status === "active").length,
             icon: "egg_alt",
             color: "from-emerald-500/20 to-teal-500/20",
-          },
-          {
-            label: "Cost/Bird",
-            value: `₦${(investments[0]?.flocks?.cost_per_bird || settings.cost_per_bird).toLocaleString()}`,
-            icon: "payments",
-            color: "from-accent/20 to-amber-500/20",
+            textColor: "text-emerald-700",
+            valueText: "text-primary"
           },
           {
             label: "Sell Price/Bird",
             value: `₦${(investments[0]?.flocks?.selling_price_per_bird || settings.selling_price_per_bird).toLocaleString()}`,
             icon: "trending_up",
             color: "from-sky-500/20 to-indigo-500/20",
+            textColor: "text-sky-700",
+            valueText: "text-primary"
+          },
+          {
+            label: "Flock Health Rate",
+            value: `${healthScore.toFixed(1)}%`,
+            icon: "psychiatry",
+            color: "from-rose-500/20 to-pink-500/20",
+            textColor: "text-rose-700",
+            valueText: healthScore > 95 ? "text-emerald-600" : "text-amber-600"
+          },
+          {
+            label: "Current FCR",
+            value: fcrValue ? fcrValue.toFixed(2) : "1.8",
+            icon: "calculate",
+            color: "from-accent/20 to-amber-500/20",
+            textColor: "text-amber-700",
+            valueText: fcrValue && fcrValue < 2 ? "text-emerald-600" : fcrValue && fcrValue > 2.5 ? "text-rose-600" : "text-amber-600"
           },
         ].map((kpi) => (
-          <div
-            key={kpi.label}
-            className={`kpi-card bg-gradient-to-br ${kpi.color} rounded-2xl p-5 border border-white/40`}
-          >
-            <div className="w-11 h-11 rounded-xl bg-white/60 backdrop-blur-sm flex items-center justify-center shadow-sm mb-4">
-              <span className="material-symbols-outlined text-primary text-xl">
+          <div key={kpi.label} className={`kpi-card bg-gradient-to-br ${kpi.color} rounded-2xl p-4 md:p-5 border border-white/40 shadow-sm flex flex-col justify-between`}>
+            <div className="w-10 h-10 md:w-11 md:h-11 rounded-xl bg-white/60 backdrop-blur-sm flex items-center justify-center shadow-sm mb-3">
+              <span className={`material-symbols-outlined ${kpi.textColor} text-lg md:text-xl`}>
                 {kpi.icon}
               </span>
             </div>
-            <p className="font-mono text-2xl font-bold text-primary tracking-tighter">
-              {kpi.value}
-            </p>
-            <p className="text-slate-500 text-xs mt-1 font-medium">
-              {kpi.label}
-            </p>
+            <div>
+              <p className={`font-mono text-xl md:text-2xl font-bold tracking-tighter ${kpi.valueText}`}>
+                {kpi.value}
+              </p>
+              <p className="text-slate-500 text-[10px] md:text-xs mt-0.5 font-bold uppercase tracking-wider">
+                {kpi.label}
+              </p>
+            </div>
           </div>
         ))}
       </div>

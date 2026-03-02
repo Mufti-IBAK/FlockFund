@@ -6,7 +6,7 @@ import { createClient } from "@supabase/supabase-js";
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { investor_id, birds_count, gateway, flock_id } = body;
+    const { investor_id, birds_count, gateway, flock_id, callback_url } = body;
 
     if (!investor_id || !birds_count) {
       return NextResponse.json(
@@ -83,6 +83,7 @@ export async function POST(req: NextRequest) {
     // Generate checkout URL
     let checkoutUrl = "";
     const reference = `FF-${investment.id.slice(0, 8)}-${Date.now()}`;
+    const redirectUrl = callback_url || `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/investor/payment/callback`;
 
     // Flutterwave Standard Payment
     const flwResponse = await fetch("https://api.flutterwave.com/v3/payments", {
@@ -95,7 +96,7 @@ export async function POST(req: NextRequest) {
         tx_ref: reference,
         amount,
         currency: "NGN",
-        redirect_url: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/investor/payment/callback`,
+        redirect_url: redirectUrl,
         customer: { email: body.email || "investor@flockfund.com" },
         customizations: {
           title: "FlockFund Investment",

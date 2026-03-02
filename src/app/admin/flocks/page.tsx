@@ -478,126 +478,215 @@ export default function AdminFlocks() {
             </p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <div className="divide-y divide-slate-50 min-w-[800px] xl:min-w-0">
-              {/* Header - hidden on mobile */}
-              <div className="grid grid-cols-7 gap-4 px-5 py-3 bg-slate-50/50 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                <span>Name</span>
-                <span>Birds</span>
-                <span>Start</span>
-                <span>End</span>
-                <span>Progress</span>
-                <span>Status</span>
-                <span>Actions</span>
-              </div>
-              {flocks.map((flock) => (
-                <div
-                  key={flock.id}
-                  className="flock-row grid grid-cols-2 grid-cols-7 gap-3 md:gap-4 px-4 md:px-5 py-4 items-center hover:bg-slate-50/50 transition-colors duration-300"
-                >
-                  <span className="font-bold text-sm text-primary col-span-1">
-                    {getFlockName(flock)}
-                  </span>
-                  <span className="font-mono text-sm text-primary font-bold">
-                    {(
-                      flock.current_count ?? getBatchSize(flock)
-                    ).toLocaleString()}
-                    <span className="text-[10px] text-slate-400 block font-normal">
-                      of {getBatchSize(flock).toLocaleString()}
+          <>
+            <div className="hidden md:block overflow-x-auto">
+              <div className="divide-y divide-slate-50 min-w-[800px] xl:min-w-0">
+                {/* Header */}
+                <div className="grid grid-cols-7 gap-4 px-5 py-3 bg-slate-50/50 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                  <span>Name</span>
+                  <span>Birds</span>
+                  <span>Start</span>
+                  <span>End</span>
+                  <span>Progress</span>
+                  <span>Status</span>
+                  <span>Actions</span>
+                </div>
+                {flocks.map((flock) => (
+                  <div
+                    key={flock.id}
+                    className="flock-row grid grid-cols-2 grid-cols-7 gap-3 md:gap-4 px-4 md:px-5 py-4 items-center hover:bg-slate-50/50 transition-colors duration-300"
+                  >
+                    <span className="font-bold text-sm text-primary col-span-1">
+                      {getFlockName(flock)}
                     </span>
-                  </span>
-                  <span className="text-xs text-slate-500">
-                    {new Date(flock.start_date).toLocaleDateString()}
-                  </span>
-                  <span className="text-xs text-slate-500">
-                    {flock.expected_end_date
-                      ? new Date(flock.expected_end_date).toLocaleDateString()
-                      : "—"}
-                  </span>
-                  <div>
-                    {flock.expected_end_date ? (
-                      <div className="flex flex-col gap-1">
-                        <div className="flex items-center gap-2">
-                          <div className="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                            <div
-                              className={`h-full rounded-full transition-all duration-1000 ${
-                                flock.status === "completed"
-                                  ? "bg-emerald-500"
-                                  : daysProgress(
-                                        flock.start_date,
-                                        flock.expected_end_date,
-                                      ) >= 100
-                                    ? "bg-rose-400"
-                                    : "bg-gradient-to-r from-accent to-emerald-500"
-                              }`}
-                              style={{
-                                width: `${flock.status === "completed" ? 100 : daysProgress(flock.start_date, flock.expected_end_date)}%`,
-                              }}
-                            />
-                          </div>
-                          <span
-                            className={`text-[10px] font-mono font-bold ${
-                              flock.status !== "completed" &&
-                              daysProgress(
-                                flock.start_date,
-                                flock.expected_end_date,
-                              ) >= 100
-                                ? "text-rose-500"
-                                : "text-slate-400"
-                            }`}
-                          >
-                            {flock.status === "completed"
-                              ? "100"
-                              : daysProgress(
+                    <span className="font-mono text-sm text-primary font-bold">
+                      {(
+                        flock.current_count ?? getBatchSize(flock)
+                      ).toLocaleString()}
+                      <span className="text-[10px] text-slate-400 block font-normal">
+                        of {getBatchSize(flock).toLocaleString()}
+                      </span>
+                    </span>
+                    <span className="text-xs text-slate-500">
+                      {new Date(flock.start_date).toLocaleDateString()}
+                    </span>
+                    <span className="text-xs text-slate-500">
+                      {flock.expected_end_date
+                        ? new Date(flock.expected_end_date).toLocaleDateString()
+                        : "—"}
+                    </span>
+                    <div>
+                      {flock.expected_end_date ? (
+                        <div className="flex flex-col gap-1">
+                          <div className="flex items-center gap-2">
+                            <div className="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                              <div
+                                className={`h-full rounded-full transition-all duration-1000 ${
+                                  flock.status === "completed"
+                                    ? "bg-emerald-500"
+                                    : daysProgress(
+                                          flock.start_date,
+                                          flock.expected_end_date,
+                                        ) >= 100
+                                      ? "bg-rose-400"
+                                      : "bg-gradient-to-r from-accent to-emerald-500"
+                                }`}
+                                style={{
+                                  width: `${flock.status === "completed" ? 100 : daysProgress(flock.start_date, flock.expected_end_date)}%`,
+                                }}
+                              />
+                            </div>
+                            <span
+                              className={`text-[10px] font-mono font-bold ${
+                                flock.status !== "completed" &&
+                                daysProgress(
                                   flock.start_date,
                                   flock.expected_end_date,
-                                )}
-                            %
+                                ) >= 100
+                                  ? "text-rose-500"
+                                  : "text-slate-400"
+                              }`}
+                            >
+                              {flock.status === "completed"
+                                ? "100"
+                                : daysProgress(
+                                    flock.start_date,
+                                    flock.expected_end_date,
+                                  )}
+                              %
+                            </span>
+                          </div>
+                          {flock.status !== "completed" &&
+                            daysProgress(
+                              flock.start_date,
+                              flock.expected_end_date,
+                            ) >= 100 && (
+                              <span className="text-[9px] font-bold text-rose-400 uppercase tracking-tighter animate-pulse">
+                                Overdue Cycle
+                              </span>
+                            )}
+                        </div>
+                      ) : (
+                        <div className="flex flex-col gap-1">
+                          <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
+                            <div className="h-full bg-slate-200 w-1/4 rounded-full" />
+                          </div>
+                          <span className="text-[10px] text-slate-300 font-mono">
+                            No end date
                           </span>
                         </div>
-                        {flock.status !== "completed" &&
-                          daysProgress(
-                            flock.start_date,
-                            flock.expected_end_date,
-                          ) >= 100 && (
-                            <span className="text-[9px] font-bold text-rose-400 uppercase tracking-tighter animate-pulse">
-                              Overdue Cycle
-                            </span>
-                          )}
-                      </div>
-                    ) : (
-                      <div className="flex flex-col gap-1">
-                        <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
-                          <div className="h-full bg-slate-200 w-1/4 rounded-full" />
+                      )}
+                    </div>
+                    <span
+                      className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full inline-block w-fit ${STATUS_COLORS[flock.status] || "bg-slate-100 text-slate-600"}`}
+                    >
+                      {flock.status}
+                    </span>
+                    <div>
+                      {flock.status !== "completed" && (
+                        <button
+                          onClick={() => markCompleted(flock.id)}
+                          className="text-xs font-bold text-accent hover:text-primary transition-colors flex items-center gap-1"
+                        >
+                          <span className="material-symbols-outlined text-sm">
+                            check_circle
+                          </span>
+                          Complete
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:hidden gap-4 p-4">
+              {flocks.map((flock) => (
+                <div key={flock.id} className="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm flex flex-col gap-3 relative">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h3 className="font-bold text-primary text-sm line-clamp-1">
+                        {getFlockName(flock)}
+                      </h3>
+                      <p className="text-[10px] text-slate-400 font-medium uppercase tracking-wider mt-0.5">
+                        Start: {new Date(flock.start_date).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                       <span
+                         className={`text-[9px] font-bold uppercase tracking-wider px-2 py-1 rounded-md ${STATUS_COLORS[flock.status] || "bg-slate-100 text-slate-600"}`}
+                       >
+                         {flock.status}
+                       </span>
+                    </div>
+                  </div>
+
+                  <div className="bg-slate-50 rounded-xl p-3 flex flex-col gap-2 mt-1">
+                    <div className="flex justify-between items-center text-[10px] uppercase font-bold text-slate-400 tracking-widest mb-1">
+                       <span>Flock Size</span>
+                       <span>Current Count</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                       <span className="font-mono text-sm text-slate-600">
+                         {getBatchSize(flock).toLocaleString()} birds
+                       </span>
+                       <span className="font-mono text-sm font-bold text-primary">
+                         {(flock.current_count ?? getBatchSize(flock)).toLocaleString()}
+                       </span>
+                    </div>
+                  </div>
+
+                  <div className="bg-slate-50 rounded-xl p-3 mt-1">
+                     <div className="flex justify-between items-center mb-2">
+                       <span className="text-[10px] uppercase font-bold text-slate-400 tracking-widest">Progress</span>
+                       <span className="text-[10px] font-bold text-slate-600">
+                          {flock.expected_end_date ? new Date(flock.expected_end_date).toLocaleDateString() : "No end date"}
+                       </span>
+                     </div>
+                     {flock.expected_end_date ? (
+                       <div className="flex items-center gap-2">
+                         <div className="flex-1 h-1.5 bg-slate-200 rounded-full overflow-hidden">
+                           <div
+                             className={`h-full rounded-full transition-all duration-1000 ${
+                               flock.status === "completed"
+                                 ? "bg-emerald-500"
+                                 : daysProgress(flock.start_date, flock.expected_end_date) >= 100
+                                   ? "bg-rose-400"
+                                   : "bg-gradient-to-r from-accent to-emerald-500"
+                             }`}
+                             style={{
+                               width: `${flock.status === "completed" ? 100 : daysProgress(flock.start_date, flock.expected_end_date)}%`,
+                             }}
+                           />
+                         </div>
+                         <span className="text-[10px] font-mono font-bold text-slate-500 min-w-[3ch]">
+                           {flock.status === "completed" ? "100" : daysProgress(flock.start_date, flock.expected_end_date)}%
+                         </span>
+                       </div>
+                     ) : (
+                        <div className="h-1.5 w-full bg-slate-200 rounded-full overflow-hidden">
+                          <div className="h-full bg-slate-300 w-1/4 rounded-full" />
                         </div>
-                        <span className="text-[10px] text-slate-300 font-mono">
-                          No end date
-                        </span>
-                      </div>
-                    )}
+                     )}
                   </div>
-                  <span
-                    className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full inline-block w-fit ${STATUS_COLORS[flock.status] || "bg-slate-100 text-slate-600"}`}
-                  >
-                    {flock.status}
-                  </span>
-                  <div>
-                    {flock.status !== "completed" && (
-                      <button
-                        onClick={() => markCompleted(flock.id)}
-                        className="text-xs font-bold text-accent hover:text-primary transition-colors flex items-center gap-1"
-                      >
-                        <span className="material-symbols-outlined text-sm">
-                          check_circle
-                        </span>
-                        Complete
-                      </button>
-                    )}
-                  </div>
+
+                  {flock.status !== "completed" && (
+                     <div className="pt-2">
+                        <button
+                          onClick={() => markCompleted(flock.id)}
+                          className="w-full py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-lg text-xs font-bold transition-colors flex items-center justify-center gap-1.5"
+                        >
+                          <span className="material-symbols-outlined text-[14px]">
+                            check_circle
+                          </span>
+                          Mark as Completed
+                        </button>
+                     </div>
+                  )}
                 </div>
               ))}
             </div>
-          </div>
+          </>
         )}
       </div>
     </div>

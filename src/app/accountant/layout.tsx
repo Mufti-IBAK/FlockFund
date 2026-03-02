@@ -31,7 +31,7 @@ const navItems = [
     label: "Payout Forecasting",
     href: "/accountant/projections",
   },
-  { icon: "shopping_cart", label: "Invest", href: "/investor/invest" },
+  { icon: "shopping_cart", label: "Invest", href: "/accountant/invest" },
   { icon: "analytics", label: "Data Insights", href: "/accountant/insights" },
   { icon: "settings", label: "Settings", href: "/accountant/settings" },
 ];
