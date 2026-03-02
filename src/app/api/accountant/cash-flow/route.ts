@@ -42,7 +42,7 @@ export async function GET(req: Request) {
       .from("investments")
       .select("id, cost_paid, created_at, status")
       // assuming successful investments only
-      .not("status", "eq", "failed");
+      .in("status", ["active", "completed"]);
 
     // b) Sales / Revenue (profit cycles)
     const { data: cycles } = await supabaseAdmin

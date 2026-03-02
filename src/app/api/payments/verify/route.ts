@@ -27,14 +27,6 @@ export async function GET(req: NextRequest) {
           .update({ status: 'failed' })
           .or(`payment_reference.eq.${txRef},payment_transaction_id.eq.${txRef}`)
           .eq('status', 'pending');
-
-        // Update transactions table too
-        try {
-          await supabase
-            .from('transactions')
-            .update({ status: 'failed' })
-            .eq('reference', txRef);
-        } catch { /* table may not exist */ }
       }
 
       return NextResponse.json({
@@ -69,13 +61,23 @@ export async function GET(req: NextRequest) {
           .select()
           .single();
 
-        // Update transactions table
-        try {
-          await supabase
-            .from('transactions')
-            .update({ status: 'completed', gateway_response: verifyData.data || {} })
-            .eq('reference', txTxRef);
-        } catch { /* table may not exist */ }
+        // Update transactions table by inserting completed transaction
+        if (investment) {
+          try {
+            await supabase
+              .from('transactions')
+              .insert({
+                investor_id: investment.investor_id,
+                investment_id: investment.id,
+                type: 'investment',
+                amount: verifyData.data.amount,
+                status: 'completed',
+                gateway: 'flutterwave',
+                reference: txTxRef,
+                gateway_response: verifyData.data || {}
+              });
+          } catch { /* table may not exist */ }
+        }
 
         // Award badge
         if (investment) {
@@ -117,13 +119,6 @@ export async function GET(req: NextRequest) {
             .from('investments')
             .update({ status: txStatus === 'pending' ? 'pending' : 'failed' })
             .or(`payment_reference.eq.${txTxRef},payment_transaction_id.eq.${txTxRef}`);
-
-          try {
-            await supabase
-              .from('transactions')
-              .update({ status: txStatus === 'pending' ? 'pending' : 'failed' })
-              .eq('reference', txTxRef);
-          } catch { /* table may not exist */ }
         }
 
         return NextResponse.json({

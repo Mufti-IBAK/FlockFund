@@ -83,7 +83,9 @@ export async function POST(req: NextRequest) {
     // Generate checkout URL
     let checkoutUrl = "";
     const reference = `FF-${investment.id.slice(0, 8)}-${Date.now()}`;
-    const redirectUrl = callback_url || `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/investor/payment/callback`;
+    const redirectUrl =
+      callback_url ||
+      `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/investor/payment/callback`;
 
     // Flutterwave Standard Payment
     const flwResponse = await fetch("https://api.flutterwave.com/v3/payments", {
@@ -116,21 +118,6 @@ export async function POST(req: NextRequest) {
         payment_transaction_id: reference,
       })
       .eq("id", investment.id);
-
-    // Also log to transactions table
-    try {
-      await supabase.from("transactions").insert({
-        investor_id,
-        investment_id: investment.id,
-        type: "investment",
-        amount,
-        status: "pending",
-        gateway: "flutterwave",
-        reference,
-      });
-    } catch {
-      /* transactions table may not exist yet */
-    }
 
     return NextResponse.json({
       success: true,

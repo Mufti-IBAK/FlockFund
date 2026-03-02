@@ -1,0 +1,281 @@
+FlockFund — Official Company Documents
+
+## Table of Contents
+
+- [About Us](#about-us)
+- [Careers](#careers)
+- [Privacy Policy](#privacy-policy)
+- [Terms of Service](#terms-of-service)
+- [Compliance Statement](#compliance-statement)
+
+---
+
+# About Us
+
+## Our Story
+
+FlockFund was born from a simple observation: poultry farming is profitable, but the barrier to entry is high. Land, infrastructure, expertise, and capital — most people don't have all four. Meanwhile, those who *do* have capital are often looking for alternative investments that are tangible, ethical, and transparent.
+
+We asked: *What if we could bridge the gap?*
+
+Our mission is to democratise agricultural investment by allowing anyone to co‑own broiler chickens, earn profits, and be part of a growing community of forward‑thinking investors. No farm required. No expertise needed. Just a belief in something real.
+
+## Our Mission
+
+To make poultry farming accessible, transparent, and profitable for everyone.
+
+## Our Values
+
+| Value | What It Means |
+|-------|---------------|
+| **Transparency** | We share what's happening on the farm — good and bad — in real time. |
+| **Trust** | We earn it daily through honest communication and fair treatment. |
+| **Sustainability** | We build farms that last and practices that protect. |
+| **Community** | We are all in this together. Your success is our success. |
+
+## Our Team
+
+| Name | Role |
+|------|------|
+| **Dr. Muhammed Jimoh** | Founder & CEO — Doctor of Veterinary Medicine |
+| **Umar Muhammad** | C0-Founder - Business Expert & Real Estate Agent |
+| **Khairat Jimoh** | Chief Technology Officer — FullStack Developer & Data Analyst |
+| **Aisha Ismail** | Head of Investor Relations — community building expert |
+| **Sadiq Aliu** | Operations Director — Supply chain and farm management |
+
+---
+
+# Careers
+
+## Join the Flock
+
+We're building something different — where technology meets agriculture, and transparency is non‑negotiable.
+
+## Why Work With Us?
+
+- **Mission‑Driven:** Your work helps people invest in real, tangible assets.
+- **Growth Environment:** We invest in your learning and development.
+- **Flexible Culture:** Remote‑first with regular team gatherings.
+- **Impact:** See the results of your work in real farms and happy investors.
+
+## Positions (note that opening of application are internal for now)
+
+### Farm Manager (Veterinarian)
+- Oversee flock health across farm locations.
+- Review keeper reports, conduct health inspections.
+- Implement biosecurity protocols.
+- **Experience:** DVM + poultry experience
+
+### Keeper (Poultry Attendant)
+- Daily care of broiler chickens: feeding, watering, monitoring.
+- Record mortality, temperature, feed consumption.
+- **Experience:** Training provided
+
+### Community Manager
+- Manage investor community and social media.
+- Organise webinars and Q&A sessions.
+- **Location:** Remote
+- **Experience:** 2+ years community management
+
+## How to Apply
+
+Information would be disclosed as at when necessary
+
+We are an equal opportunity employer.
+
+---
+
+# Privacy Policy
+
+**Last Updated:** March 2026
+
+## 1. Introduction
+
+FlockFund ("we," "our," "us") is committed to protecting your privacy. This policy explains how we collect, use, and safeguard your information.
+
+## 2. Information We Collect
+
+| Type | Examples |
+|------|----------|
+| **Identity Data** | Name, email, phone number |
+| **Financial Data** | Bank details (processed securely by payment gateways) |
+| **Investment Data** | Flock selections, transaction history |
+| **Farm Data** | Anonymised feed consumption, weight records, mortality |
+| **Technical Data** |  browser type, cookies |
+
+## 3. How We Use Your Information
+
+- To provide investment services
+- To process transactions
+- To communicate with you
+- To improve our platform
+- To comply with legal obligations
+
+## 4. Data Monetisation (Transparency Note)
+
+We collect **anonymised and aggregated** farm data (feed conversion ratios, growth rates, etc.) that may be shared with third parties such as feed companies or researchers.
+
+**What this means for you:**
+- Your personal information is **never** sold.
+- Farm data is stripped of anything identifying.
+- You cannot be identified from this data.
+
+## 5. Data Sharing
+
+We may share your information with:
+- **Service providers:** Payment processors, cloud hosting
+- **Legal authorities:** When required by law
+- **Aggregated data recipients:** Anonymised farm data only
+
+We do **not** sell your personal information.
+
+## 6. Data Security
+
+We implement reasonable security measures to protect your information, including encryption and access controls. However, no online platform is 100% secure.
+
+## 7. Your Rights
+
+You may request access to, correction of, or deletion of your personal data by contacting **flockfund001@gmail.com**.
+
+## 8. Contact
+
+For privacy inquiries: **flockfund001@gmail.com**
+
+---
+
+# Terms of Service
+
+**Last Updated:** March 2026
+
+## 1. Acceptance of Terms
+
+By using FlockFund, you agree to these Terms. If you do not agree, please do not use the Service.
+
+## 2. Eligibility
+
+You must be at least 18 years old and capable of entering binding contracts.
+
+## 3. Account Registration
+
+You are responsible for maintaining accurate account information and for all activity under your account.
+
+## 4. Investment Services
+
+### 4.1 Nature of Investment
+Investing in FlockFund means you are co‑owning broiler chickens. You are **not** purchasing securities or shares. Returns are based on the profitable sale of birds.
+
+### 4.2 Risk Acknowledgment
+**You acknowledge that:**
+- Poultry farming involves inherent risks including disease, mortality, and market fluctuations.
+- You may lose part or all of your investment.
+- FlockFund does not guarantee any return.
+
+### 4.3 Profit Distribution
+- Investor share: **70%** of flock profits
+- FlockFund share: **30%** of flock profits
+
+### 4.4 Reinvestment Rule
+For the first **three completed cycles**, **20%** of your profit must be reinvested. After three cycles, you may withdraw any or all funds.
+
+## 5. Reserve Fund
+
+- **8% of FlockFund's profit share** from each flock is set aside in a Reserve Fund.
+- The fund provides **partial compensation** in case of catastrophic losses (disease outbreak, government culling).
+- It does **not** guarantee full recovery.
+- Once the fund reaches **20% of total active investments**, excess is distributed as bonus birds to flock fund workers as incentives and bonuses for badged investors.
+
+## 6. Farm Data
+
+Anonymised farm data may be used for analytics and shared with third parties. Your personal information is never included.
+
+## 7. Payment Terms
+
+Payments are processed by third‑party gateways. Transaction fees apply. Investments are non‑refundable once a flock cycle begins.
+
+## 8. Disclaimers
+
+THE SERVICE IS PROVIDED "AS IS." WE DO NOT GUARANTEE UNINTERRUPTED SERVICE OR SPECIFIC RETURNS.
+
+## 9. Limitation of Liability
+
+To the maximum extent permitted by law, FlockFund is not liable for any indirect or consequential damages arising from your use of the Service or investment losses.
+
+## 10. Governing Law
+
+These Terms are governed by the laws of the Federal Republic of Nigeria.
+
+## 11. Contact
+
+For questions: **flockfund001@gmail.com**
+
+---
+
+# Compliance Statement
+
+**Last Updated:** March 2026
+
+## 1. Our Commitment
+
+FlockFund is committed to operating with integrity, transparency, and in accordance with applicable laws and regulations. We believe that strong compliance protects both our investors and our business.
+
+## 2. Investment Structure
+
+Our model is structured as a **direct co‑ownership agreement**:
+
+- Investors jointly own physical assets (broiler chickens).
+- Profits are shared based on actual farm performance.
+- This is distinct from securities or collective investment schemes.
+
+## 3. Investor Protection
+
+### Clear Risk Disclosure
+All investors must acknowledge and accept the risks of agricultural investment before participating. Risk disclosures are prominently displayed.
+
+### Segregated Funds
+Investor funds are held separately from operational funds and used only for their intended purpose.
+
+### Dispute Resolution
+We maintain a fair dispute resolution process:
+1. **Internal review** — complaint submitted to support
+2. **Escalation** — reviewed by management
+3. **Mediation** — if unresolved, referred to agreed mediator
+
+## 4. Data Protection
+
+We follow industry best practices for data protection, including:
+- Collecting only necessary information
+- Obtaining consent for processing
+- Implementing reasonable security measures
+- Honouring data subject requests
+
+## 5. Anti‑Money Laundering
+
+We take reasonable steps to prevent misuse of our platform, including identity verification for larger investments and monitoring for suspicious activity.
+
+## 6. Tax Compliance
+
+- FlockFund pays applicable taxes on its share of profits.
+- Investors are responsible for reporting and paying taxes on their profits based on their individual circumstances.
+
+## 7. Advertising & Marketing
+
+Our marketing is honest and transparent. We do not:
+- Make exaggerated claims
+- Guarantee specific returns
+- Target vulnerable populations
+
+## 8. Risk Management
+
+We maintain a comprehensive risk management framework including:
+- Strict biosecurity protocols
+- Veterinary oversight
+- Reserve Fund (8% of FlockFund profits)
+- Geographic diversification of farms
+
+## 9. Contact Our Compliance Team
+
+For compliance inquiries: **flockfund001@gmail.com**
+
+---
+
+*These documents are for informational purposes. FlockFund recommends that investors consult with their own advisors before investing.*

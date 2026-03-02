@@ -47,7 +47,8 @@ export async function POST(req: NextRequest) {
         },
       );
       verifyData = await verifyRes.json();
-      const txStatus = (verifyData as { data?: { status?: string } })?.data?.status;
+      const txStatus = (verifyData as { data?: { status?: string } })?.data
+        ?.status;
       verified = txStatus === "successful";
       paymentFailed = txStatus === "failed" || txStatus === "cancelled";
     }
@@ -58,7 +59,9 @@ export async function POST(req: NextRequest) {
       : supabase
           .from("investments")
           .select("*")
-          .or(`payment_reference.eq.${reference},payment_transaction_id.eq.${reference}`)
+          .or(
+            `payment_reference.eq.${reference},payment_transaction_id.eq.${reference}`,
+          )
           .single();
 
     const { data: investment } = await query;
@@ -82,13 +85,21 @@ export async function POST(req: NextRequest) {
         .update({ status: "active" })
         .eq("id", investment.id);
 
-      // Update transactions table
+      // Insert into transactions table
       try {
-        await supabase
-          .from("transactions")
-          .update({ status: "completed", gateway_response: verifyData })
-          .eq("reference", reference);
-      } catch { /* table may not exist */ }
+        await supabase.from("transactions").insert({
+          investor_id: investment.investor_id,
+          investment_id: investment.id,
+          type: "investment",
+          amount: investment.amount_invested || investment.cost_paid,
+          status: "completed",
+          gateway: "flutterwave",
+          reference: reference,
+          gateway_response: verifyData,
+        });
+      } catch {
+        /* table may not exist */
+      }
 
       // Generate blockchain hash if enabled
       const { data: settings } = await supabase
@@ -137,14 +148,6 @@ export async function POST(req: NextRequest) {
         .from("investments")
         .update({ status: "failed" })
         .eq("id", investment.id);
-
-      // Update transactions table
-      try {
-        await supabase
-          .from("transactions")
-          .update({ status: "failed", gateway_response: verifyData })
-          .eq("reference", reference);
-      } catch { /* table may not exist */ }
     }
 
     return NextResponse.json({ success: true });

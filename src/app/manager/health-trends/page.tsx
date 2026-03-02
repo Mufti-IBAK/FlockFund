@@ -102,22 +102,43 @@ function LineChart({ data, yKey, color, label, unit }: {
 
 export default function ManagerHealthTrends() {
   const [data, setData] = useState<TrendData[]>([]);
+  const [flocks, setFlocks] = useState<{id: string, name: string}[]>([]);
+  const [selectedFlock, setSelectedFlock] = useState<string>('all');
   const [loading, setLoading] = useState(true);
   const contentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    async function loadFlocks() {
+      try {
+        const { createClient } = await import('@/lib/supabase/client');
+        const supabase = createClient();
+        const { data } = await supabase.from('flocks').select('id, name').order('created_at', { ascending: false });
+        if (data) setFlocks(data);
+      } catch (err) { console.error(err); }
+    }
+    loadFlocks();
+  }, []);
+
+  useEffect(() => {
     async function load() {
+      setLoading(true);
       try {
         const { createClient } = await import('@/lib/supabase/client');
         const supabase = createClient();
 
         // Try to load approved reports first
-        const { data: reports, error } = await supabase
+        let query = supabase
           .from('farm_reports')
-          .select('report_date, mortality_count, temperature, temperature_celsius, feed_consumed_kg, status')
+          .select('report_date, mortality_count, temperature, temperature_celsius, feed_consumed_kg, status, flock_id')
           .in('status', ['approved', 'pending'])
           .order('report_date', { ascending: true })
-          .limit(90);
+          .limit(300);
+
+        if (selectedFlock !== 'all') {
+          query = query.eq('flock_id', selectedFlock);
+        }
+
+        const { data: reports, error } = await query;
 
         if (error) {
           console.error('Query error:', error);
@@ -150,7 +171,7 @@ export default function ManagerHealthTrends() {
       finally { setLoading(false); }
     }
     load();
-  }, []);
+  }, [selectedFlock]);
 
   useEffect(() => {
     if (contentRef.current && !loading) {
@@ -169,9 +190,24 @@ export default function ManagerHealthTrends() {
 
   return (
     <div ref={contentRef}>
-      <div className="mb-6 md:mb-8">
-        <h1 className="text-xl md:text-2xl font-heading font-extrabold text-primary tracking-tight">Health Trends</h1>
-        <p className="text-slate-400 text-sm mt-1">Flock health metrics from keeper reports (line charts)</p>
+      <div className="mb-6 md:mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-xl md:text-2xl font-heading font-extrabold text-primary tracking-tight">Health Trends</h1>
+          <p className="text-slate-400 text-sm mt-1">Flock health metrics from keeper reports (line charts)</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="material-symbols-outlined text-slate-400">filter_list</span>
+          <select
+            value={selectedFlock}
+            onChange={(e) => setSelectedFlock(e.target.value)}
+            className="bg-white border border-slate-200 text-primary text-sm rounded-lg focus:ring-accent focus:border-accent block w-full p-2.5 font-bold shadow-sm"
+          >
+            <option value="all">Average (All Flocks)</option>
+            {flocks.map(f => (
+              <option key={f.id} value={f.id}>{f.name}</option>
+            ))}
+          </select>
+        </div>
       </div>
 
       {loading ? (
