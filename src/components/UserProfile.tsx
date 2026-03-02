@@ -59,6 +59,12 @@ export function useUserInfo() {
     fetchUser();
   }, []);
 
+  useEffect(() => {
+    if (user?.role === 'admin') {
+      localStorage.setItem('flockfund_was_admin', 'true');
+    }
+  }, [user?.role]);
+
   return { user, loading };
 }
 
@@ -125,8 +131,41 @@ export function TopBarUserProfile() {
   const { user, loading } = useUserInfo();
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [isSwitching, setIsSwitching] = useState(false);
+
+  const canSwitchRole = 
+    user?.role === 'admin' || 
+    (typeof window !== 'undefined' && localStorage.getItem('flockfund_was_admin') === 'true');
+
+  async function handleSwitchRole(newRole: string) {
+    setIsSwitching(true);
+    try {
+      const res = await fetch('/api/user/switch-role', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ role: newRole })
+      });
+      if (res.ok) {
+        // Redirect to new role dashboard
+        let dest = '/investor';
+        if (newRole === 'admin') dest = '/admin';
+        if (newRole === 'farm_manager') dest = '/manager';
+        if (newRole === 'keeper') dest = '/keeper';
+        if (newRole === 'accountant') dest = '/accountant';
+        window.location.href = dest;
+      } else {
+        alert("Failed to switch role");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Failed to switch role");
+    } finally {
+      setIsSwitching(false);
+    }
+  }
 
   async function handleLogout() {
+    localStorage.removeItem('flockfund_was_admin');
     const { createClient } = await import('@/lib/supabase/client');
     const supabase = createClient();
     await supabase.auth.signOut();
@@ -171,11 +210,26 @@ export function TopBarUserProfile() {
                 {ROLE_LABELS[user.role] || user.role}
               </span>
             </div>
-            <div className="p-2">
-              <a href="/login" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-slate-600 hover:bg-slate-50 transition-colors font-medium">
-                <span className="material-symbols-outlined text-lg text-slate-400">swap_horiz</span>
-                Switch Role
-              </a>
+            <div className="p-2 animate-fade-in">
+              {canSwitchRole && (
+                <div className="mb-2 pb-2 border-b border-slate-100">
+                  <p className="px-3 py-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Switch Role</p>
+                  {['admin', 'farm_manager', 'accountant', 'keeper', 'investor'].map(r => (
+                    <button
+                      key={r}
+                      onClick={() => handleSwitchRole(r)}
+                      disabled={isSwitching || user.role === r}
+                      className={`w-full text-left px-3 py-2 rounded-lg text-xs font-bold transition-colors ${
+                        user.role === r 
+                          ? 'bg-accent/10 text-accent/80 cursor-default'
+                          : 'text-slate-600 hover:bg-slate-50'
+                      }`}
+                    >
+                      {ROLE_LABELS[r] || r}
+                    </button>
+                  ))}
+                </div>
+              )}
               <button
                 onClick={handleLogout}
                 className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-rose-600 hover:bg-rose-50 transition-colors font-medium"

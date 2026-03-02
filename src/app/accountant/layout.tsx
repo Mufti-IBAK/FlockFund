@@ -17,6 +17,16 @@ const navItems = [
     href: "/accountant/assets",
   },
   {
+    icon: "groups",
+    label: "Investors & Payouts",
+    href: "/accountant/investors",
+  },
+  {
+    icon: "shopping_bag",
+    label: "Bird Sales Report",
+    href: "/accountant/sales",
+  },
+  {
     icon: "trending_up",
     label: "Payout Forecasting",
     href: "/accountant/projections",

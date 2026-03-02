@@ -249,45 +249,47 @@ export default function AdminPayments() {
             </p>
           </div>
         ) : (
-          <div className="divide-y divide-slate-50">
-            {/* Header */}
-            <div className="hidden md:grid grid-cols-7 gap-4 px-5 py-3 bg-slate-50/50 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-              <span>Investor</span>
-              <span>Type</span>
-              <span>Amount</span>
-              <span>Gateway</span>
-              <span>Reference</span>
-              <span>Status</span>
-              <span>Date</span>
-            </div>
-            {allEntries.map((entry) => (
-              <div
-                key={entry.id}
-                className="grid grid-cols-2 md:grid-cols-7 gap-3 md:gap-4 px-4 md:px-5 py-3 items-center hover:bg-slate-50/50 transition-colors"
-              >
-                <span className="text-sm font-bold text-primary col-span-2 md:col-span-1 truncate">
-                  {entry.investor}
-                </span>
-                <span className="text-xs text-slate-500">{entry.type}</span>
-                <span className="text-sm font-mono font-bold text-primary">
-                  {formatNaira(entry.amount)}
-                </span>
-                <span className="text-xs text-slate-500 capitalize">
-                  {entry.gateway}
-                </span>
-                <span className="text-[10px] text-slate-400 font-mono truncate">
-                  {entry.reference}
-                </span>
-                <span
-                  className={`text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full inline-block w-fit ${STATUS_COLORS[entry.status] || "bg-slate-100 text-slate-500"}`}
-                >
-                  {entry.status}
-                </span>
-                <span className="text-[10px] text-slate-400">
-                  {new Date(entry.date).toLocaleDateString()}
-                </span>
+          <div className="overflow-x-auto">
+            <div className="divide-y divide-slate-50 min-w-[800px] xl:min-w-0">
+              {/* Header */}
+              <div className="grid grid-cols-7 gap-4 px-5 py-3 bg-slate-50/50 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                <span>Investor</span>
+                <span>Type</span>
+                <span>Amount</span>
+                <span>Gateway</span>
+                <span>Reference</span>
+                <span>Status</span>
+                <span>Date</span>
               </div>
-            ))}
+              {allEntries.map((entry) => (
+                <div
+                  key={entry.id}
+                  className="grid grid-cols-2 grid-cols-7 gap-3 md:gap-4 px-4 md:px-5 py-3 items-center hover:bg-slate-50/50 transition-colors"
+                >
+                  <span className="text-sm font-bold text-primary col-span-1 truncate">
+                    {entry.investor}
+                  </span>
+                  <span className="text-xs text-slate-500">{entry.type}</span>
+                  <span className="text-sm font-mono font-bold text-primary">
+                    {formatNaira(entry.amount)}
+                  </span>
+                  <span className="text-xs text-slate-500 capitalize">
+                    {entry.gateway}
+                  </span>
+                  <span className="text-[10px] text-slate-400 font-mono truncate">
+                    {entry.reference}
+                  </span>
+                  <span
+                    className={`text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full inline-block w-fit ${STATUS_COLORS[entry.status] || "bg-slate-100 text-slate-500"}`}
+                  >
+                    {entry.status}
+                  </span>
+                  <span className="text-[10px] text-slate-400">
+                    {new Date(entry.date).toLocaleDateString()}
+                  </span>
+                </div>
+              ))}
+            </div>
           </div>
         )}
       </div>

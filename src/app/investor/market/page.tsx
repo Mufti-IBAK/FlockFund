@@ -52,7 +52,7 @@ export default function InvestorMarket() {
       </div>
 
       {/* Current Prices */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
+      <div className="grid grid-cols-1 grid-cols-3 gap-5 mb-8">
         {[
           { label: 'Selling Price', value: `₦${settings.selling_price_per_bird.toLocaleString()}`, icon: 'trending_up', color: 'from-emerald-500/20 to-teal-500/20' },
           { label: 'Market Cost', value: `₦${settings.market_cost.toLocaleString()}`, icon: 'storefront', color: 'from-accent/20 to-amber-500/20' },
@@ -83,24 +83,27 @@ export default function InvestorMarket() {
             <p className="text-sm text-slate-400">No market updates yet.</p>
           </div>
         ) : (
-          <div className="divide-y divide-slate-50">
-            {updates.map((u) => (
-              <div key={u.id} className="market-card flex items-center gap-4 p-4 hover:bg-slate-50/50 transition-colors">
-                <div className="w-9 h-9 rounded-lg bg-sky-100 flex items-center justify-center">
-                  <span className="material-symbols-outlined text-sky-600 text-lg">timeline</span>
+          <div className="overflow-x-auto">
+            <div className="divide-y divide-slate-50 min-w-[800px] xl:min-w-0">
+              {updates.map((u) => (
+                <div key={u.id} className="market-card flex items-center gap-4 p-4 hover:bg-slate-50/50 transition-colors">
+                  <div className="w-9 h-9 rounded-lg bg-sky-100 flex items-center justify-center">
+                    <span className="material-symbols-outlined text-sky-600 text-lg">timeline</span>
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-bold text-primary">
+                      Floor: ₦{(u.floor_price || 0).toLocaleString()} → Market: ₦{(u.market_cost || 0).toLocaleString()}
+                    </p>
+                    {u.note && <p className="text-xs text-slate-400">{u.note}</p>}
+                  </div>
+                  <span className="text-[10px] text-slate-300 font-mono">{new Date(u.created_at).toLocaleDateString()}</span>
                 </div>
-                <div className="flex-1">
-                  <p className="text-sm font-bold text-primary">
-                    Floor: ₦{(u.floor_price || 0).toLocaleString()} → Market: ₦{(u.market_cost || 0).toLocaleString()}
-                  </p>
-                  {u.note && <p className="text-xs text-slate-400">{u.note}</p>}
-                </div>
-                <span className="text-[10px] text-slate-300 font-mono">{new Date(u.created_at).toLocaleDateString()}</span>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         )}
       </div>
+
     </div>
   );
 }

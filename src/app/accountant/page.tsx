@@ -12,49 +12,29 @@ export default function AccountantOverview() {
     pendingFunds: 0,
     activeFlocks: 0,
   });
+  const [transactions, setTransactions] = useState<any[]>([]);
 
   useEffect(() => {
-    async function loadStats() {
+    async function fetchCashFlow() {
       try {
-        const { createClient } = await import("@/lib/supabase/client");
-        const supabase = createClient();
-
-        const [invResult, reqResult, flockResult] = await Promise.all([
-          supabase
-            .from("investments")
-            .select("amount_invested")
-            .eq("status", "active"),
-          supabase.from("fund_requests").select("amount, status"),
-          supabase
-            .from("flocks")
-            .select("id", { count: "exact" })
-            .eq("status", "active"),
-        ]);
-
-        const inflow = (invResult.data || []).reduce(
-          (acc: number, curr: any) => acc + (curr.amount_invested || 0),
-          0,
-        );
-        const outflow = (reqResult.data || [])
-          .filter((r: any) => r.status === "processed")
-          .reduce((acc: number, curr: any) => acc + (curr.amount || 0), 0);
-        const pending = (reqResult.data || [])
-          .filter((r: any) => r.status === "approved")
-          .reduce((acc: number, curr: any) => acc + (curr.amount || 0), 0);
+        const res = await fetch("/api/accountant/cash-flow");
+        if (!res.ok) throw new Error("Failed to load cash flow");
+        const data = await res.json();
 
         setStats({
-          totalInflow: inflow,
-          totalOutflow: outflow,
-          pendingFunds: pending,
-          activeFlocks: flockResult.count || 0,
+          totalInflow: data.aggregates.totalInflow || 0,
+          totalOutflow: data.aggregates.totalOutflow || 0,
+          pendingFunds: data.aggregates.pendingFunds || 0,
+          activeFlocks: data.aggregates.activeFlocks || 0,
         });
+        setTransactions((data.transactions || []).slice(0, 5)); // First 5 for feed
       } catch (err) {
         console.error(err);
       } finally {
         setLoading(false);
       }
     }
-    loadStats();
+    fetchCashFlow();
   }, []);
 
   if (loading)
@@ -188,9 +168,68 @@ export default function AccountantOverview() {
             </div>
           </div>
         </div>
+        <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden col-span-1 lg:col-span-2">
+          <div className="p-6 border-b border-slate-100 pb-4">
+            <h2 className="text-sm font-bold text-primary uppercase tracking-wider">
+              Recent Transactions Ledger
+            </h2>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse min-w-[700px]">
+              <thead>
+                <tr className="bg-slate-50 border-b border-slate-100 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                  <th className="p-4 pl-6">Type</th>
+                  <th className="p-4">Source</th>
+                  <th className="p-4">Date</th>
+                  <th className="p-4 pr-6 text-right">Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                {transactions.length === 0 ? (
+                  <tr>
+                    <td colSpan={4} className="p-8 text-center text-slate-400">
+                      No recent transactions
+                    </td>
+                  </tr>
+                ) : (
+                  transactions.map((tx) => (
+                    <tr
+                      key={tx.id}
+                      className="border-b border-slate-50 hover:bg-slate-50/50"
+                    >
+                      <td className="p-4 pl-6">
+                        <span
+                          className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider
+                          ${tx.type === "INFLOW" ? "bg-emerald-50 text-emerald-600" : "bg-rose-50 text-rose-600"}`}
+                        >
+                          <span className="material-symbols-outlined text-[10px]">
+                            {tx.type === "INFLOW"
+                              ? "arrow_downward"
+                              : "arrow_upward"}
+                          </span>
+                          {tx.type}
+                        </span>
+                      </td>
+                      <td className="p-4 text-sm font-medium text-slate-700">
+                        {tx.source}
+                      </td>
+                      <td className="p-4 text-xs text-slate-400">
+                        {new Date(tx.date).toLocaleDateString()}
+                      </td>
+                      <td
+                        className={`p-4 pr-6 text-right text-sm font-mono font-bold ${tx.type === "INFLOW" ? "text-emerald-600" : "text-rose-600"}`}
+                      >
+                        {tx.type === "INFLOW" ? "+" : "-"}₦
+                        {(tx.amount || 0).toLocaleString()}
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
-
-      <RecentActivityFeed limit={5} />
     </div>
   );
 }

@@ -65,7 +65,7 @@ export default function AdminProfitCycles() {
       </div>
 
       {/* Summary KPIs */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
+      <div className="grid grid-cols-1 grid-cols-3 gap-5 mb-8">
         {[
           { label: 'Total Revenue', value: `₦${(totalRevenue / 1_000_000).toFixed(1)}M`, icon: 'payments', color: 'from-emerald-500/20 to-teal-500/20' },
           { label: 'Gross Profit', value: `₦${(totalProfit / 1_000_000).toFixed(1)}M`, icon: 'trending_up', color: 'from-accent/20 to-amber-500/20' },
@@ -99,7 +99,8 @@ export default function AdminProfitCycles() {
             <p className="text-sm text-slate-400">No profit cycles yet. Complete a flock to generate the first cycle.</p>
           </div>
         ) : (
-          <div className="divide-y divide-slate-50">
+          <div className="overflow-x-auto">
+          <div className="divide-y divide-slate-50 min-w-[800px] xl:min-w-0">
             <div className="grid grid-cols-6 gap-4 px-5 py-3 bg-slate-50/50 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
               <span>Date</span>
               <span>Revenue</span>
@@ -120,6 +121,7 @@ export default function AdminProfitCycles() {
                 <span className="font-mono text-sm text-primary/60">₦{(c.platform_pool || 0).toLocaleString()}</span>
               </div>
             ))}
+          </div>
           </div>
         )}
       </div>

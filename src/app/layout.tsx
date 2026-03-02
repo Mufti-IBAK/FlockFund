@@ -1,21 +1,30 @@
-import type { Metadata } from 'next';
-import './globals.css';
+import type { Metadata } from "next";
+import "./globals.css";
 
 export const metadata: Metadata = {
-  title: 'FlockFund | Premium Poultry Investment',
+  title: "FlockFund | Premium Poultry Investment",
   description:
-    'Democratizing high-yield poultry farming through collective investment. Own a piece of the flock and earn from every bird.',
-  keywords: ['poultry', 'investment', 'agritech', 'broiler', 'farming', 'fintech'],
-  manifest: '/manifest.json',
+    "Democratizing high-yield poultry farming through collective investment. Own a piece of the flock and earn from every bird.",
+  keywords: [
+    "poultry",
+    "investment",
+    "agritech",
+    "broiler",
+    "farming",
+    "fintech",
+  ],
+  manifest: "/manifest.json",
 };
 
 export const viewport = {
-  themeColor: '#19382d',
-  width: 'device-width',
+  themeColor: "#19382d",
+  width: "device-width",
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
 };
+
+import { AuthProvider } from "@/components/AuthProvider";
 
 export default function RootLayout({
   children,
@@ -24,7 +33,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="light">
-      <body className="min-h-screen antialiased">{children}</body>
+      <body className="min-h-screen antialiased">
+        <AuthProvider>{children}</AuthProvider>
+      </body>
     </html>
   );
 }

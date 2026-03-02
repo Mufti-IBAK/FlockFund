@@ -66,30 +66,33 @@ export default function ManagerApproved() {
             <p className="text-sm text-slate-400">No reviewed reports yet.</p>
           </div>
         ) : (
-          <div className="divide-y divide-slate-50">
-            <div className="grid grid-cols-6 gap-4 px-5 py-3 bg-slate-50/50 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-              <span>Date</span>
-              <span>Status</span>
-              <span>Mortality</span>
-              <span>Feed (kg)</span>
-              <span>Clinical Signs</span>
-              <span>Vet Notes</span>
-            </div>
-            {reports.map((r) => (
-              <div key={r.id} className="report-row grid grid-cols-6 gap-4 px-5 py-4 items-center hover:bg-slate-50/50 transition-colors">
-                <span className="text-xs text-slate-500">{new Date(r.report_date || r.created_at).toLocaleDateString()}</span>
-                <span className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full w-fit ${
-                  r.status === 'approved' ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'
-                }`}>{r.status}</span>
-                <span className={`font-mono text-sm font-bold ${r.mortality_count > 0 ? 'text-rose-600' : 'text-emerald-600'}`}>{r.mortality_count}</span>
-                <span className="font-mono text-sm text-primary">{r.feed_consumed_kg || '—'}</span>
-                <p className="text-xs text-slate-400 truncate">{r.clinical_signs || '—'}</p>
-                <p className="text-xs text-sky-600 truncate">{r.vet_notes || '—'}</p>
+          <div className="overflow-x-auto">
+            <div className="divide-y divide-slate-50 min-w-[800px] xl:min-w-0">
+              <div className="grid grid-cols-6 gap-4 px-5 py-3 bg-slate-50/50 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                <span>Date</span>
+                <span>Status</span>
+                <span>Mortality</span>
+                <span>Feed (kg)</span>
+                <span>Clinical Signs</span>
+                <span>Vet Notes</span>
               </div>
-            ))}
+              {reports.map((r) => (
+                <div key={r.id} className="report-row grid grid-cols-6 gap-4 px-5 py-4 items-center hover:bg-slate-50/50 transition-colors">
+                  <span className="text-xs text-slate-500">{new Date(r.report_date || r.created_at).toLocaleDateString()}</span>
+                  <span className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full w-fit ${
+                    r.status === 'approved' ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'
+                  }`}>{r.status}</span>
+                  <span className={`font-mono text-sm font-bold ${r.mortality_count > 0 ? 'text-rose-600' : 'text-emerald-600'}`}>{r.mortality_count}</span>
+                  <span className="font-mono text-sm text-primary">{r.feed_consumed_kg || '—'}</span>
+                  <p className="text-xs text-slate-400 truncate">{r.clinical_signs || '—'}</p>
+                  <p className="text-xs text-sky-600 truncate">{r.vet_notes || '—'}</p>
+                </div>
+              ))}
+            </div>
           </div>
         )}
       </div>
+
     </div>
   );
 }

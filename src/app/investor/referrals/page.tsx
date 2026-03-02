@@ -118,7 +118,7 @@ export default function InvestorReferrals() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6 md:mb-8">
+      <div className="grid grid-cols-2 grid-cols-4 gap-4 mb-6 md:mb-8">
         {[
           { label: 'Total Referrals', value: referrals.length, icon: 'group', color: 'bg-sky-500/10 text-sky-600' },
           { label: 'Signed Up', value: signedUp, icon: 'person_add', color: 'bg-amber-500/10 text-amber-600' },
@@ -151,24 +151,27 @@ export default function InvestorReferrals() {
             <p className="text-[10px] text-slate-300">Share your code with friends to start earning!</p>
           </div>
         ) : (
-          <div className="divide-y divide-slate-50">
-            {referrals.map((r) => (
-              <div key={r.id} className="px-4 py-3 flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-bold text-primary">{r.referee?.full_name || 'Referred User'}</p>
-                  <p className="text-[10px] text-slate-400">{new Date(r.created_at).toLocaleDateString()}</p>
+          <div className="overflow-x-auto">
+            <div className="divide-y divide-slate-50 min-w-[800px] xl:min-w-0">
+              {referrals.map((r) => (
+                <div key={r.id} className="px-4 py-3 flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-bold text-primary">{r.referee?.full_name || 'Referred User'}</p>
+                    <p className="text-[10px] text-slate-400">{new Date(r.created_at).toLocaleDateString()}</p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    {r.bonus_paid && <span className="text-xs font-mono font-bold text-emerald-600">+₦{r.bonus_amount?.toLocaleString()}</span>}
+                    <span className={`text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${STATUS_COLORS[r.status] || 'bg-slate-100 text-slate-500'}`}>
+                      {r.status?.replace('_', ' ')}
+                    </span>
+                  </div>
                 </div>
-                <div className="flex items-center gap-3">
-                  {r.bonus_paid && <span className="text-xs font-mono font-bold text-emerald-600">+₦{r.bonus_amount?.toLocaleString()}</span>}
-                  <span className={`text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${STATUS_COLORS[r.status] || 'bg-slate-100 text-slate-500'}`}>
-                    {r.status?.replace('_', ' ')}
-                  </span>
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         )}
       </div>
+
     </div>
   );
 }

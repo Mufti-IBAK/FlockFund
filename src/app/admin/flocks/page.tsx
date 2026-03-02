@@ -271,7 +271,7 @@ export default function AdminFlocks() {
           <h3 className="font-heading font-bold text-primary text-sm uppercase tracking-wider mb-4">
             Create New Flock
           </h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
             <div className="space-y-1.5">
               <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">
                 Flock Name *
@@ -366,7 +366,7 @@ export default function AdminFlocks() {
             </button>
 
             {showSettings && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 animate-fade-in-up">
+              <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 animate-fade-in-up">
                 <div className="space-y-1.5">
                   <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">
                     Cost per Bird (₦)
@@ -478,123 +478,125 @@ export default function AdminFlocks() {
             </p>
           </div>
         ) : (
-          <div className="divide-y divide-slate-50">
-            {/* Header - hidden on mobile */}
-            <div className="hidden md:grid grid-cols-7 gap-4 px-5 py-3 bg-slate-50/50 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-              <span>Name</span>
-              <span>Birds</span>
-              <span>Start</span>
-              <span>End</span>
-              <span>Progress</span>
-              <span>Status</span>
-              <span>Actions</span>
-            </div>
-            {flocks.map((flock) => (
-              <div
-                key={flock.id}
-                className="flock-row grid grid-cols-2 md:grid-cols-7 gap-3 md:gap-4 px-4 md:px-5 py-4 items-center hover:bg-slate-50/50 transition-colors duration-300"
-              >
-                <span className="font-bold text-sm text-primary col-span-2 md:col-span-1">
-                  {getFlockName(flock)}
-                </span>
-                <span className="font-mono text-sm text-primary font-bold">
-                  {(
-                    flock.current_count ?? getBatchSize(flock)
-                  ).toLocaleString()}
-                  <span className="text-[10px] text-slate-400 block font-normal">
-                    of {getBatchSize(flock).toLocaleString()}
+          <div className="overflow-x-auto">
+            <div className="divide-y divide-slate-50 min-w-[800px] xl:min-w-0">
+              {/* Header - hidden on mobile */}
+              <div className="grid grid-cols-7 gap-4 px-5 py-3 bg-slate-50/50 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                <span>Name</span>
+                <span>Birds</span>
+                <span>Start</span>
+                <span>End</span>
+                <span>Progress</span>
+                <span>Status</span>
+                <span>Actions</span>
+              </div>
+              {flocks.map((flock) => (
+                <div
+                  key={flock.id}
+                  className="flock-row grid grid-cols-2 grid-cols-7 gap-3 md:gap-4 px-4 md:px-5 py-4 items-center hover:bg-slate-50/50 transition-colors duration-300"
+                >
+                  <span className="font-bold text-sm text-primary col-span-1">
+                    {getFlockName(flock)}
                   </span>
-                </span>
-                <span className="text-xs text-slate-500">
-                  {new Date(flock.start_date).toLocaleDateString()}
-                </span>
-                <span className="text-xs text-slate-500">
-                  {flock.expected_end_date
-                    ? new Date(flock.expected_end_date).toLocaleDateString()
-                    : "—"}
-                </span>
-                <div>
-                  {flock.expected_end_date ? (
-                    <div className="flex flex-col gap-1">
-                      <div className="flex items-center gap-2">
-                        <div className="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                          <div
-                            className={`h-full rounded-full transition-all duration-1000 ${
-                              flock.status === "completed"
-                                ? "bg-emerald-500"
-                                : daysProgress(
-                                      flock.start_date,
-                                      flock.expected_end_date,
-                                    ) >= 100
-                                  ? "bg-rose-400"
-                                  : "bg-gradient-to-r from-accent to-emerald-500"
-                            }`}
-                            style={{
-                              width: `${flock.status === "completed" ? 100 : daysProgress(flock.start_date, flock.expected_end_date)}%`,
-                            }}
-                          />
-                        </div>
-                        <span
-                          className={`text-[10px] font-mono font-bold ${
-                            flock.status !== "completed" &&
-                            daysProgress(
-                              flock.start_date,
-                              flock.expected_end_date,
-                            ) >= 100
-                              ? "text-rose-500"
-                              : "text-slate-400"
-                          }`}
-                        >
-                          {flock.status === "completed"
-                            ? "100"
-                            : daysProgress(
+                  <span className="font-mono text-sm text-primary font-bold">
+                    {(
+                      flock.current_count ?? getBatchSize(flock)
+                    ).toLocaleString()}
+                    <span className="text-[10px] text-slate-400 block font-normal">
+                      of {getBatchSize(flock).toLocaleString()}
+                    </span>
+                  </span>
+                  <span className="text-xs text-slate-500">
+                    {new Date(flock.start_date).toLocaleDateString()}
+                  </span>
+                  <span className="text-xs text-slate-500">
+                    {flock.expected_end_date
+                      ? new Date(flock.expected_end_date).toLocaleDateString()
+                      : "—"}
+                  </span>
+                  <div>
+                    {flock.expected_end_date ? (
+                      <div className="flex flex-col gap-1">
+                        <div className="flex items-center gap-2">
+                          <div className="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                            <div
+                              className={`h-full rounded-full transition-all duration-1000 ${
+                                flock.status === "completed"
+                                  ? "bg-emerald-500"
+                                  : daysProgress(
+                                        flock.start_date,
+                                        flock.expected_end_date,
+                                      ) >= 100
+                                    ? "bg-rose-400"
+                                    : "bg-gradient-to-r from-accent to-emerald-500"
+                              }`}
+                              style={{
+                                width: `${flock.status === "completed" ? 100 : daysProgress(flock.start_date, flock.expected_end_date)}%`,
+                              }}
+                            />
+                          </div>
+                          <span
+                            className={`text-[10px] font-mono font-bold ${
+                              flock.status !== "completed" &&
+                              daysProgress(
                                 flock.start_date,
                                 flock.expected_end_date,
-                              )}
-                          %
+                              ) >= 100
+                                ? "text-rose-500"
+                                : "text-slate-400"
+                            }`}
+                          >
+                            {flock.status === "completed"
+                              ? "100"
+                              : daysProgress(
+                                  flock.start_date,
+                                  flock.expected_end_date,
+                                )}
+                            %
+                          </span>
+                        </div>
+                        {flock.status !== "completed" &&
+                          daysProgress(
+                            flock.start_date,
+                            flock.expected_end_date,
+                          ) >= 100 && (
+                            <span className="text-[9px] font-bold text-rose-400 uppercase tracking-tighter animate-pulse">
+                              Overdue Cycle
+                            </span>
+                          )}
+                      </div>
+                    ) : (
+                      <div className="flex flex-col gap-1">
+                        <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
+                          <div className="h-full bg-slate-200 w-1/4 rounded-full" />
+                        </div>
+                        <span className="text-[10px] text-slate-300 font-mono">
+                          No end date
                         </span>
                       </div>
-                      {flock.status !== "completed" &&
-                        daysProgress(
-                          flock.start_date,
-                          flock.expected_end_date,
-                        ) >= 100 && (
-                          <span className="text-[9px] font-bold text-rose-400 uppercase tracking-tighter animate-pulse">
-                            Overdue Cycle
-                          </span>
-                        )}
-                    </div>
-                  ) : (
-                    <div className="flex flex-col gap-1">
-                      <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
-                        <div className="h-full bg-slate-200 w-1/4 rounded-full" />
-                      </div>
-                      <span className="text-[10px] text-slate-300 font-mono">
-                        No end date
-                      </span>
-                    </div>
-                  )}
+                    )}
+                  </div>
+                  <span
+                    className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full inline-block w-fit ${STATUS_COLORS[flock.status] || "bg-slate-100 text-slate-600"}`}
+                  >
+                    {flock.status}
+                  </span>
+                  <div>
+                    {flock.status !== "completed" && (
+                      <button
+                        onClick={() => markCompleted(flock.id)}
+                        className="text-xs font-bold text-accent hover:text-primary transition-colors flex items-center gap-1"
+                      >
+                        <span className="material-symbols-outlined text-sm">
+                          check_circle
+                        </span>
+                        Complete
+                      </button>
+                    )}
+                  </div>
                 </div>
-                <span
-                  className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full inline-block w-fit ${STATUS_COLORS[flock.status] || "bg-slate-100 text-slate-600"}`}
-                >
-                  {flock.status}
-                </span>
-                <div>
-                  {flock.status !== "completed" && (
-                    <button
-                      onClick={() => markCompleted(flock.id)}
-                      className="text-xs font-bold text-accent hover:text-primary transition-colors flex items-center gap-1"
-                    >
-                      <span className="material-symbols-outlined text-sm">
-                        check_circle
-                      </span>
-                      Complete
-                    </button>
-                  )}
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         )}
       </div>

@@ -18,6 +18,14 @@ export default function LoginPage() {
   const orbitRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    // Force clear any stale sessions on mount so we don't try to log in with expired tokens
+    async function clearStaleSession() {
+      const { createClient } = await import("@/lib/supabase/client");
+      const supabase = createClient();
+      await supabase.auth.signOut();
+    }
+    clearStaleSession();
+    
     const ctx = gsap.context(() => {
       if (leftRef.current) {
         gsap.fromTo(
@@ -66,7 +74,10 @@ export default function LoginPage() {
         password,
       });
       if (authError) {
-        setError(authError.message);
+        console.warn(`[Login] Auth failure for ${email}: ${authError.message}`);
+        setError(authError.message === "Invalid credentials" 
+          ? "Invalid email or password. Please verify your credentials." 
+          : authError.message);
         setLoading(false);
         return;
       }

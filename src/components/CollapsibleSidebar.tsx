@@ -77,7 +77,7 @@ export function CollapsibleSidebar({ navItems, roleLabel, basePath }: Props) {
             psychiatry
           </span>
         </div>
-        {!collapsed && (
+        {(!collapsed || mobileOpen) && (
           <div className="min-w-0">
             <span className="text-white font-heading font-extrabold text-base tracking-tight block">
               FlockFund
@@ -108,7 +108,7 @@ export function CollapsibleSidebar({ navItems, roleLabel, basePath }: Props) {
                   >
                     {item.icon}
                   </span>
-                  {!collapsed && item.label}
+                  {(!collapsed || mobileOpen) && item.label}
                 </Link>
                 {/* Tooltip on hover when collapsed */}
                 {collapsed && (
@@ -141,7 +141,7 @@ export function CollapsibleSidebar({ navItems, roleLabel, basePath }: Props) {
       </div>
 
       {/* User profile */}
-      {!collapsed && (
+      {(!collapsed || mobileOpen) && (
         <div className="p-3">
           <SidebarUserProfile />
         </div>
@@ -173,7 +173,7 @@ export function CollapsibleSidebar({ navItems, roleLabel, basePath }: Props) {
             />
             <aside
               ref={sidebarRef}
-              className="absolute left-0 top-0 bottom-0 w-64 sidebar-gradient flex flex-col z-10"
+              className="absolute left-0 top-0 bottom-0 w-[45vw] min-w-[200px] sidebar-gradient flex flex-col z-10"
             >
               <button
                 onClick={() => setMobileOpen(false)}

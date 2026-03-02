@@ -119,7 +119,8 @@ export default function AdminReports() {
             <p className="text-sm text-slate-400">No reports found.</p>
           </div>
         ) : (
-          <div className="divide-y divide-slate-50">
+          <div className="overflow-x-auto">
+          <div className="divide-y divide-slate-50 min-w-[800px] xl:min-w-0">
             <div className="grid grid-cols-7 gap-4 px-5 py-3 bg-slate-50/50 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
               <span>Date</span>
               <span>Mortality</span>
@@ -151,6 +152,7 @@ export default function AdminReports() {
                 <p className="text-xs text-slate-400 truncate">{r.clinical_signs || '—'}</p>
               </div>
             ))}
+          </div>
           </div>
         )}
       </div>
