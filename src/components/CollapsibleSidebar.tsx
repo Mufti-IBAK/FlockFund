@@ -67,7 +67,7 @@ export function CollapsibleSidebar({ navItems, roleLabel, basePath }: Props) {
     <>
       {/* Logo */}
       <div
-        className={`p-4 flex items-center gap-3 ${collapsed && !mobileOpen ? "justify-center" : "justify-start"}`}
+        className={`p-3 flex items-center gap-2 ${collapsed && !mobileOpen ? "justify-center" : "justify-start"}`}
       >
         <div className="w-9 h-9 rounded-lg bg-accent/20 flex items-center justify-center flex-shrink-0">
           <span
@@ -89,9 +89,9 @@ export function CollapsibleSidebar({ navItems, roleLabel, basePath }: Props) {
         )}
       </div>
 
-      {/* Nav — scrollable for long menus */}
+      {/* Nav — no scroll, fit screen by reducing padding */}
       <div
-        className={`${collapsed && !mobileOpen ? "px-2" : "px-3"} mt-1 flex-1 overflow-y-auto sidebar-nav-scroll`}
+        className={`${collapsed && !mobileOpen ? "px-1.5" : "px-2"} mt-0.5 flex-1`}
       >
         <nav className="space-y-0.5">
           {navItems.map((item) => {
@@ -102,7 +102,7 @@ export function CollapsibleSidebar({ navItems, roleLabel, basePath }: Props) {
               <div key={item.href} className="relative group">
                 <Link
                   href={item.href}
-                  className={`nav-item flex items-center gap-3 ${collapsed && !mobileOpen ? "justify-center px-2" : "justify-start px-3"} py-2.5 rounded-lg text-sm font-medium transition-all duration-200
+                  className={`nav-item flex items-center gap-2.5 ${collapsed && !mobileOpen ? "justify-center px-1.5" : "justify-start px-2.5"} py-1.5 rounded-lg text-xs font-medium transition-all duration-200
                     ${isActive ? "bg-white/10 text-accent" : "text-white/40 hover:text-white/70 hover:bg-white/[0.04]"}`}
                 >
                   <span
@@ -144,7 +144,7 @@ export function CollapsibleSidebar({ navItems, roleLabel, basePath }: Props) {
 
       {/* User profile */}
       {(!collapsed || mobileOpen) && (
-        <div className="p-3">
+        <div className="p-2">
           <SidebarUserProfile />
         </div>
       )}
