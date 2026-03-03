@@ -13,19 +13,35 @@ interface Flock {
   status: string;
   cost_per_bird?: number;
   min_birds_per_investment?: number;
+  cost_breakdown?: {
+    doc: number;
+    feed: number;
+    medication: number;
+    labor: number;
+    overhead: number;
+  };
 }
 
 function formatNaira(n: number): string {
   if (n >= 1_000_000) return `₦${(n / 1_000_000).toFixed(1)}M`;
-  if (n >= 1_000) return `₦${(n / 1_000).toFixed(1)}Th`;
+  if (n >= 1_000) return `₦${(n / 1_000).toFixed(1)}th`;
   return `₦${n.toLocaleString()}`;
 }
+
+const DEFAULT_BREAKDOWN = {
+  doc: 800,
+  feed: 2200,
+  medication: 350,
+  labor: 500,
+  overhead: 400,
+};
 
 export default function InvestPage() {
   const [flocks, setFlocks] = useState<Flock[]>([]);
   const [selectedFlock, setSelectedFlock] = useState("");
   const [birdCount, setBirdCount] = useState(10);
   const [costPerBird, setCostPerBird] = useState(4250);
+  const [costBreakdown, setBreakdown] = useState<any>(DEFAULT_BREAKDOWN);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [email, setEmail] = useState("");
@@ -42,26 +58,29 @@ export default function InvestPage() {
         } = await supabase.auth.getUser();
         if (user) setEmail(user.email || "");
 
-        const { data: settings } = await supabase
+        const { data: globalSettings } = await supabase
           .from("settings")
-          .select("cost_per_bird")
+          .select("cost_per_bird, cost_breakdown")
           .single();
-        const defaultCost = settings?.cost_per_bird || 4250;
+        
+        const defaultCost = globalSettings?.cost_per_bird || 4250;
+        const defaultBreakdown = globalSettings?.cost_breakdown || DEFAULT_BREAKDOWN;
         setCostPerBird(defaultCost);
+        setBreakdown(defaultBreakdown);
 
         const { data: flockData } = await supabase
           .from("flocks")
           .select(
-            "id, name, flock_name, current_count, total_birds, batch_size, status, cost_per_bird, min_birds_per_investment",
+            "id, name, flock_name, current_count, total_birds, batch_size, status, cost_per_bird, min_birds_per_investment, cost_breakdown",
           )
           .eq("status", "active");
 
         setFlocks(flockData || []);
         if (flockData && flockData.length > 0) {
-          setSelectedFlock(flockData[0].id);
-          if (flockData[0].cost_per_bird) {
-            setCostPerBird(flockData[0].cost_per_bird);
-          }
+          const first = flockData[0];
+          setSelectedFlock(first.id);
+          if (first.cost_per_bird) setCostPerBird(first.cost_per_bird);
+          if (first.cost_breakdown) setBreakdown(first.cost_breakdown);
         }
       } catch (err) {
         console.error(err);
@@ -176,6 +195,7 @@ export default function InvestPage() {
                     onClick={() => {
                       setSelectedFlock(f.id);
                       if (f.cost_per_bird) setCostPerBird(f.cost_per_bird);
+                      if (f.cost_breakdown) setBreakdown(f.cost_breakdown);
                       const min = f.min_birds_per_investment || 10;
                       if (birdCount < min) setBirdCount(min);
                       if (birdCount > (f.current_count || 0)) setBirdCount(f.current_count || 0);
@@ -321,6 +341,41 @@ export default function InvestPage() {
               </div>
             </div>
           </div>
+
+          {/* Cost Breakdown — Transparency */}
+          {selectedFlock && (
+            <div className="fade-in bg-white rounded-xl border border-slate-200/80 p-4 md:p-5">
+              <div className="flex items-center gap-2 mb-4">
+                <span className="material-symbols-outlined text-accent text-lg">info</span>
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                  How your money is spent (Per Bird)
+                </label>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                {[
+                  { label: "Birds (DOC)", key: "doc", icon: "egg" },
+                  { label: "Feed", key: "feed", icon: "bakery_dining" },
+                  { label: "Meds", key: "medication", icon: "vaccines" },
+                  { label: "Labor", key: "labor", icon: "engineering" },
+                  { label: "Overhead", key: "overhead", icon: "factory" },
+                ].map((item) => (
+                  <div key={item.key} className="p-3 bg-slate-50 rounded-lg border border-slate-100/50">
+                    <div className="flex items-center gap-1.5 mb-1 opacity-40">
+                      <span className="material-symbols-outlined text-[10px]">{item.icon}</span>
+                      <p className="text-[8px] font-bold uppercase tracking-tight">{item.label}</p>
+                    </div>
+                    <p className="text-xs font-mono font-bold text-primary">
+                      ₦{costBreakdown[item.key]?.toLocaleString() || "0"}
+                    </p>
+                  </div>
+                ))}
+              </div>
+              <p className="text-[9px] text-slate-400 mt-4 leading-relaxed">
+                * This breakdown represents the direct costs incurred to raise a single bird to maturity. 
+                Transparency is our core value; your investment directly funds these operational essentials.
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Right: Summary */}

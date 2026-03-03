@@ -89,9 +89,9 @@ export function CollapsibleSidebar({ navItems, roleLabel, basePath }: Props) {
         )}
       </div>
 
-      {/* Nav — no scroll, fit screen */}
+      {/* Nav — scrollable for long menus */}
       <div
-        className={`${collapsed && !mobileOpen ? "px-2" : "px-3"} mt-1 flex-1`}
+        className={`${collapsed && !mobileOpen ? "px-2" : "px-3"} mt-1 flex-1 overflow-y-auto sidebar-nav-scroll`}
       >
         <nav className="space-y-0.5">
           {navItems.map((item) => {
