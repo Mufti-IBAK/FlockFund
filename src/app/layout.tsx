@@ -25,6 +25,7 @@ export const viewport = {
 };
 
 import { AuthProvider } from "@/components/AuthProvider";
+import Navbar from "@/components/Navbar";
 
 export default function RootLayout({
   children,
@@ -34,7 +35,10 @@ export default function RootLayout({
   return (
     <html lang="en" className="light">
       <body className="min-h-screen antialiased">
-        <AuthProvider>{children}</AuthProvider>
+        <AuthProvider>
+          <Navbar />
+          {children}
+        </AuthProvider>
       </body>
     </html>
   );

@@ -22,6 +22,7 @@ const navItems = [
   { icon: "analytics", label: "Data", href: "/admin/data" },
   { icon: "forum", label: "Community", href: "/admin/community" },
   { icon: "public", label: "Globe", href: "/admin/globe" },
+  { icon: "settings", label: "Settings", href: "/admin/settings" },
 ];
 
 export default function AdminLayout({

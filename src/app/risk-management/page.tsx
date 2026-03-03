@@ -50,63 +50,8 @@ export default function RiskManagementPage() {
       ref={containerRef}
       className="min-h-screen bg-background-light font-sans text-slate-800"
     >
-      {/* ── Navbar ── */}
-      <nav className="fixed top-0 left-0 right-0 z-50 px-6 py-4">
-        <div className="max-w-7xl mx-auto flex items-center justify-between backdrop-blur-xl bg-primary/70 rounded-2xl px-8 py-3 border border-white/10 shadow-2xl shadow-black/20">
-          <Link href="/" className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-accent/20 flex items-center justify-center">
-              <span className="material-symbols-outlined text-accent text-lg">
-                psychiatry
-              </span>
-            </div>
-            <span className="text-white font-heading font-extrabold text-lg tracking-tight">
-              FlockFund
-            </span>
-          </Link>
-          <div className="hidden lg:flex items-center gap-6">
-            <Link
-              href="/how-it-works"
-              className="text-white/50 text-xs font-bold uppercase tracking-widest hover:text-accent transition-colors"
-            >
-              How It Works
-            </Link>
-            <Link
-              href="/returns"
-              className="text-white/50 text-xs font-bold uppercase tracking-widest hover:text-accent transition-colors"
-            >
-              Returns
-            </Link>
-            <Link
-              href="/risk-management"
-              className="text-accent text-xs font-bold uppercase tracking-widest hover:text-accent transition-colors"
-            >
-              Risk Management
-            </Link>
-            <Link
-              href="/about"
-              className="text-white/50 text-xs font-bold uppercase tracking-widest hover:text-accent transition-colors"
-            >
-              About
-            </Link>
-          </div>
-          <div className="hidden lg:flex items-center gap-3">
-            <Link
-              href="/login"
-              className="text-white/60 text-xs font-bold uppercase tracking-widest hover:text-white px-4 py-2"
-            >
-              Sign In
-            </Link>
-            <Link
-              href="/signup"
-              className="px-6 py-2.5 bg-accent text-primary text-xs font-bold uppercase tracking-widest rounded-xl hover:bg-accent/90 transition-all shadow-lg shadow-accent/20"
-            >
-              Invest Now
-            </Link>
-          </div>
-        </div>
-      </nav>
-
       {/* ── Hero ── */}
+
       <section className="relative pt-40 pb-24 px-6 overflow-hidden">
         <div className="absolute inset-0 bg-primary" />
         <div className="absolute inset-0 bg-[url('/grain.png')] opacity-20 pointer-events-none" />

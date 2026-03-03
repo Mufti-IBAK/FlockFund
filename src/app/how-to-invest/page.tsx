@@ -217,64 +217,8 @@ export default function HowToInvestPage() {
 
   return (
     <div ref={pageRef} className="min-h-screen bg-background-light">
-      {/* Navbar */}
-      <nav className="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-xl border-b border-slate-100">
-        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <span
-              className="material-symbols-outlined text-accent text-xl"
-              style={{ fontVariationSettings: "'FILL' 1" }}
-            >
-              psychiatry
-            </span>
-            <span className="font-heading font-extrabold text-primary text-lg tracking-tight">
-              FlockFund
-            </span>
-          </Link>
-          <div className="hidden md:flex items-center gap-6">
-            <Link
-              href="/how-it-works"
-              className="text-xs font-bold text-slate-400 uppercase tracking-widest hover:text-primary transition-colors"
-            >
-              How It Works
-            </Link>
-            <Link
-              href="/returns"
-              className="text-xs font-bold text-slate-400 uppercase tracking-widest hover:text-primary transition-colors"
-            >
-              Returns
-            </Link>
-            <Link
-              href="/risk-management"
-              className="text-xs font-bold text-slate-400 uppercase tracking-widest hover:text-primary transition-colors"
-            >
-              Risk Management
-            </Link>
-            <Link
-              href="/about"
-              className="text-xs font-bold text-slate-400 uppercase tracking-widest hover:text-primary transition-colors"
-            >
-              About
-            </Link>
-          </div>
-          <div className="flex items-center gap-3">
-            <Link
-              href="/login"
-              className="text-sm font-bold text-slate-500 hover:text-primary transition-colors"
-            >
-              Log In
-            </Link>
-            <Link
-              href="/signup"
-              className="px-5 py-2.5 bg-accent text-primary rounded-xl font-bold text-sm shadow-lg shadow-accent/20 hover:scale-[1.02] transition-all"
-            >
-              Get Started
-            </Link>
-          </div>
-        </div>
-      </nav>
-
       {/* Hero */}
+
       <div className="pt-32 pb-16 text-center max-w-4xl mx-auto px-6">
         <div className="hero-text">
           <span className="text-accent text-xs font-bold uppercase tracking-[0.3em]">

@@ -80,7 +80,6 @@ function FloatingParticles() {
 }
 
 export default function HomePage() {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const heroRef = useRef<HTMLElement>(null);
   const heroTitleRef = useRef<HTMLHeadingElement>(null);
   const heroSubRef = useRef<HTMLParagraphElement>(null);
@@ -89,18 +88,9 @@ export default function HomePage() {
   const statsRef = useRef<HTMLElement>(null);
   const stepsRef = useRef<HTMLElement>(null);
   const ctaRef = useRef<HTMLElement>(null);
-  const navRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      // ── Sticky Nav reveal ──
-      if (navRef.current) {
-        gsap.fromTo(
-          navRef.current,
-          { y: -100, opacity: 0 },
-          { y: 0, opacity: 1, duration: 0.8, delay: 0.3, ease: "power3.out" },
-        );
-      }
 
       // ── Hero entrance sequence ──
       const heroTl = gsap.timeline({ defaults: { ease: "power4.out" } });
@@ -208,126 +198,8 @@ export default function HomePage() {
 
   return (
     <main className="min-h-screen flex flex-col overflow-x-hidden bg-background-light">
-      {/* ═══════ Fixed Navigation ═══════ */}
-      <nav ref={navRef} className="fixed top-0 left-0 right-0 z-50 px-6 py-4">
-        <div className="max-w-7xl mx-auto flex items-center justify-between backdrop-blur-xl bg-primary/70 rounded-2xl px-8 py-3 border border-white/10 shadow-2xl shadow-black/20">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-accent/20 flex items-center justify-center">
-              <span
-                className="material-symbols-outlined text-accent text-lg"
-                style={{ fontVariationSettings: "'FILL' 1" }}
-              >
-                psychiatry
-              </span>
-            </div>
-            <span className="text-white font-heading font-extrabold text-lg tracking-tight">
-              FlockFund
-            </span>
-          </div>
-          <div className="hidden lg:flex items-center gap-6">
-            <Link
-              href="/how-it-works"
-              className="text-white/50 text-xs font-bold uppercase tracking-widest hover:text-accent transition-colors duration-300"
-            >
-              How It Works
-            </Link>
-            <Link
-              href="/returns"
-              className="text-white/50 text-xs font-bold uppercase tracking-widest hover:text-accent transition-colors duration-300"
-            >
-              Returns
-            </Link>
-            <Link
-              href="/risk-management"
-              className="text-white/50 text-xs font-bold uppercase tracking-widest hover:text-accent transition-colors duration-300"
-            >
-              Risk Management
-            </Link>
-            <Link
-              href="/about"
-              className="text-white/50 text-xs font-bold uppercase tracking-widest hover:text-accent transition-colors duration-300"
-            >
-              About
-            </Link>
-          </div>
-          <div className="hidden lg:flex items-center gap-3">
-            <a
-              href="/login"
-              className="text-white/60 text-xs font-bold uppercase tracking-widest hover:text-white transition-colors duration-300 px-4 py-2"
-            >
-              Sign In
-            </a>
-            <a
-              href="/signup"
-              className="px-6 py-2.5 bg-accent text-primary text-xs font-bold uppercase tracking-widest rounded-xl hover:bg-accent/90 transition-all duration-300 shadow-lg shadow-accent/20"
-            >
-              Invest Now
-            </a>
-          </div>
-          {/* Mobile Menu Toggle */}
-          <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="lg:hidden w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 text-white"
-          >
-            <span className="material-symbols-outlined text-xl">
-              {mobileMenuOpen ? "close" : "menu"}
-            </span>
-          </button>
-        </div>
-
-        {/* Mobile Menu Overlay */}
-        {mobileMenuOpen && (
-          <div className="lg:hidden absolute top-[80px] left-6 right-6 bg-primary/95 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-2xl flex flex-col gap-6 animate-fade-in-down">
-            <div className="flex flex-col gap-4">
-              <Link
-                onClick={() => setMobileMenuOpen(false)}
-                href="/how-it-works"
-                className="text-white/70 text-sm font-bold uppercase tracking-wider hover:text-accent"
-              >
-                How It Works
-              </Link>
-              <Link
-                onClick={() => setMobileMenuOpen(false)}
-                href="/returns"
-                className="text-white/70 text-sm font-bold uppercase tracking-wider hover:text-accent"
-              >
-                Returns
-              </Link>
-              <Link
-                onClick={() => setMobileMenuOpen(false)}
-                href="/risk-management"
-                className="text-white/70 text-sm font-bold uppercase tracking-wider hover:text-accent"
-              >
-                Risk Management
-              </Link>
-              <Link
-                onClick={() => setMobileMenuOpen(false)}
-                href="/about"
-                className="text-white/70 text-sm font-bold uppercase tracking-wider hover:text-accent"
-              >
-                About
-              </Link>
-            </div>
-            <div className="h-px bg-white/10" />
-            <div className="flex flex-col gap-3">
-              <a
-                href="/login"
-                className="w-full text-center text-white/80 py-3 rounded-xl border border-white/20 font-bold uppercase tracking-wider text-xs"
-              >
-                Sign In
-              </a>
-              <a
-                href="/signup"
-                className="w-full text-center bg-accent text-primary py-3 rounded-xl font-bold uppercase tracking-wider text-xs shadow-lg shadow-accent/20"
-              >
-                Invest Now
-              </a>
-            </div>
-          </div>
-        )}
-      </nav>
-
       {/* ═══════ HERO ═══════ */}
+
       <section
         ref={heroRef}
         className="relative min-h-screen flex items-center justify-center overflow-hidden"
