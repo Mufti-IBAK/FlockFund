@@ -109,12 +109,29 @@ export default function InvestPage() {
   const totalCost = birdCount * costPerBird;
 
   async function handleSignAgreement() {
+    const userName = prompt("Confirm Signatory Name (must match your profile):");
+    const userEmail = prompt("Confirm Signatory Email:");
+
+    if (!userName || !userEmail) {
+      alert("Verification cancelled.");
+      return;
+    }
+
     setSigningAgreement(true);
     try {
       const { createClient } = await import("@/lib/supabase/client");
       const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
+
+      const { data: profile } = await supabase.from("profiles").select("full_name").eq("id", user.id).single();
+
+      if (userEmail.toLowerCase() !== user.email?.toLowerCase() || 
+          userName.toLowerCase() !== profile?.full_name?.toLowerCase()) {
+        alert("Verification failed. Name or Email does not match your account record.");
+        setSigningAgreement(false);
+        return;
+      }
 
       const res = await fetch("/api/mudarabah/agreement", {
         method: "POST",
@@ -207,7 +224,7 @@ export default function InvestPage() {
           Invest in a Flock
         </h1>
         <p className="text-slate-400 text-sm mt-1">
-          Mudarabah Al-Muqayyada — Restricted Islamic Investment in Broiler Farming
+          Islamic Finance — We strictly follow the Mudarabah Al-Muqayyad model of Islamic finance and investment.
         </p>
       </div>
 
@@ -384,7 +401,7 @@ export default function InvestPage() {
               <div className="flex items-center gap-2 mb-4">
                 <span className="material-symbols-outlined text-accent text-lg">info</span>
                 <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
-                  Estimated Cost Per Bird (Mudarabah Transparency)
+                  Estimated Cost Per Bird (Transparency)
                 </label>
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
@@ -407,7 +424,7 @@ export default function InvestPage() {
                 ))}
               </div>
               <p className="text-[9px] text-slate-400 mt-4 leading-relaxed">
-                * These are estimated costs. Under Mudarabah rules, <strong>actual verified costs</strong> will be
+                * These are estimated costs. Under Islamic Finance rules, <strong>actual verified costs</strong> will be
                 deducted from revenue before profit calculation. All costs are transparent and visible on your dashboard.
               </p>
             </div>
@@ -429,11 +446,11 @@ export default function InvestPage() {
                 <ul className="space-y-2 text-[11px] text-emerald-700">
                   <li className="flex items-start gap-2">
                     <span className="material-symbols-outlined text-xs mt-0.5">check_circle</span>
-                    <span><strong>Business Scope:</strong> Restricted to broiler chicken farming only (Al-Muqayyada)</span>
+                    <span><strong>Business Scope:</strong> Restricted to broiler chicken farming operations only.</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="material-symbols-outlined text-xs mt-0.5">check_circle</span>
-                    <span><strong>Profit Ratio:</strong> 70% FlockFund (Mudarib) / 30% Investor (Rabb-ul-Maal) of net profit</span>
+                    <span><strong>Profit Ratio:</strong> 70% FlockFund / 30% Investor of net profit</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="material-symbols-outlined text-xs mt-0.5">check_circle</span>
@@ -463,29 +480,32 @@ export default function InvestPage() {
               {showFullAgreement && (
                 <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 mb-4 max-h-64 overflow-y-auto">
                   <pre className="text-[10px] text-slate-600 whitespace-pre-wrap font-sans leading-relaxed">
-{`MUDARABAH AL-MUQAYYADA (RESTRICTED MUDARABAH) AGREEMENT
+{`ISLAMIC FINANCE INVESTMENT AGREEMENT
 
 This agreement is entered into between:
-1. The RABB-UL-MAAL (Capital Provider / Investor)
-2. The MUDARIB (Fund Manager / FlockFund International)
+1. The INVESTOR (Capital Provider)
+2. FLOCKFUND (Fund Manager / FlockFund International)
+
+STRICT ADHERENCE TO MUDARABAH AL-MUQAYYAD MODEL
+We strictly follow the Mudarabah Al-Muqayyad model of Islamic finance and investment in all our operations.
 
 TERMS AND CONDITIONS:
 
-1. BUSINESS SCOPE (Al-Muqayyada Restriction)
-   The Mudarib shall use the invested capital exclusively for broiler chicken farming operations.
+1. BUSINESS SCOPE
+   Funds shall be used exclusively for broiler chicken farming operations.
 
 2. PROFIT DISTRIBUTION
    Net profit (revenue minus capital and verified costs) shall be distributed as follows:
-   - 70% to the Mudarib (FlockFund)
-   - 30% to the Rabb-ul-Maal (Investor)
+   - 70% to FlockFund
+   - 30% to the Investor
 
 3. LOSS LIABILITY
-   Financial loss from normal operations is borne by the Rabb-ul-Maal (Investor).
-   The Mudarib is liable only if negligence or breach of protocols is proven.
+   Financial loss from normal operations is borne by the Investor.
+   FlockFund is liable only if negligence or breach of protocols is proven.
 
 4. DEFINITION OF NEGLIGENCE
    Includes: failure to follow biosecurity protocols, ignoring veterinary advice,
-   misappropriation of funds, investing in prohibited activities, gross mismanagement.
+   misappropriation of funds, gross mismanagement.
 
 5. CAPITAL PRIORITY
    Capital must be returned before any profit calculation.
@@ -494,10 +514,7 @@ TERMS AND CONDITIONS:
    All costs are itemized, verified, and visible to the Investor.
 
 7. NO GUARANTEED RETURNS
-   Returns depend entirely on actual farm performance.
-
-8. DISPUTE RESOLUTION
-   Disputes resolved through arbitration per Islamic commercial jurisprudence.`}
+   Returns depend entirely on actual farm performance.`}
                   </pre>
                 </div>
               )}
@@ -525,7 +542,7 @@ TERMS AND CONDITIONS:
                   ) : (
                     <>
                       <span className="material-symbols-outlined text-sm">draw</span>
-                      I Accept — Sign Mudarabah Agreement
+                      I Accept — Sign Agreement
                     </>
                   )}
                 </button>
@@ -586,7 +603,7 @@ TERMS AND CONDITIONS:
                   <span className="material-symbols-outlined text-lg">
                     shopping_cart
                   </span>
-                  Pay Now — Mudarabah Investment
+                  Pay Now — Invest
                 </>
               )}
             </button>
@@ -598,7 +615,7 @@ TERMS AND CONDITIONS:
             {/* Risk Disclaimer */}
             <div className="mt-3 p-3 bg-amber-50/50 border border-amber-100 rounded-lg">
               <p className="text-[9px] text-amber-700 leading-relaxed">
-                <strong>⚠️ Risk Notice:</strong> This is a Mudarabah investment. Returns are not guaranteed and depend on actual farm performance. Your capital may be at risk. Financial loss from normal business operations is borne by the investor (Rabb-ul-Maal).
+                <strong>⚠️ Risk Notice:</strong> Returns are not guaranteed and depend on actual farm performance. Your capital may be at risk. Financial loss from normal business operations is borne by the investor.
               </p>
             </div>
           </div>

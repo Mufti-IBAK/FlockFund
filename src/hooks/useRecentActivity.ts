@@ -23,17 +23,41 @@ function timeAgo(dateStr: string): string {
   return `${days} day${days > 1 ? "s" : ""} ago`;
 }
 
-export function useRecentActivity(limit = 10) {
+export function useRecentActivity(limit = 9) {
   const [activity, setActivity] = useState<ActivityItem[]>([]);
   const [loading, setLoading] = useState(true);
   const supabase = createClient();
 
   const fetchActivity = async () => {
     try {
-      const [recentInvestors, recentInvestments, recentReports] = await Promise.all([
-        supabase.from("profiles").select("full_name, created_at").eq("role", "investor").order("created_at", { ascending: false }).limit(limit),
-        supabase.from("investments").select("amount_invested, birds_owned, created_at").in("status", ["active", "completed"]).order("created_at", { ascending: false }).limit(limit),
-        supabase.from("farm_reports").select("mortality_count, created_at, status").order("created_at", { ascending: false }).limit(limit),
+      const [
+        recentInvestors,
+        recentInvestments,
+        recentReports,
+        recentIncidents,
+      ] = await Promise.all([
+        supabase
+          .from("profiles")
+          .select("full_name, created_at")
+          .eq("role", "investor")
+          .order("created_at", { ascending: false })
+          .limit(limit),
+        supabase
+          .from("investments")
+          .select("amount_invested, birds_owned, created_at")
+          .in("status", ["active", "completed"])
+          .order("created_at", { ascending: false })
+          .limit(limit),
+        supabase
+          .from("farm_reports")
+          .select("mortality_count, created_at, status")
+          .order("created_at", { ascending: false })
+          .limit(limit),
+        supabase
+          .from("incident_reports")
+          .select("title, status, admin_determination, created_at, updated_at")
+          .order("updated_at", { ascending: false })
+          .limit(limit),
       ]);
 
       const items: ActivityItem[] = [];
@@ -82,8 +106,40 @@ export function useRecentActivity(limit = 10) {
         }
       });
 
+      (recentIncidents.data || []).forEach((inc) => {
+        if (inc.status === "received") {
+          items.push({
+            icon: "notification_important",
+            text: "VET Alerted",
+            detail: inc.title,
+            time: timeAgo(inc.created_at),
+            color: "text-amber-500",
+            sortDate: new Date(inc.created_at).getTime(),
+          });
+        } else if (inc.status === "reported") {
+          items.push({
+            icon: "medical_services",
+            text: "Incident Reported",
+            detail: `VET report submitted for: ${inc.title}`,
+            time: timeAgo(inc.updated_at),
+            color: "text-indigo-500",
+            sortDate: new Date(inc.updated_at).getTime(),
+          });
+        } else if (inc.status === "resolved" && inc.admin_determination) {
+          const isRisk = inc.admin_determination === "risk_neg_found";
+          items.push({
+            icon: isRisk ? "gavel" : "check_circle",
+            text: isRisk ? "Risk (Negligence Found)" : "Incident Resolved",
+            detail: inc.title,
+            time: timeAgo(inc.updated_at),
+            color: isRisk ? "text-rose-600" : "text-emerald-600",
+            sortDate: new Date(inc.updated_at).getTime(),
+          });
+        }
+      });
+
       items.sort((a, b) => b.sortDate - a.sortDate);
-      setActivity(items.slice(0, limit));
+      setActivity(items.slice(0, 9));
     } catch (error) {
       console.error("Error fetching activity:", error);
     } finally {
@@ -96,23 +152,45 @@ export function useRecentActivity(limit = 10) {
 
     const profilesSub = supabase
       .channel("profiles_changes")
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "profiles", filter: "role=eq.investor" }, () => fetchActivity())
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "profiles" },
+        () => fetchActivity(),
+      )
       .subscribe();
 
     const investmentsSub = supabase
       .channel("investments_changes")
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "investments" }, () => fetchActivity())
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "investments" },
+        () => fetchActivity(),
+      )
       .subscribe();
 
     const reportsSub = supabase
       .channel("reports_changes")
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "farm_reports" }, () => fetchActivity())
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "farm_reports" },
+        () => fetchActivity(),
+      )
+      .subscribe();
+
+    const incidentsSub = supabase
+      .channel("incidents_changes")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "incident_reports" },
+        () => fetchActivity(),
+      )
       .subscribe();
 
     return () => {
       supabase.removeChannel(profilesSub);
       supabase.removeChannel(investmentsSub);
       supabase.removeChannel(reportsSub);
+      supabase.removeChannel(incidentsSub);
     };
   }, []);
 

@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { useRecentActivity } from "@/hooks/useRecentActivity";
 
-export function RecentActivityFeed({ limit = 10 }: { limit?: number }) {
+export function RecentActivityFeed({ limit = 9 }: { limit?: number }) {
   const { activity, loading } = useRecentActivity(limit);
   const listRef = useRef<HTMLDivElement>(null);
 
