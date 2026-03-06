@@ -12,9 +12,11 @@ interface Incident {
   reported_by: string;
   investigation_notes: string | null;
   resolution: string | null;
+  admin_resolution_notes: string | null;
   negligence_determined: boolean;
   created_at: string;
   updated_at: string;
+  investigation_started_at?: string;
   admin_determination?:
     | "resolved_no_neg"
     | "risk_alert_no_neg"
@@ -55,6 +57,12 @@ export default function AdminIncidentsPage() {
   const [incidents, setIncidents] = useState<Incident[]>([]);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState<string | null>(null);
+  const [showSummaryModal, setShowSummaryModal] = useState(false);
+  const [selectedDetermination, setSelectedDetermination] = useState<
+    Incident["admin_determination"] | null
+  >(null);
+  const [activeIncident, setActiveIncident] = useState<Incident | null>(null);
+  const [adminSummary, setAdminSummary] = useState("");
 
   useEffect(() => {
     fetchIncidents();
@@ -123,7 +131,7 @@ export default function AdminIncidentsPage() {
           },
           {
             label: "Investigating",
-            value: incidents.filter((i) => i.status === "investigating").length,
+            value: incidents.filter((i) => i.status === "investigating" || i.status === "reported").length,
             icon: "search",
             color: "text-amber-600",
           },
@@ -233,128 +241,197 @@ export default function AdminIncidentsPage() {
               )}
 
               {/* Admin Actions */}
-              {incident.status !== 'resolved' && incident.status !== 'dismissed' && (
-                <div className="flex flex-wrap gap-2 pt-3 border-t border-slate-100">
-                  {(incident.status === 'reported' || incident.status === 'investigating') && (
-                    <div className="w-full mb-4 bg-slate-50 rounded-xl p-4 border border-slate-100">
-                      <div className="flex items-center justify-between mb-3">
-                        <h4 className="text-[10px] font-bold text-primary uppercase tracking-wider">VET Investigation Report</h4>
-                        {incident.status === 'reported' && (
-                          <span className="text-[9px] bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded-full font-bold">REPORT READY</span>
-                        )}
+              {incident.status !== "resolved" &&
+                incident.status !== "dismissed" && (
+                  <div className="flex flex-wrap gap-2 pt-3 border-t border-slate-100">
+                    {/* VET Report Visibility - only if reported or investigating */}
+                    {(incident.status === "reported" ||
+                      incident.status === "investigating") && (
+                      <div className="w-full mb-4 bg-slate-50 rounded-xl p-4 border border-slate-100">
+                        <div className="flex items-center justify-between mb-3">
+                          <h4 className="text-[10px] font-bold text-primary uppercase tracking-wider">
+                            VET Investigation Report
+                          </h4>
+                          {incident.status === "reported" && (
+                            <span className="text-[9px] bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded-full font-bold">
+                              REPORT READY
+                            </span>
+                          )}
+                        </div>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                          {[
+                            {
+                              label: "Dead",
+                              val: incident.birds_dead,
+                              color: "text-rose-600",
+                            },
+                            {
+                              label: "Culled",
+                              val: incident.birds_culled,
+                              color: "text-amber-600",
+                            },
+                            {
+                              label: "Isolated",
+                              val: incident.birds_isolated,
+                              color: "text-sky-600",
+                            },
+                            {
+                              label: "Recovered",
+                              val: incident.birds_recovered,
+                              color: "text-emerald-600",
+                            },
+                          ].map((stat) => (
+                            <div
+                              key={stat.label}
+                              className="p-2 bg-white rounded border border-slate-100"
+                            >
+                              <p className="text-[8px] text-slate-400 uppercase font-bold">
+                                {stat.label}
+                              </p>
+                              <p
+                                className={`text-sm font-mono font-bold ${stat.color}`}
+                              >
+                                {stat.val || 0}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                        <div className="space-y-2">
+                          <div>
+                            <p className="text-[9px] font-bold text-slate-500">
+                              Clinical Exam Findings
+                            </p>
+                            <p className="text-xs text-slate-600 italic bg-white p-2 rounded mt-1 border border-slate-100">
+                              {incident.clinical_exam || "Pending..."}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-[9px] font-bold text-slate-500">
+                              Recommendations
+                            </p>
+                            <p className="text-xs text-slate-600 italic bg-white p-2 rounded mt-1 border border-slate-100">
+                              {incident.recommendations || "Pending..."}
+                            </p>
+                          </div>
+                        </div>
                       </div>
-                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                            <div className="p-2 bg-white rounded border border-slate-100">
-                              <p className="text-[8px] text-slate-400 uppercase font-bold">
-                                Birds Dead
-                              </p>
-                              <p className="text-sm font-mono font-bold text-rose-600">
-                                {incident.birds_dead || 0}
-                              </p>
-                            </div>
-                            <div className="p-2 bg-white rounded border border-slate-100">
-                              <p className="text-[8px] text-slate-400 uppercase font-bold">
-                                Culled
-                              </p>
-                              <p className="text-sm font-mono font-bold text-amber-600">
-                                {incident.birds_culled || 0}
-                              </p>
-                            </div>
-                            <div className="p-2 bg-white rounded border border-slate-100">
-                              <p className="text-[8px] text-slate-400 uppercase font-bold">
-                                Isolated
-                              </p>
-                              <p className="text-sm font-mono font-bold text-sky-600">
-                                {incident.birds_isolated || 0}
-                              </p>
-                            </div>
-                            <div className="p-2 bg-white rounded border border-slate-100">
-                              <p className="text-[8px] text-slate-400 uppercase font-bold">
-                                Recovered
-                              </p>
-                              <p className="text-sm font-mono font-bold text-emerald-600">
-                                {incident.birds_recovered || 0}
-                              </p>
-                            </div>
-                          </div>
-                          <div className="space-y-2">
-                            <div>
-                              <p className="text-[9px] font-bold text-slate-500">
-                                Clinical Exam Findings
-                              </p>
-                              <p className="text-xs text-slate-600 italic bg-white p-2 rounded mt-1 border border-slate-100">
-                                {incident.clinical_exam || "N/A"}
-                              </p>
-                            </div>
-                            <div>
-                              <p className="text-[9px] font-bold text-slate-500">
-                                Recommendations
-                              </p>
-                              <p className="text-xs text-slate-600 italic bg-white p-2 rounded mt-1 border border-slate-100">
-                                {incident.recommendations || "N/A"}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                  )}
+                    )}
 
-                      {incident.status === 'reported' ? (
-                         <button
-                         onClick={() => updateIncident(incident.id, { status: 'investigating' })}
-                         disabled={updating === incident.id}
-                         className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-xs font-bold hover:bg-indigo-700 transition-colors disabled:opacity-50 shadow-lg shadow-indigo-200"
-                       >
-                         Begin Investigation
-                       </button>
-                      ) : (
-                        <div className="flex flex-wrap gap-2 w-full pt-2">
-                          <button
-                            onClick={() => {
-                              const resolution = prompt('Enter resolution summary:');
-                              if (resolution) updateIncident(incident.id, { status: 'resolved', resolution, admin_determination: 'resolved_no_neg' });
-                            }}
-                            disabled={updating === incident.id}
-                            className="px-3 py-1.5 bg-emerald-500 text-white rounded-lg text-xs font-bold hover:bg-emerald-600 transition-colors disabled:opacity-50"
-                          >
-                            Resolved (No Negligence)
-                          </button>
+                    {/* Contextual Information/Buttons */}
+                  <div className="flex flex-wrap gap-2 w-full">
+                    {incident.status === 'received' && (
+                      <div className="flex items-center gap-2 px-3 py-2 bg-slate-50 border border-slate-100 rounded-xl text-slate-400 text-[10px] font-bold uppercase tracking-wider">
+                        <span className="material-symbols-outlined text-xs animate-pulse">hourglass_empty</span>
+                        Awaiting VET investigation...
+                      </div>
+                    )}
 
-                          <button
-                            onClick={() => {
-                              const resolution = prompt('Enter Risk Alert details:');
-                              if (resolution) updateIncident(incident.id, { status: 'resolved', resolution, admin_determination: 'risk_alert_no_neg' });
-                            }}
-                            disabled={updating === incident.id}
-                            className="px-3 py-1.5 bg-amber-500 text-white rounded-lg text-xs font-bold hover:bg-amber-600 transition-colors disabled:opacity-50"
-                          >
-                            Risk Alert (No Negligence)
-                          </button>
+                    {incident.status === 'investigating' && (
+                      <div className="flex items-center gap-2 px-3 py-2 bg-amber-50 border border-amber-100 rounded-xl text-amber-600 text-[10px] font-bold uppercase tracking-wider">
+                        <span className="material-symbols-outlined text-xs animate-spin">sync</span>
+                        Investigation in Progress
+                      </div>
+                    )}
 
-                          <button
-                            onClick={() => {
-                              const resolution = prompt('Enter Risk determination details:');
-                              if (resolution) updateIncident(incident.id, { status: 'resolved', resolution, admin_determination: 'risk_neg_found', negligence_determined: true });
-                            }}
-                            disabled={updating === incident.id}
-                            className="px-3 py-1.5 bg-rose-500 text-white rounded-lg text-xs font-bold hover:bg-rose-600 transition-colors disabled:opacity-50"
-                          >
-                            Risk (Negligence Found)
-                          </button>
-                        </div>
-                      )}
-                    <button
-                      onClick={() =>
-                        updateIncident(incident.id, { status: "dismissed" })
-                      }
-                      disabled={updating === incident.id}
-                      className="px-3 py-1.5 bg-slate-100 text-slate-600 rounded-lg text-xs font-bold hover:bg-slate-200 transition-colors disabled:opacity-50"
-                    >
-                      Dismiss
-                    </button>
+                    {incident.status === 'reported' && (
+                      <div className="flex flex-wrap gap-2">
+                        <button
+                          onClick={() => {
+                            setActiveIncident(incident);
+                            setSelectedDetermination('resolved_no_neg');
+                            setShowSummaryModal(true);
+                            setAdminSummary("");
+                          }}
+                          className="px-3 py-1.5 bg-emerald-500 text-white rounded-lg text-xs font-bold hover:bg-emerald-600"
+                        >
+                          Resolved (No Negligence)
+                        </button>
+                        <button
+                          onClick={() => {
+                            setActiveIncident(incident);
+                            setSelectedDetermination('risk_alert_no_neg');
+                            setShowSummaryModal(true);
+                            setAdminSummary("");
+                          }}
+                          className="px-3 py-1.5 bg-amber-500 text-white rounded-lg text-xs font-bold hover:bg-amber-600"
+                        >
+                          Risk Alert (No Negligence)
+                        </button>
+                        <button
+                          onClick={() => {
+                            setActiveIncident(incident);
+                            setSelectedDetermination('risk_neg_found');
+                            setShowSummaryModal(true);
+                            setAdminSummary("");
+                          }}
+                          className="px-3 py-1.5 bg-rose-500 text-white rounded-lg text-xs font-bold hover:bg-rose-600"
+                        >
+                          Risk (Negligence Found)
+                        </button>
+                      </div>
+                    )}
+                  </div>
                   </div>
                 )}
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Admin Summary Modal */}
+      {showSummaryModal && activeIncident && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-primary/40 backdrop-blur-sm">
+          <div className="bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95">
+            <div className="p-6 bg-primary text-white">
+              <h3 className="text-xl font-heading font-bold">
+                Final Incident Determination
+              </h3>
+              <p className="text-white/60 text-[10px] uppercase font-bold tracking-widest mt-1">
+                {DETERMINATION_LABELS[selectedDetermination!]}
+              </p>
+            </div>
+            <div className="p-8 space-y-4">
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                  Formal Summary & Outcome
+                </label>
+                <textarea
+                  value={adminSummary}
+                  onChange={(e) => setAdminSummary(e.target.value)}
+                  placeholder="Summarize the entire incident and the final decision. This will be visible to investors."
+                  rows={5}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-4 text-sm focus:ring-2 focus:ring-primary/20 transition-all outline-none"
+                />
+              </div>
+
+              <div className="flex gap-3 pt-4">
+                <button
+                  onClick={() => setShowSummaryModal(false)}
+                  className="flex-1 py-3 bg-slate-100 text-slate-600 font-bold text-xs uppercase rounded-xl hover:bg-slate-200 transition-all"
+                >
+                  Back
+                </button>
+                <button
+                  onClick={async () => {
+                    if (!adminSummary.trim())
+                      return alert("Please provide a summary.");
+                    await updateIncident(activeIncident.id, {
+                      status: "resolved",
+                      admin_determination: selectedDetermination!,
+                      admin_resolution_notes: adminSummary,
+                      negligence_determined:
+                        selectedDetermination === "risk_neg_found",
+                    });
+                    setShowSummaryModal(false);
+                  }}
+                  disabled={updating === activeIncident.id}
+                  className="flex-[2] py-3 bg-primary text-white font-bold text-xs uppercase rounded-xl shadow-lg shadow-stone-200 hover:stone-800 transition-all"
+                >
+                  Finalise & Publish
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>

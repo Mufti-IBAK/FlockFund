@@ -5,13 +5,7 @@ import gsap from "gsap";
 
 interface Settings {
   cost_per_bird: number;
-  cost_breakdown: {
-    bird_purchase: number;
-    feed: number;
-    medication: number;
-    combined_operational_fees: number;
-    other: number;
-  };
+  cost_breakdown: Record<string, number>;
   age_of_purchase_days: number;
   selling_price_per_bird: number;
   market_floor_price: number;
@@ -30,11 +24,11 @@ interface Settings {
 const DEFAULT_SETTINGS: Settings = {
   cost_per_bird: 4250,
   cost_breakdown: {
-    bird_purchase: 800,
-    feed: 2200,
-    medication: 350,
-    combined_operational_fees: 900,
-    other: 0,
+    "Bird Purchase": 800,
+    "Feed": 2200,
+    "Medication": 350,
+    "Operational Fees": 900,
+    "Structural Fees": 0,
   },
   selling_price_per_bird: 7500,
   market_floor_price: 6800,
@@ -179,8 +173,7 @@ export default function AdminSettings() {
         if (data) {
           setSettings({
             cost_per_bird: data.cost_per_bird ?? DEFAULT_SETTINGS.cost_per_bird,
-            cost_breakdown:
-              data.cost_breakdown ?? DEFAULT_SETTINGS.cost_breakdown,
+            cost_breakdown: (data.cost_breakdown as Record<string, number>) ?? DEFAULT_SETTINGS.cost_breakdown,
             selling_price_per_bird:
               data.selling_price_per_bird ??
               DEFAULT_SETTINGS.selling_price_per_bird,
@@ -201,7 +194,8 @@ export default function AdminSettings() {
             enabled_gateways:
               data.enabled_gateways ?? DEFAULT_SETTINGS.enabled_gateways,
             age_of_purchase_days:
-              data.age_of_purchase_days ?? DEFAULT_SETTINGS.age_of_purchase_days,
+              data.age_of_purchase_days ??
+              DEFAULT_SETTINGS.age_of_purchase_days,
             blockchain_enabled:
               data.blockchain_enabled ?? DEFAULT_SETTINGS.blockchain_enabled,
             data_monetization_enabled:
@@ -282,7 +276,10 @@ export default function AdminSettings() {
           cycle_duration_days: payload.cycle_duration_days,
           min_birds_per_investment: payload.min_birds_per_investment,
         };
-        const { error: err } = await supabase.from("flocks").update(flockPayload).eq("id", selectedContext);
+        const { error: err } = await supabase
+          .from("flocks")
+          .update(flockPayload)
+          .eq("id", selectedContext);
         error = err;
       }
 
@@ -368,29 +365,73 @@ export default function AdminSettings() {
       <div className="grid lg:grid-cols-2 gap-6">
         {/* ── Cost Breakdown ── */}
         <SettingCard title="Cost Breakdown (per bird)" icon="calculate">
-          <div className="grid grid-cols-2 gap-4">
-            {Object.entries(settings.cost_breakdown).map(([key, val]) => (
-              <NumberField
-                key={key}
-                label={key.replace(/_/g, " ").charAt(0).toUpperCase() + key.replace(/_/g, " ").slice(1)}
-                value={val}
-                prefix="₦"
-                onChange={(v) =>
-                  setSettings((s) => ({
-                    ...s,
-                    cost_breakdown: { ...s.cost_breakdown, [key]: v },
-                  }))
-                }
-              />
-            ))}
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {Object.entries(settings.cost_breakdown).map(([key, val]) => (
+                <div key={key} className="flex items-end gap-2 group">
+                  <div className="flex-1">
+                    <NumberField
+                      label={key}
+                      value={val}
+                      prefix="₦"
+                      onChange={(v) =>
+                        setSettings((s) => ({
+                          ...s,
+                          cost_breakdown: { ...s.cost_breakdown, [key]: v },
+                        }))
+                      }
+                    />
+                  </div>
+                  <button
+                    onClick={() => {
+                      const next = { ...settings.cost_breakdown };
+                      delete next[key];
+                      setSettings((s) => ({ ...s, cost_breakdown: next }));
+                    }}
+                    className="mb-1 p-2 text-slate-300 hover:text-rose-500 transition-colors opacity-0 group-hover:opacity-100"
+                    title="Remove item"
+                  >
+                    <span className="material-symbols-outlined text-lg">
+                      delete
+                    </span>
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            <div className="pt-4 border-t border-slate-100 flex flex-wrap gap-3">
+              <button
+                onClick={() => {
+                  const label = prompt(
+                    "Enter new cost item label (e.g., Insurance, Logistics):",
+                  );
+                  if (label && !settings.cost_breakdown[label]) {
+                    setSettings((s) => ({
+                      ...s,
+                      cost_breakdown: { ...s.cost_breakdown, [label]: 0 },
+                    }));
+                  }
+                }}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 text-slate-600 rounded-xl text-[10px] font-bold uppercase tracking-wider hover:bg-slate-200 transition-all"
+              >
+                <span className="material-symbols-outlined text-sm">add</span>
+                Add New Cost Item
+              </button>
+            </div>
           </div>
-          <div className="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between">
+
+          <div className="mt-6 pt-6 border-t border-slate-100 flex items-center justify-between">
             <span className="text-xs text-slate-400 font-bold uppercase tracking-wider">
               Total Cost/Bird
             </span>
-            <span className="font-mono text-xl font-bold text-primary">
-              ₦{calculatedCost.toLocaleString()}
-            </span>
+            <div className="text-right">
+              <p className="font-mono text-2xl font-bold text-primary">
+                ₦{calculatedCost.toLocaleString()}
+              </p>
+              <p className="text-[9px] text-slate-400 mt-1 uppercase font-bold tracking-tighter">
+                Dynamic Summation from Breakdown
+              </p>
+            </div>
           </div>
         </SettingCard>
 
@@ -553,10 +594,10 @@ export default function AdminSettings() {
                   type="checkbox"
                   checked={settings.enabled_gateways.includes(gw)}
                   onChange={(e) => {
-                    const next = e.target.checked 
+                    const next = e.target.checked
                       ? [...settings.enabled_gateways, gw]
-                      : settings.enabled_gateways.filter(x => x !== gw);
-                    setSettings(s => ({ ...s, enabled_gateways: next }));
+                      : settings.enabled_gateways.filter((x) => x !== gw);
+                    setSettings((s) => ({ ...s, enabled_gateways: next }));
                   }}
                   className="w-4 h-4 text-accent accent-accent rounded"
                 />

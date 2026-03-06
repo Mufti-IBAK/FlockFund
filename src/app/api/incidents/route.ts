@@ -9,7 +9,7 @@ export async function GET(req: NextRequest) {
 
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
     );
 
     let query = supabase
@@ -29,7 +29,7 @@ export async function GET(req: NextRequest) {
     console.error("Fetch incidents error:", error);
     return NextResponse.json(
       { error: "Failed to fetch incidents" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -43,22 +43,31 @@ export async function POST(req: NextRequest) {
 
     if (!flock_id || !description || !cause || !reported_by) {
       return NextResponse.json(
-        { error: "Missing required fields: flock_id, description, cause, reported_by" },
-        { status: 400 }
+        {
+          error:
+            "Missing required fields: flock_id, description, cause, reported_by",
+        },
+        { status: 400 },
       );
     }
 
-    const validCauses = ["disease", "natural_disaster", "negligence", "mismanagement", "other"];
+    const validCauses = [
+      "disease",
+      "natural_disaster",
+      "negligence",
+      "mismanagement",
+      "other",
+    ];
     if (!validCauses.includes(cause)) {
       return NextResponse.json(
         { error: `Invalid cause. Must be one of: ${validCauses.join(", ")}` },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
     );
 
     const { data, error } = await supabase
@@ -80,7 +89,7 @@ export async function POST(req: NextRequest) {
     console.error("Create incident error:", error);
     return NextResponse.json(
       { error: "Failed to create incident report" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -95,13 +104,13 @@ export async function PATCH(req: NextRequest) {
     if (!id) {
       return NextResponse.json(
         { error: "Missing incident report id" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
     );
 
     const payload: Record<string, unknown> = {};
@@ -110,10 +119,23 @@ export async function PATCH(req: NextRequest) {
     if (updates.findings !== undefined) payload.findings = updates.findings;
     if (updates.negligence_found !== undefined)
       payload.negligence_found = updates.negligence_found;
+    if (updates.negligence_determined !== undefined)
+      payload.negligence_determined = updates.negligence_determined;
     if (updates.compensation_required !== undefined)
       payload.compensation_required = updates.compensation_required;
-    if (updates.resolved)
-      payload.resolved_at = new Date().toISOString();
+    if (updates.status !== undefined) {
+      payload.status = updates.status;
+      if (updates.status === "resolved") {
+        payload.resolved_at = new Date().toISOString();
+      }
+    }
+    if (updates.admin_determination !== undefined)
+      payload.admin_determination = updates.admin_determination;
+    if (updates.admin_resolution_notes !== undefined)
+      payload.admin_resolution_notes = updates.admin_resolution_notes;
+    if (updates.investigation_started_at !== undefined)
+      payload.investigation_started_at = updates.investigation_started_at;
+    if (updates.resolved) payload.resolved_at = new Date().toISOString();
 
     const { data, error } = await supabase
       .from("incident_reports")
@@ -129,7 +151,7 @@ export async function PATCH(req: NextRequest) {
     console.error("Update incident error:", error);
     return NextResponse.json(
       { error: "Failed to update incident report" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

@@ -6,6 +6,7 @@ import gsap from "gsap";
 interface StaffProfile {
   id: string;
   full_name: string;
+  email: string;
   role: string;
   bank_name: string;
   account_number: string;
@@ -40,8 +41,8 @@ export default function AccountantSalaries() {
       const supabase = createClient();
       const { data } = await supabase
         .from("profiles")
-        .select("id, full_name, role, bank_name, account_number, salary_amount")
-        .in("role", ["farm_manager", "keeper", "accountant", "sales_manager"])
+        .select("id, full_name, email, role, bank_name, account_number, salary_amount")
+        .in("role", ["admin", "farm_manager", "keeper", "accountant", "sales_manager"])
         .order("role", { ascending: true });
 
       setStaff(data || []);
@@ -137,43 +138,53 @@ export default function AccountantSalaries() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-50">
-                  {staff.map((s) => (
+                    {staff.map((s) => (
                     <tr
                       key={s.id}
-                      className="hover:bg-slate-50/50 transition-all"
+                      className="hover:bg-slate-50/50 transition-all border-b border-slate-50 last:border-0"
                     >
-                      <td className="px-6 py-4">
-                        <p className="text-sm font-bold text-primary">
-                          {s.full_name}
-                        </p>
+                      <td className="px-6 py-5">
+                        <div className="flex flex-col">
+                          <p className="text-sm font-bold text-primary">
+                            {s.full_name}
+                          </p>
+                          <p className="text-[10px] text-slate-400 font-medium">
+                            {s.email || "No email"}
+                          </p>
+                        </div>
                       </td>
-                      <td className="px-6 py-4">
-                        <span className="text-[10px] font-bold text-slate-500 uppercase bg-slate-100 px-2 py-1 rounded">
+                      <td className="px-6 py-5">
+                        <span className="text-[9px] font-bold text-slate-500 uppercase bg-slate-100 px-2.5 py-1 rounded-lg">
                           {s.role.replace("_", " ")}
                         </span>
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="px-6 py-5">
                         {s.bank_name ? (
-                          <p className="text-[10px] font-mono text-emerald-600 font-bold uppercase">
-                            {s.bank_name} • {s.account_number}
-                          </p>
+                          <div className="flex flex-col">
+                            <p className="text-[10px] font-bold text-primary uppercase">
+                              {s.bank_name}
+                            </p>
+                            <p className="text-[10px] font-mono text-emerald-600 font-bold">
+                              {s.account_number}
+                            </p>
+                          </div>
                         ) : (
-                          <span className="text-[10px] text-rose-500 font-bold uppercase italic">
+                          <span className="text-[9px] text-rose-500 font-bold uppercase p-1.5 bg-rose-50 rounded-lg">
                             Missing Details
                           </span>
                         )}
                       </td>
-                      <td className="px-6 py-4 font-mono font-bold text-primary text-sm">
+                      <td className="px-6 py-5 font-mono font-bold text-primary text-sm">
                         ₦{(s.salary_amount || 0).toLocaleString()}
                       </td>
-                      <td className="px-6 py-4 text-right">
+                      <td className="px-6 py-5 text-right">
                         <button
                           onClick={() => handlePaySalary(s)}
                           disabled={payingId === s.id || !s.bank_name}
-                          className="px-4 py-2 bg-primary text-white text-[10px] font-bold uppercase tracking-wider rounded-lg shadow-lg shadow-primary/10 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 flex items-center gap-2 ml-auto"
+                          className="px-4 py-2.5 bg-primary text-white text-[10px] font-bold uppercase tracking-wider rounded-xl shadow-lg shadow-primary/10 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 flex items-center gap-2 ml-auto"
                         >
                           {payingId === s.id ? (
-                            <div className="w-2.5 h-2.5 border border-white/20 border-t-white rounded-full animate-spin" />
+                            <div className="w-3 h-3 border-2 border-white/20 border-t-white rounded-full animate-spin" />
                           ) : (
                             <span className="material-symbols-outlined text-xs">
                               payments
@@ -181,7 +192,7 @@ export default function AccountantSalaries() {
                           )}
                           {payingId === s.id
                             ? "Processing..."
-                            : "Disburse Salary"}
+                            : "Disburse"}
                         </button>
                       </td>
                     </tr>
@@ -190,60 +201,76 @@ export default function AccountantSalaries() {
               </table>
             </div>
 
-            {/* Mobile Card View */}
-            <div className="grid grid-cols-1 md:hidden gap-4 p-4">
+            {/* Mobile Card View - Enhanced Responsiveness */}
+            <div className="grid grid-cols-1 md:hidden gap-5 p-5">
               {staff.map((s) => (
                 <div
                   key={s.id}
-                  className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm flex flex-col gap-4 relative"
+                  className="bg-white rounded-3xl p-6 border border-slate-100 shadow-md flex flex-col gap-5 relative group transition-all hover:shadow-xl hover:border-slate-200"
                 >
                   <div className="flex justify-between items-start">
-                    <div>
-                      <h3 className="text-sm font-bold text-primary">
+                    <div className="space-y-1">
+                      <h3 className="text-base font-extrabold text-primary tracking-tight">
                         {s.full_name}
                       </h3>
-                      <span className="text-[9px] font-bold text-slate-500 uppercase bg-slate-100 px-2 py-0.5 rounded">
-                        {s.role.replace("_", " ")}
-                      </span>
+                      <p className="text-[11px] text-slate-400 font-medium lowercase">
+                        {s.email || "No email"}
+                      </p>
+                      <div className="pt-1">
+                        <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest bg-slate-50 px-2 py-0.5 rounded-md border border-slate-100">
+                          {s.role.replace("_", " ")}
+                        </span>
+                      </div>
                     </div>
                     <div className="text-right">
                       <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">
-                        Monthly Salary
+                        Monthly
                       </p>
-                      <p className="font-mono font-bold text-primary text-sm">
+                      <p className="font-mono font-bold text-primary text-base">
                         ₦{(s.salary_amount || 0).toLocaleString()}
                       </p>
                     </div>
                   </div>
 
-                  <div className="bg-slate-50 rounded-xl p-3">
-                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">
-                      Bank Details
-                    </p>
-                    {s.bank_name ? (
-                      <p className="text-[10px] font-mono text-emerald-600 font-bold uppercase">
-                        {s.bank_name} • {s.account_number}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="bg-slate-50/50 rounded-2xl p-4 border border-slate-50">
+                      <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-2">
+                        Bank / Institution
                       </p>
-                    ) : (
-                      <span className="text-[10px] text-rose-500 font-bold uppercase italic">
-                        Missing Details
-                      </span>
-                    )}
+                      <p className="text-[11px] font-bold text-primary uppercase line-clamp-1">
+                        {s.bank_name || "---"}
+                      </p>
+                    </div>
+                    <div className="bg-slate-50/50 rounded-2xl p-4 border border-slate-50">
+                      <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-2">
+                        Account No.
+                      </p>
+                      <p className="text-[11px] font-mono text-emerald-600 font-bold">
+                        {s.account_number || "---"}
+                      </p>
+                    </div>
                   </div>
+
+                  {!s.bank_name && (
+                    <div className="flex items-center gap-2 px-4 py-2 bg-rose-50 rounded-xl border border-rose-100">
+                      <span className="material-symbols-outlined text-rose-500 text-sm">warning</span>
+                      <p className="text-[10px] text-rose-600 font-bold uppercase tracking-tight">Missing Bank Details</p>
+                    </div>
+                  )}
 
                   <button
                     onClick={() => handlePaySalary(s)}
                     disabled={payingId === s.id || !s.bank_name}
-                    className="w-full py-3 bg-primary text-white text-[10px] font-bold uppercase tracking-wider rounded-xl shadow-lg shadow-primary/10 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                    className="w-full py-4 bg-primary text-white text-[11px] font-bold uppercase tracking-widest rounded-2xl shadow-xl shadow-primary/10 transition-all disabled:opacity-50 flex items-center justify-center gap-2 group-active:scale-[0.97]"
                   >
                     {payingId === s.id ? (
-                      <div className="w-2.5 h-2.5 border border-white/20 border-t-white rounded-full animate-spin" />
+                      <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
                     ) : (
-                      <span className="material-symbols-outlined text-sm">
+                      <span className="material-symbols-outlined text-base">
                         payments
                       </span>
                     )}
-                    {payingId === s.id ? "Processing..." : "Disburse Salary"}
+                    {payingId === s.id ? "Processing Payment..." : "Disburse Monthly Salary"}
                   </button>
                 </div>
               ))}

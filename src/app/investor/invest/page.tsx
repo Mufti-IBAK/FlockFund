@@ -13,13 +13,7 @@ interface Flock {
   status: string;
   cost_per_bird?: number;
   min_birds_per_investment?: number;
-  cost_breakdown?: {
-    bird_purchase: number;
-    feed: number;
-    medication: number;
-    combined_operational_fees: number;
-    other: number;
-  };
+  cost_breakdown?: Record<string, number>;
 }
 
 function formatNaira(n: number): string {
@@ -28,12 +22,12 @@ function formatNaira(n: number): string {
   return `₦${n.toLocaleString()}`;
 }
 
-const DEFAULT_BREAKDOWN = {
-  bird_purchase: 800,
-  feed: 2200,
-  medication: 350,
-  combined_operational_fees: 900,
-  other: 0,
+const DEFAULT_BREAKDOWN: Record<string, number> = {
+  "Bird Purchase": 800,
+  "Feed": 2200,
+  "Medication": 350,
+  "Operational Fees": 900,
+  "Structural Fees": 0,
 };
 
 export default function InvestPage() {
@@ -395,7 +389,7 @@ export default function InvestPage() {
             </div>
           </div>
 
-          {/* Cost Breakdown — Mudarabah Transparency */}
+          {/* Cost Breakdown — Islamic Finance Transparency */}
           {selectedFlock && (
             <div className="fade-in bg-white rounded-xl border border-slate-200/80 p-4 md:p-5">
               <div className="flex items-center gap-2 mb-4">
@@ -404,21 +398,15 @@ export default function InvestPage() {
                   Estimated Cost Per Bird (Transparency)
                 </label>
               </div>
-              <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-                {[
-                  { label: "Bird Purchase", key: "bird_purchase", icon: "egg" },
-                  { label: "Feed", key: "feed", icon: "bakery_dining" },
-                  { label: "Medication", key: "medication", icon: "vaccines" },
-                  { label: "Op. Fees", key: "combined_operational_fees", icon: "engineering" },
-                  { label: "Other", key: "other", icon: "factory" },
-                ].map((item) => (
-                  <div key={item.key} className="p-3 bg-slate-50 rounded-lg border border-slate-100/50">
+              <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
+                {Object.entries(costBreakdown).map(([label, value]: [string, any]) => (
+                  <div key={label} className="p-3 bg-slate-50 rounded-lg border border-slate-100/50">
                     <div className="flex items-center gap-1.5 mb-1 opacity-40">
-                      <span className="material-symbols-outlined text-[10px]">{item.icon}</span>
-                      <p className="text-[8px] font-bold uppercase tracking-tight">{item.label}</p>
+                      <span className="material-symbols-outlined text-[10px]">payments</span>
+                      <p className="text-[8px] font-bold uppercase tracking-tight">{label}</p>
                     </div>
                     <p className="text-sm font-mono font-bold text-primary">
-                      ₦{costBreakdown[item.key as keyof typeof DEFAULT_BREAKDOWN]?.toLocaleString() || "0"}
+                      ₦{Number(value).toLocaleString()}
                     </p>
                   </div>
                 ))}

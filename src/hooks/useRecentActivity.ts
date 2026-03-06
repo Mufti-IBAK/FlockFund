@@ -116,6 +116,15 @@ export function useRecentActivity(limit = 9) {
             color: "text-amber-500",
             sortDate: new Date(inc.created_at).getTime(),
           });
+        } else if (inc.status === "investigating") {
+          items.push({
+            icon: "sync",
+            text: "Investigation Started",
+            detail: `VET started on-site investigation for: ${inc.title}`,
+            time: timeAgo(inc.updated_at || inc.created_at),
+            color: "text-amber-500",
+            sortDate: new Date(inc.updated_at || inc.created_at).getTime(),
+          });
         } else if (inc.status === "reported") {
           items.push({
             icon: "medical_services",

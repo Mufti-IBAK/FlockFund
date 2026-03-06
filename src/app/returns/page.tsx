@@ -418,51 +418,21 @@ export default function ReturnsPage() {
                 </h3>
               </div>
               <div className="space-y-2.5 mb-4">
-                {(settings.cost_breakdown
-                  ? [
-                      {
-                        label: "Day-Old Chick (DOC)",
-                        val: settings.cost_breakdown.doc,
-                      },
-                      {
-                        label: "Feed (28-day broiler ration)",
-                        val: settings.cost_breakdown.feed,
-                      },
-                      {
-                        label: "Medication & Vaccines",
-                        val: settings.cost_breakdown.medication,
-                      },
-                      {
-                        label: "Labor & Management",
-                        val: settings.cost_breakdown.labor,
-                      },
-                      {
-                        label: "Operational Overhead",
-                        val: settings.cost_breakdown.overhead,
-                      },
-                    ]
-                  : [
-                      { label: "Day-Old Chick (DOC)", val: 1800 },
-                      { label: "Feed (28-day broiler ration)", val: 2500 },
-                      { label: "Medication & Vaccines", val: 400 },
-                      { label: "Labor & Management", val: 500 },
-                      { label: "Operational Overhead", val: 400 },
-                    ]
-                ).map((c) => (
+                {Object.entries(settings.cost_breakdown || {}).map(([label, val]: [string, any]) => (
                   <div
-                    key={c.label}
+                    key={label}
                     className="flex items-center justify-between py-1.5 border-b border-white/5"
                   >
-                    <span className="text-white/60 text-xs">{c.label}</span>
+                    <span className="text-white/60 text-xs">{label}</span>
                     <div className="flex items-center gap-3">
                       <span className="text-white/30 text-[10px]">
                         {settings.cost_per_bird
-                          ? Math.round((c.val / settings.cost_per_bird) * 100)
+                          ? Math.round((Number(val) / settings.cost_per_bird) * 100)
                           : 0}
                         %
                       </span>
                       <span className="font-mono text-xs text-white font-bold">
-                        ₦{c.val?.toLocaleString() || "0"}
+                        ₦{Number(val)?.toLocaleString() || "0"}
                       </span>
                     </div>
                   </div>
