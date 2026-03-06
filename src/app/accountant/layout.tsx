@@ -12,6 +12,11 @@ const navItems = [
     href: "/accountant/disbursements",
   },
   {
+    icon: "payments",
+    label: "Staff Salaries",
+    href: "/accountant/salaries",
+  },
+  {
     icon: "receipt_long",
     label: "Invoices & Receipts",
     href: "/accountant/assets",
@@ -23,13 +28,13 @@ const navItems = [
   },
   {
     icon: "shopping_bag",
-    label: "Bird Sales Report",
+    label: "Bird Sales",
     href: "/accountant/sales",
   },
   {
-    icon: "trending_up",
-    label: "Payout Forecasting",
-    href: "/accountant/projections",
+    icon: "payments",
+    label: "Payment Transactions",
+    href: "/accountant/payments",
   },
   { icon: "shopping_cart", label: "Invest", href: "/accountant/invest" },
   { icon: "analytics", label: "Data Insights", href: "/accountant/insights" },

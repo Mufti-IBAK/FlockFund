@@ -16,9 +16,10 @@ export default function AccountantDisbursements() {
   useEffect(() => {
     if (!pageRef.current || loading) return;
     const ctx = gsap.context(() => {
-      gsap.fromTo(".fade-in", 
-        { y: 20, opacity: 0 }, 
-        { y: 0, opacity: 1, stagger: 0.05, duration: 0.5, ease: "power3.out" }
+      gsap.fromTo(
+        ".fade-in",
+        { y: 20, opacity: 0 },
+        { y: 0, opacity: 1, stagger: 0.05, duration: 0.5, ease: "power3.out" },
       );
     });
     return () => ctx.revert();
@@ -26,7 +27,7 @@ export default function AccountantDisbursements() {
 
   async function loadApprovedRequests() {
     try {
-      const { createClient } = await import('@/lib/supabase/client');
+      const { createClient } = await import("@/lib/supabase/client");
       const supabase = createClient();
       const { data } = await supabase
         .from("fund_requests")
@@ -45,7 +46,8 @@ export default function AccountantDisbursements() {
   }
 
   async function handleManualProcess(id: string) {
-    if (!confirm("Are you sure you have disbursed these funds MANUALLY?")) return;
+    if (!confirm("Are you sure you have disbursed these funds MANUALLY?"))
+      return;
 
     try {
       const { createClient } = await import("@/lib/supabase/client");
@@ -65,6 +67,26 @@ export default function AccountantDisbursements() {
         .eq("id", id);
 
       if (error) throw error;
+
+      // Also insert into flock_costs for manager transparency
+      const req = requests.find((r) => r.id === id);
+      if (req && req.flock_id) {
+        await supabase.from("flock_costs").insert({
+          flock_id: req.flock_id,
+          cost_category:
+            req.category === "drugs"
+              ? "drugs"
+              : req.category === "maintenance"
+                ? "combined_operational_fees"
+                : req.category,
+          amount: req.amount,
+          description: `Disbursement for Request #${id.substring(0, 8)}: ${req.description}`,
+          incurred_date: new Date().toISOString().split("T")[0],
+          verified: true,
+          verified_by: user?.id,
+        });
+      }
+
       loadApprovedRequests();
     } catch (err) {
       console.error(err);
@@ -75,7 +97,9 @@ export default function AccountantDisbursements() {
   async function handleAutomatedPay(req: any) {
     const profile = req.profiles;
     if (!profile?.bank_name || !profile?.account_number) {
-      alert("Recipient has not set their bank details. Please ask them to update their Settings.");
+      alert(
+        "Recipient has not set their bank details. Please ask them to update their Settings.",
+      );
       return;
     }
 
@@ -93,14 +117,14 @@ Proceed with real-time transfer?`;
 
     setPayingId(req.id);
     try {
-      const res = await fetch('/api/payments/disburse', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch("/api/payments/disburse", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           request_id: req.id,
           amount: req.amount,
           user_id: req.requester_id,
-          category: req.category
+          category: req.category,
         }),
       });
 
@@ -137,8 +161,12 @@ Proceed with real-time transfer?`;
           </div>
         ) : requests.length === 0 ? (
           <div className="p-14 text-center">
-            <span className="material-symbols-outlined text-4xl text-slate-200 mb-3">payments</span>
-            <p className="text-slate-400 text-sm">No pending disbursements at this time.</p>
+            <span className="material-symbols-outlined text-4xl text-slate-200 mb-3">
+              payments
+            </span>
+            <p className="text-slate-400 text-sm">
+              No pending disbursements at this time.
+            </p>
           </div>
         ) : (
           <>
@@ -178,11 +206,14 @@ Proceed with real-time transfer?`;
                         </p>
                         {req.profiles?.bank_name ? (
                           <p className="text-[10px] font-mono text-emerald-600 font-bold uppercase">
-                            {req.profiles.bank_name} • {req.profiles.account_number}
+                            {req.profiles.bank_name} •{" "}
+                            {req.profiles.account_number}
                           </p>
                         ) : (
                           <p className="text-[10px] text-rose-500 font-bold uppercase flex items-center gap-1">
-                            <span className="material-symbols-outlined text-xs">warning</span>
+                            <span className="material-symbols-outlined text-xs">
+                              warning
+                            </span>
                             No Bank Details
                           </p>
                         )}
@@ -208,15 +239,21 @@ Proceed with real-time transfer?`;
                           </button>
                           <button
                             onClick={() => handleAutomatedPay(req)}
-                            disabled={payingId === req.id || !req.profiles?.bank_name}
+                            disabled={
+                              payingId === req.id || !req.profiles?.bank_name
+                            }
                             className="px-4 py-1.5 bg-accent text-primary text-[9px] font-bold uppercase tracking-wider rounded-lg shadow-lg shadow-accent/20 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:grayscale flex items-center gap-1.5"
                           >
                             {payingId === req.id ? (
                               <div className="w-2.5 h-2.5 border border-primary/20 border-t-primary rounded-full animate-spin" />
                             ) : (
-                              <span className="material-symbols-outlined text-xs">bolt</span>
+                              <span className="material-symbols-outlined text-xs">
+                                bolt
+                              </span>
                             )}
-                            {payingId === req.id ? "Paying..." : "Pay via Flutterwave"}
+                            {payingId === req.id
+                              ? "Paying..."
+                              : "Pay via Flutterwave"}
                           </button>
                         </div>
                       </td>
@@ -228,36 +265,52 @@ Proceed with real-time transfer?`;
 
             <div className="grid grid-cols-1 md:hidden gap-4 p-4">
               {requests.map((req) => (
-                <div key={req.id} className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm flex flex-col gap-4 relative">
+                <div
+                  key={req.id}
+                  className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm flex flex-col gap-4 relative"
+                >
                   <div className="flex justify-between items-start">
                     <div>
                       <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">
-                         {new Date(req.created_at).toLocaleDateString()}
+                        {new Date(req.created_at).toLocaleDateString()}
                       </p>
                       <h3 className="font-bold text-primary text-sm">
                         {req.profiles?.full_name}
                       </h3>
                       {req.profiles?.bank_name ? (
                         <p className="text-[10px] font-mono text-emerald-600 font-bold uppercase mt-1">
-                          {req.profiles.bank_name} •<br/>{req.profiles.account_number}
+                          {req.profiles.bank_name} •<br />
+                          {req.profiles.account_number}
                         </p>
                       ) : (
                         <p className="text-[10px] text-rose-500 font-bold uppercase flex items-center gap-1 mt-1">
-                          <span className="material-symbols-outlined text-xs">warning</span>
+                          <span className="material-symbols-outlined text-xs">
+                            warning
+                          </span>
                           No Bank Details
                         </p>
                       )}
                     </div>
                     <div className="text-right">
-                       <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Amount</p>
-                       <p className="font-mono font-bold text-primary text-sm">₦{Number(req.amount).toLocaleString()}</p>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">
+                        Amount
+                      </p>
+                      <p className="font-mono font-bold text-primary text-sm">
+                        ₦{Number(req.amount).toLocaleString()}
+                      </p>
                     </div>
                   </div>
 
                   <div className="bg-slate-50 rounded-xl p-3">
-                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Purpose / Flock</p>
-                     <p className="text-xs font-bold text-slate-700">{req.category.toUpperCase()}</p>
-                     <p className="text-[10px] text-slate-500 italic">Flock: {req.flocks?.flock_name || req.flocks?.name}</p>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">
+                      Purpose / Flock
+                    </p>
+                    <p className="text-xs font-bold text-slate-700">
+                      {req.category.toUpperCase()}
+                    </p>
+                    <p className="text-[10px] text-slate-500 italic">
+                      Flock: {req.flocks?.flock_name || req.flocks?.name}
+                    </p>
                   </div>
 
                   <div className="flex flex-col gap-2 mt-2">
@@ -269,9 +322,13 @@ Proceed with real-time transfer?`;
                       {payingId === req.id ? (
                         <div className="w-3 h-3 border-2 border-primary/20 border-t-primary rounded-full animate-spin" />
                       ) : (
-                        <span className="material-symbols-outlined text-sm">bolt</span>
+                        <span className="material-symbols-outlined text-sm">
+                          bolt
+                        </span>
                       )}
-                      {payingId === req.id ? "Paying..." : "Pay via Flutterwave"}
+                      {payingId === req.id
+                        ? "Paying..."
+                        : "Pay via Flutterwave"}
                     </button>
                     <button
                       onClick={() => handleManualProcess(req.id)}
@@ -290,8 +347,10 @@ Proceed with real-time transfer?`;
       <div className="mt-6 flex items-center gap-3 p-4 bg-primary/5 rounded-xl border border-primary/10 fade-in">
         <span className="material-symbols-outlined text-primary">security</span>
         <p className="text-[11px] text-slate-500 leading-relaxed font-medium">
-          Automated disbursements are processed via encrypted channels and require verified bank details from the recipient. 
-          Manual processing should only be used as a fallback if the automated system fails or for bank-to-bank cash transfers.
+          Automated disbursements are processed via encrypted channels and
+          require verified bank details from the recipient. Manual processing
+          should only be used as a fallback if the automated system fails or for
+          bank-to-bank cash transfers.
         </p>
       </div>
     </div>

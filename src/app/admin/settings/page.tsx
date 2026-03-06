@@ -6,11 +6,11 @@ import gsap from "gsap";
 interface Settings {
   cost_per_bird: number;
   cost_breakdown: {
-    doc: number;
+    bird_purchase: number;
     feed: number;
     medication: number;
-    labor: number;
-    overhead: number;
+    combined_operational_fees: number;
+    other: number;
   };
   selling_price_per_bird: number;
   market_floor_price: number;
@@ -29,11 +29,11 @@ interface Settings {
 const DEFAULT_SETTINGS: Settings = {
   cost_per_bird: 4250,
   cost_breakdown: {
-    doc: 800,
+    bird_purchase: 800,
     feed: 2200,
     medication: 350,
-    labor: 500,
-    overhead: 400,
+    combined_operational_fees: 900,
+    other: 0,
   },
   selling_price_per_bird: 7500,
   market_floor_price: 6800,
@@ -368,7 +368,7 @@ export default function AdminSettings() {
             {Object.entries(settings.cost_breakdown).map(([key, val]) => (
               <NumberField
                 key={key}
-                label={key.charAt(0).toUpperCase() + key.slice(1)}
+                label={key.replace(/_/g, " ").charAt(0).toUpperCase() + key.replace(/_/g, " ").slice(1)}
                 value={val}
                 prefix="₦"
                 onChange={(v) =>

@@ -16,14 +16,12 @@ const navItems = [
     label: "Profit Cycles",
     href: "/admin/profit-cycles",
   },
-  { icon: "payments", label: "Payments", href: "/admin/payments" },
   { icon: "request_quote", label: "Fund Requests", href: "/admin/requests" },
   { icon: "vaccines", label: "Vaccinations", href: "/admin/vaccinations" },
   { icon: "report_problem", label: "Incidents", href: "/admin/incidents" },
   { icon: "receipt_long", label: "Flock Costs", href: "/admin/flock-costs" },
   { icon: "analytics", label: "Data", href: "/admin/data" },
   { icon: "forum", label: "Community", href: "/admin/community" },
-  { icon: "public", label: "Globe", href: "/admin/globe" },
   { icon: "settings", label: "Settings", href: "/admin/settings" },
 ];
 

@@ -4,7 +4,7 @@
 
 // ----- database row types (mirror schema) -----
 
-export type UserRole = "admin" | "farm_manager" | "keeper" | "investor" | "accountant";
+export type UserRole = "admin" | "farm_manager" | "keeper" | "investor" | "accountant" | "sales_manager";
 
 export interface Profile {
   id: string;
@@ -268,5 +268,22 @@ export interface IncidentReport {
   reported_by: string;
   resolved_at: string | null;
   compensation_required: number;
+  urgency_grade: 'low' | 'medium' | 'high' | 'critical';
+  is_emergency: boolean;
+  created_at: string;
+}
+
+export interface SalesReport {
+  id: string;
+  flock_id: string;
+  sales_manager_id: string;
+  amount_birds: number;
+  weight_kg: number;
+  customer_name: string;
+  product_type: 'live' | 'frozen' | 'peppered' | 'other';
+  other_product_details: string | null;
+  is_manure: boolean;
+  total_revenue: number;
+  sale_timestamp: string;
   created_at: string;
 }

@@ -6,28 +6,23 @@ import { logAuditEvent } from "@/lib/auditLogger";
 export async function POST(req: Request) {
   try {
     // 0. Rate Limiting based on IP
-    let ip = req.headers.get("x-forwarded-for") || req.headers.get("cf-connecting-ip") || "unknown";
-    if (ip.includes(',')) ip = ip.split(',')[0].trim();
-    
+    let ip =
+      req.headers.get("x-forwarded-for") ||
+      req.headers.get("cf-connecting-ip") ||
+      "unknown";
+    if (ip.includes(",")) ip = ip.split(",")[0].trim();
+
     const rateLimit = getApiRateLimit(ip);
     if (!rateLimit.success) {
       return NextResponse.json(
         { error: "Too many requests. Please try again later." },
-        { status: 429, headers: { "Retry-After": "60" } }
+        { status: 429, headers: { "Retry-After": "60" } },
       );
     }
 
     const body = await req.json();
-    const { investorId } = body;
+    const { investorId, request_id, user_id, amount, category } = body;
 
-    if (!investorId) {
-      return NextResponse.json(
-        { error: "Investor ID required" },
-        { status: 400 },
-      );
-    }
-
-    // 1. Authenticate user to verify they are an accountant or admin
     const { createClient: createServerClient } =
       await import("@/lib/supabase/server");
     const supabaseUser = await createServerClient();
@@ -43,6 +38,101 @@ export async function POST(req: Request) {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
     const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
+
+    // Handle STAFF_SALARY Disbursement
+    if (body.type === "salary") {
+      const { staff_id, amount, month, year } = body;
+      if (!staff_id || !amount) {
+        return NextResponse.json(
+          { error: "Missing salary details" },
+          { status: 400 },
+        );
+      }
+
+      // 1. Record payment
+      const { error: payErr } = await supabaseAdmin
+        .from("staff_payments")
+        .insert({
+          staff_id,
+          amount,
+          payment_month: month,
+          payment_year: year,
+          processed_by: user.id,
+          payment_reference: `SAL-${Math.random().toString(36).substring(7).toUpperCase()}`,
+        });
+
+      if (payErr) {
+        return NextResponse.json(
+          { error: "Failed recording salary: " + payErr.message },
+          { status: 500 },
+        );
+      }
+
+      await logAuditEvent({
+        action: "SALARY_DISBURSEMENT_COMPLETED",
+        actor_id: user.id,
+        target_id: staff_id,
+        details: { amount, month, year },
+        ip_address: ip,
+      });
+
+      return NextResponse.json({ success: true });
+    }
+
+    // Handle Staff/Operational Disbursement if request_id provided
+    if (request_id) {
+      // 1. Update fund_request
+      const { data: request, error: reqErr } = await supabaseAdmin
+        .from("fund_requests")
+        .update({
+          status: "processed",
+          accountant_processed: true,
+          processed_by: user.id,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", request_id)
+        .select()
+        .single();
+
+      if (reqErr)
+        throw new Error("Failed to process request: " + reqErr.message);
+
+      // 2. Insert into flock_costs if linked to a flock
+      if (request.flock_id) {
+        await supabaseAdmin.from("flock_costs").insert({
+          flock_id: request.flock_id,
+          cost_category:
+            request.category === "maintenance"
+              ? "combined_operational_fees"
+              : request.category === "drugs"
+                ? "drugs"
+                : request.category,
+          amount: request.amount,
+          description: `Automated Disbursement for Request #${request_id.substring(0, 8)}`,
+          incurred_date: new Date().toISOString().split("T")[0],
+          verified: true,
+          verified_by: user.id,
+        });
+      }
+
+      await logAuditEvent({
+        action: "STAFF_DISBURSEMENT_COMPLETED",
+        actor_id: user.id,
+        target_id: user_id,
+        details: { request_id, amount, category },
+        ip_address: ip,
+      });
+
+      return NextResponse.json({ success: true });
+    }
+
+    // Existing Investor Payout Logic...
+    if (!investorId) {
+      return NextResponse.json(
+        { error: "Investor ID required" },
+        { status: 400 },
+      );
+    }
 
     const { data: requestorProfile } = await supabaseAdmin
       .from("profiles")
@@ -119,13 +209,13 @@ export async function POST(req: Request) {
 
     if (insertError) {
       console.error("Failed recording withdrawal:", insertError);
-      
+
       await logAuditEvent({
         action: "DISBURSEMENT_FAILED",
         actor_id: user.id,
         target_id: investorId,
         details: { error: insertError.message, amount: payoutAmount },
-        ip_address: ip
+        ip_address: ip,
       });
 
       return NextResponse.json(
@@ -141,7 +231,7 @@ export async function POST(req: Request) {
       actor_id: user.id,
       target_id: investorId,
       details: { amount: payoutAmount, reference: `DISB-...` },
-      ip_address: ip
+      ip_address: ip,
     });
 
     return NextResponse.json({ success: true, payoutAmount });

@@ -50,11 +50,11 @@ export default function AdminFlocks() {
     // Default Settings
     cost_per_bird: 4250,
     cost_breakdown: {
-      doc: 800,
+      bird_purchase: 800,
       feed: 2200,
       medication: 350,
-      labor: 500,
-      overhead: 400,
+      combined_operational_fees: 900,
+      other: 0,
     },
     selling_price_per_bird: 7500,
     market_floor_price: 6800,

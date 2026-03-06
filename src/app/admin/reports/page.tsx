@@ -18,6 +18,10 @@ interface Report {
   approved_by: string | null;
   report_date: string;
   created_at: string;
+  profiles?: {
+    full_name: string;
+    role: string;
+  };
 }
 
 const STATUS_COLORS: Record<string, string> = {
@@ -39,7 +43,7 @@ export default function AdminReports() {
         const supabase = createClient();
         const { data, error } = await supabase
           .from("farm_reports")
-          .select("*")
+          .select("*, profiles(full_name, role)")
           .order("created_at", { ascending: false });
         if (error) throw error;
         setReports(data || []);
@@ -142,8 +146,9 @@ export default function AdminReports() {
           <>
             <div className="hidden md:block overflow-x-auto">
               <div className="divide-y divide-slate-50 min-w-[800px] xl:min-w-0">
-                <div className="grid grid-cols-7 gap-4 px-5 py-3 bg-slate-50/50 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                <div className="grid grid-cols-8 gap-4 px-5 py-3 bg-slate-50/50 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
                   <span>Date</span>
+                  <span>Reporter</span>
                   <span>Mortality</span>
                   <span>Temp</span>
                   <span>Feed (kg)</span>
@@ -154,13 +159,21 @@ export default function AdminReports() {
                 {filtered.map((r) => (
                   <div
                     key={r.id}
-                    className="report-row grid grid-cols-7 gap-4 px-5 py-4 items-center hover:bg-slate-50/50 transition-colors duration-300"
+                    className="report-row grid grid-cols-8 gap-4 px-5 py-4 items-center hover:bg-slate-50/50 transition-colors duration-300"
                   >
                     <span className="text-xs text-slate-500">
                       {new Date(
                         r.report_date || r.created_at,
                       ).toLocaleDateString()}
                     </span>
+                    <div className="flex flex-col">
+                      <span className="text-xs font-bold text-primary truncate">
+                        {r.profiles?.full_name || "Unknown"}
+                      </span>
+                      <span className="text-[9px] uppercase tracking-tighter text-slate-400">
+                        {r.profiles?.role?.replace("_", " ") || "Keeper"}
+                      </span>
+                    </div>
                     <span
                       className={`font-mono text-sm font-bold ${r.mortality_count > 0 ? "text-rose-600" : "text-emerald-600"}`}
                     >
@@ -215,6 +228,9 @@ export default function AdminReports() {
                       <h3 className="font-bold text-primary text-sm flex items-center gap-1.5 line-clamp-1">
                         {r.clinical_signs || "No clinical signs"}
                       </h3>
+                      <p className="text-[10px] font-medium text-slate-500 mt-0.5">
+                        By {r.profiles?.full_name || "Unknown"} ({r.profiles?.role?.replace("_", " ") || "Keeper"})
+                      </p>
                     </div>
                     <div className="text-right">
                       <span
