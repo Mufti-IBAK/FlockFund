@@ -12,6 +12,7 @@ interface Settings {
     combined_operational_fees: number;
     other: number;
   };
+  age_of_purchase_days: number;
   selling_price_per_bird: number;
   market_floor_price: number;
   market_cost: number;
@@ -19,7 +20,7 @@ interface Settings {
   flockfund_share_percentage: number;
   reinvest_percentage: number;
   rounds_before_withdrawal: number;
-  payment_gateway: string;
+  enabled_gateways: string[];
   blockchain_enabled: boolean;
   data_monetization_enabled: boolean;
   cycle_duration_days: number;
@@ -42,7 +43,8 @@ const DEFAULT_SETTINGS: Settings = {
   flockfund_share_percentage: 70,
   reinvest_percentage: 100,
   rounds_before_withdrawal: 3,
-  payment_gateway: "flutterwave",
+  enabled_gateways: ["flutterwave"],
+  age_of_purchase_days: 0,
   blockchain_enabled: false,
   data_monetization_enabled: false,
   cycle_duration_days: 28,
@@ -196,8 +198,10 @@ export default function AdminSettings() {
             rounds_before_withdrawal:
               data.rounds_before_withdrawal ??
               DEFAULT_SETTINGS.rounds_before_withdrawal,
-            payment_gateway:
-              data.payment_gateway ?? DEFAULT_SETTINGS.payment_gateway,
+            enabled_gateways:
+              data.enabled_gateways ?? DEFAULT_SETTINGS.enabled_gateways,
+            age_of_purchase_days:
+              data.age_of_purchase_days ?? DEFAULT_SETTINGS.age_of_purchase_days,
             blockchain_enabled:
               data.blockchain_enabled ?? DEFAULT_SETTINGS.blockchain_enabled,
             data_monetization_enabled:
@@ -522,37 +526,46 @@ export default function AdminSettings() {
                 setSettings((s) => ({ ...s, min_birds_per_investment: v }))
               }
             />
+            <NumberField
+              label="Age of Purchase"
+              value={settings.age_of_purchase_days}
+              suffix="Days Old"
+              onChange={(v) =>
+                setSettings((s) => ({ ...s, age_of_purchase_days: v }))
+              }
+            />
           </div>
         </SettingCard>
 
-        {/* ── Payment Gateway ── */}
-        <SettingCard title="Payment Gateway" icon="credit_card">
+        {/* ── Payment Gateways ── */}
+        <SettingCard title="Payment Gateways" icon="credit_card">
           <div className="space-y-3">
             {["flutterwave", "paystack", "paypal"].map((gw) => (
               <label
                 key={gw}
                 className={`flex items-center gap-4 p-4 rounded-xl border cursor-pointer transition-all duration-300 ${
-                  settings.payment_gateway === gw
+                  settings.enabled_gateways.includes(gw)
                     ? "border-accent bg-accent/5 shadow-sm"
                     : "border-slate-200 hover:border-slate-300"
                 }`}
               >
                 <input
-                  type="radio"
-                  name="gateway"
-                  value={gw}
-                  checked={settings.payment_gateway === gw}
-                  onChange={() =>
-                    setSettings((s) => ({ ...s, payment_gateway: gw }))
-                  }
-                  className="w-4 h-4 text-accent accent-accent"
+                  type="checkbox"
+                  checked={settings.enabled_gateways.includes(gw)}
+                  onChange={(e) => {
+                    const next = e.target.checked 
+                      ? [...settings.enabled_gateways, gw]
+                      : settings.enabled_gateways.filter(x => x !== gw);
+                    setSettings(s => ({ ...s, enabled_gateways: next }));
+                  }}
+                  className="w-4 h-4 text-accent accent-accent rounded"
                 />
                 <span className="font-bold text-sm text-primary capitalize">
                   {gw}
                 </span>
-                {settings.payment_gateway === gw && (
+                {settings.enabled_gateways.includes(gw) && (
                   <span className="ml-auto text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-accent/20 text-amber-700">
-                    Active
+                    Enabled
                   </span>
                 )}
               </label>

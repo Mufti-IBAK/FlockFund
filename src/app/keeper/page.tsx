@@ -170,7 +170,7 @@ export default function KeeperDashboard() {
               : `⚠️ Emergency Alert (${urgencyGrade.toUpperCase()})`,
           message: `${name} reported: ${description}`,
           type: "system",
-          redirect_url: "/admin/incidents",
+          redirect_url: "/manager/incidents",
         }));
 
         await supabase.from("notifications").insert(notifs);
@@ -284,7 +284,7 @@ export default function KeeperDashboard() {
           },
           {
             icon: "warning",
-            label: "Alert Manager",
+            label: "Alert VET",
             onClick: () => handleQuickAction("alert"),
             color: "bg-rose-500 text-white",
           },
@@ -331,61 +331,76 @@ export default function KeeperDashboard() {
       {showEmergencyModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-6 bg-primary/40 backdrop-blur-sm animate-in fade-in duration-300">
           <div className="bg-white w-full max-w-lg rounded-3xl shadow-2xl shadow-primary/20 overflow-hidden animate-in zoom-in-95 slide-in-from-bottom-10 duration-500">
-            <div className={`p-6 ${emergencyType === 'vet' ? 'bg-amber-500' : 'bg-rose-500'} text-white`}>
+            <div
+              className={`p-6 ${emergencyType === "vet" ? "bg-amber-500" : "bg-rose-500"} text-white`}
+            >
               <div className="flex justify-between items-start mb-2">
                 <span className="material-symbols-outlined text-3xl">
-                  {emergencyType === 'vet' ? 'local_hospital' : 'warning'}
+                  {emergencyType === "vet" ? "local_hospital" : "warning"}
                 </span>
-                <button onClick={() => setShowEmergencyModal(false)} className="text-white/60 hover:text-white transition-colors">
+                <button
+                  onClick={() => setShowEmergencyModal(false)}
+                  className="text-white/60 hover:text-white transition-colors"
+                >
                   <span className="material-symbols-outlined">close</span>
                 </button>
               </div>
               <h3 className="text-xl font-heading font-bold tracking-tight">
-                {emergencyType === 'vet' ? 'Veterinary Request' : 'Emergency Alert'}
+                {emergencyType === "vet" ? "Veterinary Request" : "Alert VET"}
               </h3>
               <p className="text-white/80 text-xs font-medium uppercase tracking-wider mt-1">
-                Immediate Notification will be sent to Management
+                Immediate Notification will be sent to the Farm Manager (VET)
               </p>
             </div>
 
             <div className="p-6 space-y-5">
               {/* Flock Selection */}
               <div className="space-y-1.5">
-                <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest">Target Flock</label>
-                <select 
+                <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                  Target Flock
+                </label>
+                <select
                   value={selectedFlockId}
                   onChange={(e) => setSelectedFlockId(e.target.value)}
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-primary focus:ring-2 focus:ring-accent/20 outline-none transition-all"
                 >
-                  {activeFlocks.map(f => (
-                    <option key={f.id} value={f.id}>{f.name}</option>
+                  {activeFlocks.map((f) => (
+                    <option key={f.id} value={f.id}>
+                      {f.name}
+                    </option>
                   ))}
                 </select>
               </div>
 
               {/* Urgency Selection */}
               <div className="space-y-1.5">
-                <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest">Urgency Level</label>
+                <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                  Urgency Level
+                </label>
                 <div className="grid grid-cols-4 gap-2">
-                  {(['low', 'medium', 'high', 'critical'] as const).map(level => (
-                    <button
-                      key={level}
-                      onClick={() => setUrgencyGrade(level)}
-                      className={`py-2 rounded-xl text-[10px] font-bold uppercase tracking-tighter transition-all ${
-                        urgencyGrade === level 
-                          ? 'bg-primary text-white shadow-md shadow-primary/20' 
-                          : 'bg-slate-50 text-slate-400 hover:bg-slate-100'
-                      }`}
-                    >
-                      {level}
-                    </button>
-                  ))}
+                  {(["low", "medium", "high", "critical"] as const).map(
+                    (level) => (
+                      <button
+                        key={level}
+                        onClick={() => setUrgencyGrade(level)}
+                        className={`py-2 rounded-xl text-[10px] font-bold uppercase tracking-tighter transition-all ${
+                          urgencyGrade === level
+                            ? "bg-primary text-white shadow-md shadow-primary/20"
+                            : "bg-slate-50 text-slate-400 hover:bg-slate-100"
+                        }`}
+                      >
+                        {level}
+                      </button>
+                    ),
+                  )}
                 </div>
               </div>
 
               {/* Description */}
               <div className="space-y-1.5">
-                <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest">Situation Details</label>
+                <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                  Situation Details
+                </label>
                 <textarea
                   rows={4}
                   value={description}
@@ -399,13 +414,15 @@ export default function KeeperDashboard() {
                 onClick={handleSubmitEmergency}
                 disabled={isSubmitting}
                 className={`w-full py-4 rounded-2xl font-bold text-sm uppercase tracking-widest shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2 ${
-                  emergencyType === 'vet' ? 'bg-amber-500 shadow-amber-500/20' : 'bg-rose-500 shadow-rose-500/20'
+                  emergencyType === "vet"
+                    ? "bg-amber-500 shadow-amber-500/20"
+                    : "bg-rose-500 shadow-rose-500/20"
                 } text-white disabled:opacity-50`}
               >
                 <span className="material-symbols-outlined text-lg">
-                  {isSubmitting ? 'sync' : 'send'}
+                  {isSubmitting ? "sync" : "send"}
                 </span>
-                {isSubmitting ? 'Sending Alert...' : 'Broadcast Alert'}
+                {isSubmitting ? "Sending Alert..." : "Broadcast Alert"}
               </button>
             </div>
           </div>

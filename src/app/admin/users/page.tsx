@@ -16,6 +16,8 @@ const ROLE_COLORS: Record<string, string> = {
   farm_manager: "bg-sky-100 text-sky-700",
   keeper: "bg-amber-100 text-amber-700",
   investor: "bg-emerald-100 text-emerald-700",
+  sales_manager: "bg-purple-100 text-purple-700",
+  accountant: "bg-blue-100 text-blue-700",
 };
 
 const ROLE_LABELS: Record<string, string> = {
@@ -23,9 +25,11 @@ const ROLE_LABELS: Record<string, string> = {
   farm_manager: "Farm Manager",
   keeper: "Keeper",
   investor: "Investor",
+  sales_manager: "Sales Manager",
+  accountant: "Accountant",
 };
 
-const ROLES = ["admin", "farm_manager", "keeper", "investor"];
+const ROLES = ["admin", "farm_manager", "keeper", "investor", "sales_manager", "accountant"];
 
 export default function AdminUsers() {
   const [users, setUsers] = useState<Profile[]>([]);
@@ -100,6 +104,8 @@ export default function AdminUsers() {
     farm_manager: users.filter((u) => u.role === "farm_manager").length,
     keeper: users.filter((u) => u.role === "keeper").length,
     investor: users.filter((u) => u.role === "investor").length,
+    sales_manager: users.filter((u) => u.role === "sales_manager").length,
+    accountant: users.filter((u) => u.role === "accountant").length,
   };
 
   return (
@@ -124,6 +130,16 @@ export default function AdminUsers() {
             key: "investor",
             label: "Investors",
             icon: "account_balance_wallet",
+          },
+          {
+            key: "sales_manager",
+            label: "Sales Mgr",
+            icon: "point_of_sale",
+          },
+          {
+            key: "accountant",
+            label: "Accountant",
+            icon: "payments",
           },
         ].map((tab) => (
           <button

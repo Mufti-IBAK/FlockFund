@@ -41,12 +41,30 @@ export default function AdminReports() {
       try {
         const { createClient } = await import("@/lib/supabase/client");
         const supabase = createClient();
-        const { data, error } = await supabase
+        
+        // Fetch Standard Farm Reports
+        const { data: farmData, error: farmErr } = await supabase
           .from("farm_reports")
           .select("*, profiles(full_name, role)")
           .order("created_at", { ascending: false });
-        if (error) throw error;
-        setReports(data || []);
+        if (farmErr) throw farmErr;
+
+        // Fetch VET Incident Reports (Finalized)
+        const { data: incidentData, error: incErr } = await supabase
+          .from("incident_reports")
+          .select("*, profiles(full_name, role)")
+          .eq("status", "reported")
+          .order("created_at", { ascending: false });
+        if (incErr) throw incErr;
+
+        // Combine or handle separately. Let's combine them for a unified "Activity" view 
+        // but label them clearly.
+        const unified = [
+          ...(farmData || []).map(r => ({ ...r, report_type: 'farm_daily' })),
+          ...(incidentData || []).map(r => ({ ...r, report_type: 'vet_incident' }))
+        ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
+        setReports(unified as any);
       } catch (err) {
         console.error("Failed to load reports:", err);
       } finally {
@@ -146,67 +164,72 @@ export default function AdminReports() {
           <>
             <div className="hidden md:block overflow-x-auto">
               <div className="divide-y divide-slate-50 min-w-[800px] xl:min-w-0">
-                <div className="grid grid-cols-8 gap-4 px-5 py-3 bg-slate-50/50 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                <div className="grid grid-cols-9 gap-4 px-5 py-3 bg-slate-50/50 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                  <span>Type</span>
                   <span>Date</span>
-                  <span>Reporter</span>
-                  <span>Mortality</span>
-                  <span>Temp</span>
-                  <span>Feed (kg)</span>
-                  <span>Feed/Water</span>
+                  <span>Staff / Role</span>
+                  <span>Health Metric</span>
+                  <span>Environment</span>
                   <span>Status</span>
-                  <span>Clinical Signs</span>
+                  <span className="col-span-3">Summary / Recommendation</span>
                 </div>
-                {filtered.map((r) => (
+                {filtered.map((r: any) => (
                   <div
                     key={r.id}
-                    className="report-row grid grid-cols-8 gap-4 px-5 py-4 items-center hover:bg-slate-50/50 transition-colors duration-300"
+                    className="report-row grid grid-cols-9 gap-4 px-5 py-4 items-center hover:bg-slate-50/50 transition-colors duration-300 border-l-2"
+                    style={{ borderLeftColor: r.report_type === 'vet_incident' ? '#10b981' : 'transparent' }}
                   >
-                    <span className="text-xs text-slate-500">
-                      {new Date(
-                        r.report_date || r.created_at,
-                      ).toLocaleDateString()}
+                    <span className={`text-[8px] font-bold uppercase px-1.5 py-0.5 rounded w-fit ${
+                      r.report_type === 'vet_incident' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'
+                    }`}>
+                      {r.report_type === 'vet_incident' ? 'VET' : 'Daily'}
                     </span>
+
+                    <span className="text-xs text-slate-500">
+                      {new Date(r.report_date || r.incident_date || r.created_at).toLocaleDateString()}
+                    </span>
+
                     <div className="flex flex-col">
                       <span className="text-xs font-bold text-primary truncate">
                         {r.profiles?.full_name || "Unknown"}
                       </span>
                       <span className="text-[9px] uppercase tracking-tighter text-slate-400">
-                        {r.profiles?.role?.replace("_", " ") || "Keeper"}
+                        {r.profiles?.role?.replace("_", " ")}
                       </span>
                     </div>
-                    <span
-                      className={`font-mono text-sm font-bold ${r.mortality_count > 0 ? "text-rose-600" : "text-emerald-600"}`}
-                    >
-                      {r.mortality_count}
-                    </span>
-                    <span className="font-mono text-sm text-primary">
-                      {r.temperature_celsius
-                        ? `${r.temperature_celsius}°C`
-                        : "—"}
-                    </span>
-                    <span className="font-mono text-sm text-primary">
-                      {r.feed_consumed_kg || "—"}
-                    </span>
-                    <div className="flex gap-1.5">
-                      <span
-                        className={`text-xs px-1.5 py-0.5 rounded ${r.feed_available ? "bg-emerald-50 text-emerald-600" : "bg-rose-50 text-rose-600"}`}
-                      >
-                        {r.feed_available ? "✓ Feed" : "✗ Feed"}
-                      </span>
-                      <span
-                        className={`text-xs px-1.5 py-0.5 rounded ${r.water_available ? "bg-emerald-50 text-emerald-600" : "bg-rose-50 text-rose-600"}`}
-                      >
-                        {r.water_available ? "✓ Water" : "✗ Water"}
-                      </span>
+
+                    <div className="flex flex-col">
+                      {r.report_type === 'vet_incident' ? (
+                        <span className="text-[10px] font-bold text-rose-600">
+                          {r.birds_dead} Dead / {r.birds_isolated} Iso
+                        </span>
+                      ) : (
+                        <span className={`text-[10px] font-bold ${r.mortality_count > 0 ? "text-rose-600" : "text-emerald-600"}`}>
+                          {r.mortality_count} Mortality
+                        </span>
+                      )}
                     </div>
-                    <span
-                      className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full ${STATUS_COLORS[r.status]}`}
-                    >
+
+                    <div className="flex flex-col gap-1">
+                      {r.report_type === 'vet_incident' ? (
+                        <span className="text-[9px] font-bold text-slate-500">Mult-Flock Alert</span>
+                      ) : (
+                        <div className="flex gap-1">
+                           <span className={`text-[8px] px-1 rounded ${r.feed_available ? "bg-emerald-50 text-emerald-600" : "bg-rose-50 text-rose-600"}`}>F</span>
+                           <span className={`text-[8px] px-1 rounded ${r.water_available ? "bg-emerald-50 text-emerald-600" : "bg-rose-50 text-rose-600"}`}>W</span>
+                        </div>
+                      )}
+                    </div>
+
+                    <span className={`text-[9px] font-bold uppercase px-2 py-0.5 rounded-full w-fit ${STATUS_COLORS[r.status] || 'bg-slate-100'}`}>
                       {r.status}
                     </span>
-                    <p className="text-xs text-slate-400 truncate">
-                      {r.clinical_signs || "—"}
-                    </p>
+
+                    <div className="col-span-3">
+                       <p className="text-xs text-slate-500 line-clamp-1 font-medium italic">
+                         {r.recommendations || r.clinical_signs || "No details provided"}
+                       </p>
+                    </div>
                   </div>
                 ))}
               </div>
