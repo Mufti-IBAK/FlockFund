@@ -11,7 +11,7 @@ function ROICalculator({ settings }: { settings: any }) {
   const costPerBird = settings?.cost_per_bird || 4250;
   const targetPrice = settings?.selling_price_per_bird || 10000;
   const floorPrice = settings?.market_floor_price || 8000;
-  const investorSharePct = settings?.investor_share_percentage || 70;
+  const investorSharePct = settings?.investor_share_percentage || 30;
   const investorShare = investorSharePct / 100;
   const cycleDays = settings?.cycle_duration_days || 28;
 
@@ -210,7 +210,7 @@ export default function ReturnsPage() {
   const minBirds = settings?.min_birds_per_investment || 10;
   const costPerBird = settings?.cost_per_bird || 3700;
   const targetPrice = settings?.selling_price_per_bird || 10000;
-  const investorShare = (settings?.investor_share_percentage || 70) / 100;
+  const investorShare = (settings?.investor_share_percentage || 30) / 100;
 
   const tiers = [
     {
@@ -331,7 +331,7 @@ export default function ReturnsPage() {
                 </div>
                 <div className="flex items-center justify-between py-2 border-b border-slate-50">
                   <span className="text-xs text-slate-400">
-                    Your Profit (70%)
+                    Your Profit ({settings?.investor_share_percentage || 30}%)
                   </span>
                   <span className="font-mono text-sm font-bold text-emerald-600">
                     ₦{t.profit.toLocaleString()}
@@ -394,12 +394,11 @@ export default function ReturnsPage() {
                 </p>
               </div>
               <p className="text-white/40 text-xs leading-relaxed">
-                The {settings.investor_share_percentage}/
-                {100 - (settings.investor_share_percentage || 70)} split is
-                fixed. {settings.investor_share_percentage}% goes to investors,{" "}
-                {100 - (settings.investor_share_percentage || 70)}% covers
-                FlockFund&apos;s farm management, veterinary supervision, and
-                operational overhead. No hidden fees.
+                The {100 - (settings.investor_share_percentage || 30)}/
+                {settings.investor_share_percentage || 30} Mudarabah split is
+                fixed. {100 - (settings.investor_share_percentage || 30)}% goes to FlockFund (Mudarib) for management,{" "}
+                {settings.investor_share_percentage || 30}% goes to investors (Rabb-ul-Maal).
+                Capital is returned first before profit calculation. No hidden fees.
               </p>
             </div>
 
@@ -509,7 +508,7 @@ export default function ReturnsPage() {
                       {settings.market_floor_price?.toLocaleString()}/bird
                     </p>
                     <p className="text-white/40 text-xs">
-                      Guaranteed minimum via bulk buyers and processor contracts
+                      Target minimum via bulk buyers and processor contracts (not guaranteed under Mudarabah)
                     </p>
                   </div>
                 </div>
@@ -672,7 +671,7 @@ export default function ReturnsPage() {
               },
               {
                 risk: "Market Price Crash",
-                mitigation: `Guaranteed floor price of ₦${settings.market_floor_price?.toLocaleString()}/bird. Backup channels include frozen sales, restaurant partnerships, and processor contracts`,
+                mitigation: `Target floor price of ₦${settings.market_floor_price?.toLocaleString()}/bird (not guaranteed). Backup channels include frozen sales, restaurant partnerships, and processor contracts`,
                 icon: "trending_down",
               },
               {

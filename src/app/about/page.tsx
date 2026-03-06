@@ -143,7 +143,7 @@ export default function AboutPage() {
       icon: "savings",
     },
     {
-      label: "Guaranteed market floor",
+      label: "Target market floor *",
       value: `₦${floorPrice.toLocaleString()}/bird`,
       icon: "shield",
     },

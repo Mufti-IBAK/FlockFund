@@ -26,6 +26,8 @@ const navItems = [
   { icon: "analytics", label: "FCR Insights", href: "/manager/fcr-insights" },
   { icon: "payments", label: "Fund Requests", href: "/manager/requests" },
   { icon: "vaccines", label: "Vaccinations", href: "/manager/vaccinations" },
+  { icon: "report_problem", label: "Incidents", href: "/manager/incidents" },
+  { icon: "receipt_long", label: "Flock Costs", href: "/manager/flock-costs" },
   { icon: "settings", label: "Settings", href: "/manager/settings" },
 ];
 

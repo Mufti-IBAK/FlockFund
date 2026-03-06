@@ -1,0 +1,220 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+
+interface Incident {
+  id: string;
+  flock_id: string;
+  title: string;
+  description: string;
+  severity: 'low' | 'medium' | 'high' | 'critical';
+  status: 'reported' | 'investigating' | 'resolved' | 'dismissed';
+  reported_by: string;
+  investigation_notes: string | null;
+  resolution: string | null;
+  negligence_determined: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+const SEVERITY_STYLES: Record<string, string> = {
+  low: 'bg-slate-100 text-slate-700',
+  medium: 'bg-amber-100 text-amber-700',
+  high: 'bg-orange-100 text-orange-700',
+  critical: 'bg-rose-100 text-rose-700',
+};
+
+const STATUS_STYLES: Record<string, string> = {
+  reported: 'bg-sky-100 text-sky-700',
+  investigating: 'bg-amber-100 text-amber-700',
+  resolved: 'bg-emerald-100 text-emerald-700',
+  dismissed: 'bg-slate-100 text-slate-500',
+};
+
+export default function AdminIncidentsPage() {
+  const [incidents, setIncidents] = useState<Incident[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [updating, setUpdating] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchIncidents();
+  }, []);
+
+  async function fetchIncidents() {
+    try {
+      const res = await fetch('/api/incidents');
+      const data = await res.json();
+      if (data.data) setIncidents(data.data);
+    } catch (err) {
+      console.error(err);
+    }
+    setLoading(false);
+  }
+
+  async function updateIncident(id: string, updates: Partial<Incident>) {
+    setUpdating(id);
+    try {
+      const res = await fetch('/api/incidents', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, ...updates }),
+      });
+      const data = await res.json();
+      if (data.data) {
+        setIncidents(prev => prev.map(i => i.id === id ? { ...i, ...data.data } : i));
+      }
+    } catch (err) {
+      console.error(err);
+    }
+    setUpdating(null);
+  }
+
+  if (loading) {
+    return (
+      <div className="animate-pulse">
+        <div className="h-7 bg-slate-200 rounded-lg w-48 mb-6" />
+        <div className="h-64 bg-slate-100 rounded-xl" />
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <div className="mb-6">
+        <h1 className="text-xl md:text-2xl font-heading font-extrabold text-primary tracking-tight">
+          Incident Reports
+        </h1>
+        <p className="text-slate-400 text-sm mt-1">
+          Mudarabah compliance — track, investigate, and resolve farm incidents. Negligence must be determined for Mudarib liability.
+        </p>
+      </div>
+
+      {/* Stats */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        {[
+          { label: 'Total', value: incidents.length, icon: 'report', color: 'text-slate-600' },
+          { label: 'Investigating', value: incidents.filter(i => i.status === 'investigating').length, icon: 'search', color: 'text-amber-600' },
+          { label: 'Resolved', value: incidents.filter(i => i.status === 'resolved').length, icon: 'check_circle', color: 'text-emerald-600' },
+          { label: 'Negligence Found', value: incidents.filter(i => i.negligence_determined).length, icon: 'gavel', color: 'text-rose-600' },
+        ].map(s => (
+          <div key={s.label} className="bg-white rounded-xl border border-slate-200/80 p-4 shadow-sm">
+            <div className="flex items-center gap-2 mb-2">
+              <span className={`material-symbols-outlined text-lg ${s.color}`}>{s.icon}</span>
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{s.label}</span>
+            </div>
+            <p className="font-mono text-2xl font-extrabold text-primary">{s.value}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Incidents List */}
+      {incidents.length === 0 ? (
+        <div className="bg-white rounded-xl border border-slate-200/80 p-12 text-center">
+          <span className="material-symbols-outlined text-slate-300 text-5xl mb-4">check_circle</span>
+          <h3 className="text-lg font-bold text-primary mb-2">No Incidents</h3>
+          <p className="text-sm text-slate-400">All flocks are operating normally. No incidents have been reported.</p>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {incidents.map(incident => (
+            <div key={incident.id} className="bg-white rounded-xl border border-slate-200/80 p-5 shadow-sm">
+              <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-3 mb-4">
+                <div>
+                  <h3 className="text-base font-bold text-primary">{incident.title}</h3>
+                  <p className="text-xs text-slate-400 mt-1">
+                    Flock: {incident.flock_id.slice(0, 8)} • {new Date(incident.created_at).toLocaleDateString()}
+                  </p>
+                </div>
+                <div className="flex gap-2 flex-wrap">
+                  <span className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full ${SEVERITY_STYLES[incident.severity]}`}>
+                    {incident.severity}
+                  </span>
+                  <span className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full ${STATUS_STYLES[incident.status]}`}>
+                    {incident.status}
+                  </span>
+                  {incident.negligence_determined && (
+                    <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-rose-100 text-rose-700">
+                      ⚠ Negligence
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              <p className="text-sm text-slate-600 leading-relaxed mb-4">{incident.description}</p>
+
+              {incident.investigation_notes && (
+                <div className="bg-amber-50 border border-amber-100 rounded-lg p-3 mb-4">
+                  <p className="text-[10px] font-bold text-amber-700 uppercase tracking-wider mb-1">Investigation Notes</p>
+                  <p className="text-xs text-amber-800">{incident.investigation_notes}</p>
+                </div>
+              )}
+
+              {incident.resolution && (
+                <div className="bg-emerald-50 border border-emerald-100 rounded-lg p-3 mb-4">
+                  <p className="text-[10px] font-bold text-emerald-700 uppercase tracking-wider mb-1">Resolution</p>
+                  <p className="text-xs text-emerald-800">{incident.resolution}</p>
+                </div>
+              )}
+
+              {/* Admin Actions */}
+              {incident.status !== 'resolved' && incident.status !== 'dismissed' && (
+                <div className="flex flex-wrap gap-2 pt-3 border-t border-slate-100">
+                  {incident.status === 'reported' && (
+                    <button
+                      onClick={() => updateIncident(incident.id, { status: 'investigating' })}
+                      disabled={updating === incident.id}
+                      className="px-3 py-1.5 bg-amber-500 text-white rounded-lg text-xs font-bold hover:bg-amber-600 transition-colors disabled:opacity-50"
+                    >
+                      Begin Investigation
+                    </button>
+                  )}
+                  {incident.status === 'investigating' && (
+                    <>
+                      <button
+                        onClick={() => {
+                          const notes = prompt('Enter investigation findings:');
+                          if (notes) updateIncident(incident.id, { investigation_notes: notes });
+                        }}
+                        disabled={updating === incident.id}
+                        className="px-3 py-1.5 bg-sky-500 text-white rounded-lg text-xs font-bold hover:bg-sky-600 transition-colors disabled:opacity-50"
+                      >
+                        Add Notes
+                      </button>
+                      <button
+                        onClick={() => {
+                          const resolution = prompt('Enter resolution summary:');
+                          if (resolution) updateIncident(incident.id, { status: 'resolved', resolution, negligence_determined: false });
+                        }}
+                        disabled={updating === incident.id}
+                        className="px-3 py-1.5 bg-emerald-500 text-white rounded-lg text-xs font-bold hover:bg-emerald-600 transition-colors disabled:opacity-50"
+                      >
+                        Resolve (No Negligence)
+                      </button>
+                      <button
+                        onClick={() => {
+                          const resolution = prompt('Enter resolution (negligence confirmed):');
+                          if (resolution) updateIncident(incident.id, { status: 'resolved', resolution, negligence_determined: true });
+                        }}
+                        disabled={updating === incident.id}
+                        className="px-3 py-1.5 bg-rose-500 text-white rounded-lg text-xs font-bold hover:bg-rose-600 transition-colors disabled:opacity-50"
+                      >
+                        Resolve (Negligence Confirmed)
+                      </button>
+                    </>
+                  )}
+                  <button
+                    onClick={() => updateIncident(incident.id, { status: 'dismissed' })}
+                    disabled={updating === incident.id}
+                    className="px-3 py-1.5 bg-slate-100 text-slate-600 rounded-lg text-xs font-bold hover:bg-slate-200 transition-colors disabled:opacity-50"
+                  >
+                    Dismiss
+                  </button>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}

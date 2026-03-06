@@ -29,7 +29,7 @@ const investmentServices = [
   },
   {
     title: "Profit Distribution",
-    desc: "Profits from each successful flock cycle are split 70/30. The investors collectively receive 70% of the flock's profits, and FlockFund receives 30% for operational management.",
+    desc: "Under the Mudarabah Al-Muqayyada model, net profit (revenue minus returned capital and verified costs) is split 70/30 — 70% to FlockFund (Mudarib) and 30% to investors (Rabb-ul-Maal). Capital is returned to investors first before any profit is calculated.",
   },
   {
     title: "Reinvestment Rule",
@@ -152,27 +152,22 @@ export default function TermsPage() {
             <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-accent/10 rounded-full blur-[80px] pointer-events-none" />
             <h2 className="font-heading text-2xl font-bold text-white mb-6 relative z-10 flex items-center gap-3">
               <span className="material-symbols-outlined text-accent">
-                policy
+                gavel
               </span>
-              Reserve Fund
+              Mudarabah Loss Liability
             </h2>
             <ul className="space-y-4 text-white/70 text-sm relative z-10">
               <li className="flex items-start gap-3">
                 <span className="text-accent mt-1">•</span>
-                <strong>8% of FlockFund's profit share</strong> from each flock
-                is set aside in a Reserve Fund.
+                Under Mudarabah rules, <strong>financial loss from normal business operations</strong> (disease, market fluctuations, natural events) is borne entirely by the investor (Rabb-ul-Maal).
               </li>
               <li className="flex items-start gap-3">
                 <span className="text-accent mt-1">•</span>
-                The fund provides <strong>partial compensation</strong> in case
-                of catastrophic losses (like disease outbreaks or government
-                culling) — it does not guarantee full recovery.
+                If loss is caused by <strong>FlockFund&apos;s negligence or breach of protocols</strong>, FlockFund (Mudarib) is liable to compensate investors for their full capital.
               </li>
               <li className="flex items-start gap-3">
                 <span className="text-accent mt-1">•</span>
-                Once the fund reaches 20% of total active investments, excess is
-                distributed as bonus birds to farm workers and as incentives to
-                badged investors.
+                Negligence includes: failure to follow biosecurity protocols, ignoring veterinary advice, misappropriation of funds, or gross mismanagement.
               </li>
             </ul>
           </section>

@@ -29,7 +29,7 @@ const steps = [
   {
     num: "04",
     title: "Sale & Distribution",
-    desc: "At approximately Day 28, birds are sold to our network of buyers. Revenue is split 70% to investors and 30% to operations. Your share is credited directly to your wallet.",
+    desc: "At approximately Day 28, birds are sold to our network of buyers. Under the Mudarabah model, your capital is returned first, then net profit is split — 70% to FlockFund (Mudarib) and 30% to investors (Rabb-ul-Maal). Your share is credited directly to your wallet.",
     icon: "account_balance",
     color: "from-violet-500 to-purple-600",
   },
@@ -76,11 +76,11 @@ const faqs = [
   },
   {
     q: "Is my profit guaranteed?",
-    a: "While we provide a market floor guarantee of ₦8,000/bird via processor contracts, all agricultural investments carry risk. We mitigate this through professional veterinary oversight and biosecurity.",
+    a: "No. Under the Mudarabah Al-Muqayyada model, returns are based on actual farm performance. Your capital may be at risk. Financial loss from normal business operations is borne by investors. FlockFund is liable only if negligence is proven.",
   },
   {
-    q: "What is the 70/30 profit split?",
-    a: "After the birds are sold and the initial capital (bird cost) is accounted for, the remaining profit is split. 70% goes to you (the investor), and 30% goes to FlockFund to cover farm management and growth.",
+    q: "What is the 70/30 Mudarabah profit split?",
+    a: "After the birds are sold, your capital is returned first. Then verified costs (feed, drugs, maintenance, tax) are deducted. The remaining net profit is split: 70% to FlockFund (Mudarib) for operational management, and 30% to you (Rabb-ul-Maal / Investor).",
   },
   {
     q: "How do I withdraw my earnings?",
@@ -99,7 +99,7 @@ export default function HowToInvestPage() {
       try {
         const { createClient } = await import("@/lib/supabase/client");
         const supabase = createClient();
-        
+
         // 1. Fetch Latest Active Flock for specific pricing
         const { data: flockData } = await supabase
           .from("flocks")
@@ -110,8 +110,11 @@ export default function HowToInvestPage() {
           .maybeSingle();
 
         // 2. Fetch Global Defaults
-        const { data: globalData } = await supabase.from("settings").select("*").single();
-        
+        const { data: globalData } = await supabase
+          .from("settings")
+          .select("*")
+          .single();
+
         const merged = {
           ...flockData,
           ...globalData,
@@ -134,17 +137,41 @@ export default function HowToInvestPage() {
   const floorPrice = settings?.market_floor_price || 8000;
   const investorShare = settings?.investor_share_percentage || 70;
 
-  const dynamicSteps = steps.map(s => {
-    if (s.num === "02") return { ...s, desc: `Browse active flocks, choose your bird count (units of ${minBirds}, ${minBirds * 2}, or ${minBirds * 3}), and pay securely via Flutterwave, Paystack, or PayPal. Your investment is active once payment is confirmed.` };
-    if (s.num === "04") return { ...s, desc: `At approximately Day ${cycleDuration}, birds are sold to our network of buyers. Revenue is split ${investorShare}% to investors and ${100 - investorShare}% to operations. Your share is credited directly to your wallet.` };
+  const dynamicSteps = steps.map((s) => {
+    if (s.num === "02")
+      return {
+        ...s,
+        desc: `Browse active flocks, choose your bird count (units of ${minBirds}, ${minBirds * 2}, or ${minBirds * 3}), and pay securely via Flutterwave, Paystack, or PayPal. Your investment is active once payment is confirmed.`,
+      };
+    if (s.num === "04")
+      return {
+        ...s,
+        desc: `At approximately Day ${cycleDuration}, birds are sold to our network of buyers. Under the Mudarabah model, your capital is returned first, then net profit is split — ${100 - investorShare}% to FlockFund (Mudarib) and ${investorShare}% to investors (Rabb-ul-Maal). Your share is credited directly to your wallet.`,
+      };
     return s;
   });
 
   const dynamicPricing = [
-    { item: "Day-Old Chick (DOC)", cost: `₦${Math.round(costPerBird * 0.486).toLocaleString()}`, note: "Sourced from top-tier hatcheries" },
-    { item: "Full-Cycle Feed", cost: `₦${Math.round(costPerBird * 0.324).toLocaleString()}`, note: "Optimized high-protein broiler feed" },
-    { item: "Vet Care & Bio-security", cost: `₦${Math.round(costPerBird * 0.108).toLocaleString()}`, note: "Vaccines, medication, and sanitation" },
-    { item: "Farm Management", cost: `₦${Math.round(costPerBird * 0.082).toLocaleString()}`, note: "Professional keeper & manager overhead" },
+    {
+      item: "Day-Old Chick (DOC)",
+      cost: `₦${Math.round(costPerBird * 0.486).toLocaleString()}`,
+      note: "Sourced from top-tier hatcheries",
+    },
+    {
+      item: "Full-Cycle Feed",
+      cost: `₦${Math.round(costPerBird * 0.324).toLocaleString()}`,
+      note: "Optimized high-protein broiler feed",
+    },
+    {
+      item: "Vet Care & Bio-security",
+      cost: `₦${Math.round(costPerBird * 0.108).toLocaleString()}`,
+      note: "Vaccines, medication, and sanitation",
+    },
+    {
+      item: "Farm Management",
+      cost: `₦${Math.round(costPerBird * 0.082).toLocaleString()}`,
+      note: "Professional keeper & manager overhead",
+    },
   ];
 
   const dynamicFaqs = [
@@ -161,8 +188,8 @@ export default function HowToInvestPage() {
       a: `While we provide a market floor guarantee of ₦${floorPrice.toLocaleString()}/bird via processor contracts, all agricultural investments carry risk. We mitigate this through professional veterinary oversight and biosecurity.`,
     },
     {
-      q: "What is the 70/30 profit split?",
-      a: `After the birds are sold and the initial capital (bird cost) is accounted for, the remaining profit is split. ${investorShare}% goes to you (the investor), and ${100 - investorShare}% goes to FlockFund to cover farm management and growth.`,
+      q: "What is the 70/30 Mudarabah profit split?",
+      a: `After the birds are sold, your capital is returned first. Then verified costs are deducted. The remaining net profit is split: ${100 - investorShare}% to FlockFund (Mudarib) for operational management, and ${investorShare}% to you (Rabb-ul-Maal / Investor).`,
     },
     {
       q: "How do I withdraw my earnings?",
@@ -301,7 +328,9 @@ export default function HowToInvestPage() {
               <p className="text-white font-heading font-extrabold text-lg">
                 Total Unit Cost
               </p>
-              <p className="text-accent font-mono text-2xl font-bold">₦{costPerBird.toLocaleString()}</p>
+              <p className="text-accent font-mono text-2xl font-bold">
+                ₦{costPerBird.toLocaleString()}
+              </p>
             </div>
           </div>
           <p className="text-center text-white/30 text-[10px] uppercase font-bold tracking-widest mt-6">

@@ -1,0 +1,135 @@
+import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@supabase/supabase-js";
+
+// GET /api/incidents?flock_id=xxx
+export async function GET(req: NextRequest) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const flockId = searchParams.get("flock_id");
+
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+
+    let query = supabase
+      .from("incident_reports")
+      .select("*, profiles:reported_by(full_name, role), flocks:flock_id(name)")
+      .order("created_at", { ascending: false });
+
+    if (flockId) {
+      query = query.eq("flock_id", flockId);
+    }
+
+    const { data, error } = await query;
+    if (error) throw error;
+
+    return NextResponse.json({ success: true, data: data || [] });
+  } catch (error) {
+    console.error("Fetch incidents error:", error);
+    return NextResponse.json(
+      { error: "Failed to fetch incidents" },
+      { status: 500 }
+    );
+  }
+}
+
+// POST /api/incidents
+// Body: { flock_id, description, cause, reported_by }
+export async function POST(req: NextRequest) {
+  try {
+    const body = await req.json();
+    const { flock_id, description, cause, reported_by } = body;
+
+    if (!flock_id || !description || !cause || !reported_by) {
+      return NextResponse.json(
+        { error: "Missing required fields: flock_id, description, cause, reported_by" },
+        { status: 400 }
+      );
+    }
+
+    const validCauses = ["disease", "natural_disaster", "negligence", "mismanagement", "other"];
+    if (!validCauses.includes(cause)) {
+      return NextResponse.json(
+        { error: `Invalid cause. Must be one of: ${validCauses.join(", ")}` },
+        { status: 400 }
+      );
+    }
+
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+
+    const { data, error } = await supabase
+      .from("incident_reports")
+      .insert({
+        flock_id,
+        description,
+        cause,
+        reported_by,
+        incident_date: new Date().toISOString().split("T")[0],
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    return NextResponse.json({ success: true, data });
+  } catch (error) {
+    console.error("Create incident error:", error);
+    return NextResponse.json(
+      { error: "Failed to create incident report" },
+      { status: 500 }
+    );
+  }
+}
+
+// PATCH /api/incidents
+// Body: { id, investigation_notes?, findings?, negligence_found?, compensation_required?, resolved? }
+export async function PATCH(req: NextRequest) {
+  try {
+    const body = await req.json();
+    const { id, ...updates } = body;
+
+    if (!id) {
+      return NextResponse.json(
+        { error: "Missing incident report id" },
+        { status: 400 }
+      );
+    }
+
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+
+    const payload: Record<string, unknown> = {};
+    if (updates.investigation_notes !== undefined)
+      payload.investigation_notes = updates.investigation_notes;
+    if (updates.findings !== undefined) payload.findings = updates.findings;
+    if (updates.negligence_found !== undefined)
+      payload.negligence_found = updates.negligence_found;
+    if (updates.compensation_required !== undefined)
+      payload.compensation_required = updates.compensation_required;
+    if (updates.resolved)
+      payload.resolved_at = new Date().toISOString();
+
+    const { data, error } = await supabase
+      .from("incident_reports")
+      .update(payload)
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    return NextResponse.json({ success: true, data });
+  } catch (error) {
+    console.error("Update incident error:", error);
+    return NextResponse.json(
+      { error: "Failed to update incident report" },
+      { status: 500 }
+    );
+  }
+}

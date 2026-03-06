@@ -2,15 +2,23 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
 // POST /api/payments/initiate
-// Body: { investor_id, birds_count, gateway: 'flutterwave', email, flock_id }
+// Body: { investor_id, birds_count, gateway: 'flutterwave', email, flock_id, mudarabah_agreement_id }
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { investor_id, birds_count, gateway, flock_id, callback_url } = body;
+    const { investor_id, birds_count, gateway, flock_id, callback_url, mudarabah_agreement_id } = body;
 
     if (!investor_id || !birds_count) {
       return NextResponse.json(
         { error: "Missing required fields" },
+        { status: 400 },
+      );
+    }
+
+    // Mudarabah agreement is required for new investments
+    if (!mudarabah_agreement_id) {
+      return NextResponse.json(
+        { error: "Mudarabah agreement must be signed before investing" },
         { status: 400 },
       );
     }
@@ -28,13 +36,30 @@ export async function POST(req: NextRequest) {
       process.env.SUPABASE_SERVICE_ROLE_KEY!,
     );
 
+    // Verify the agreement exists
+    const { data: agreement } = await supabase
+      .from("mudarabah_agreements")
+      .select("id")
+      .eq("id", mudarabah_agreement_id)
+      .eq("investor_id", investor_id)
+      .single();
+
+    if (!agreement) {
+      return NextResponse.json(
+        { error: "Invalid or missing Mudarabah agreement" },
+        { status: 400 },
+      );
+    }
+
     // Get cost per bird from settings
     const { data: settings } = await supabase
       .from("settings")
-      .select("cost_per_bird")
+      .select("cost_per_bird, investor_share_percentage, flockfund_share_percentage")
       .single();
     const costPerBird = settings?.cost_per_bird || 4250;
     const amount = birds_count * costPerBird;
+    const investorRatio = settings?.investor_share_percentage ?? 30;
+    const mudaribRatio = settings?.flockfund_share_percentage ?? 70;
 
     // Get an active flock if not specified
     let activeFlock = flock_id;
@@ -55,7 +80,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Create pending investment — write both old and new columns
+    // Create pending investment with Mudarabah fields
     const { data: investment, error: invError } = await supabase
       .from("investments")
       .insert({
@@ -64,6 +89,10 @@ export async function POST(req: NextRequest) {
         birds_owned: birds_count,
         cost_paid: amount,
         amount_invested: amount,
+        capital_amount: amount,
+        mudarabah_agreement_id,
+        profit_ratio_investor: investorRatio,
+        profit_ratio_mudarib: mudaribRatio,
         status: "pending",
         round_count: 0,
         payment_gateway_used: "flutterwave",
@@ -79,6 +108,12 @@ export async function POST(req: NextRequest) {
         { status: 500 },
       );
     }
+
+    // Link the agreement to the investment
+    await supabase
+      .from("mudarabah_agreements")
+      .update({ investment_id: investment.id })
+      .eq("id", mudarabah_agreement_id);
 
     // Generate checkout URL
     let checkoutUrl = "";

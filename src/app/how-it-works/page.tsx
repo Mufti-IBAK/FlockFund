@@ -65,7 +65,7 @@ const steps = [
     num: "05",
     title: "Profit Distribution & Reinvestment",
     description:
-      "After the sale, the system automatically computes profits using the transparent 70/30 model — 70% to investors, 30% to FlockFund operations. Your share is credited to your wallet, where you can reinvest for compounding growth or withdraw to your bank account.",
+      "After the sale, under the Mudarabah Al-Muqayyada model, your capital is returned first. Verified costs are deducted, and the remaining net profit is split 70/30 — 70% to FlockFund (Mudarib), 30% to investors (Rabb-ul-Maal). Your share is credited to your wallet, where you can reinvest for compounding growth or withdraw to your bank account.",
     details: [
       "Profit = (Revenue − Cost) × 70% — calculated automatically",
       "Credited directly to your FlockFund wallet",
@@ -242,7 +242,7 @@ export default function HowItWorks() {
     },
     {
       ...steps[4],
-      description: `After the sale, the system automatically computes profits using the transparent ${investorShare}/${100 - investorShare} model — ${investorShare}% to investors, ${100 - investorShare}% to FlockFund operations. Your share is credited to your wallet, where you can reinvest for compounding growth or withdraw to your bank account.`,
+      description: `After the sale, under the Mudarabah model, your capital is returned first. Verified costs are deducted, and the remaining net profit is split ${100 - investorShare}/${investorShare} — ${100 - investorShare}% to FlockFund (Mudarib), ${investorShare}% to investors (Rabb-ul-Maal). Your share is credited to your wallet, where you can reinvest for compounding growth or withdraw to your bank account.`,
       details: [
         `Profit = (Revenue − Cost) × ${investorShare}% — calculated automatically`,
         "Credited directly to your FlockFund wallet",

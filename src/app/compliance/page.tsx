@@ -194,9 +194,9 @@ export default function CompliancePage() {
                   Tax Compliance
                 </h3>
                 <p className="text-sm text-slate-500 leading-relaxed">
-                  FlockFund pays all applicable corporate taxes on its 30%
-                  share. Individual investors are responsible for reporting and
-                  paying taxes on their 70% profit share based on their
+                  FlockFund pays all applicable corporate taxes on its 70%
+                  Mudarib share. Individual investors are responsible for reporting and
+                  paying taxes on their 30% profit share based on their
                   jurisdiction.
                 </p>
               </div>
@@ -211,9 +211,9 @@ export default function CompliancePage() {
           <p className="text-sm text-slate-500 max-w-2xl mx-auto leading-relaxed mb-6">
             Our marketing is honest and transparent. We never make exaggerated
             claims, guarantee specific returns, or target vulnerable
-            populations. We maintain continuous veterinary oversight,
-            biosecurity protocols, and our 8% Reserve Fund margin to manage
-            systemic risk.
+            populations. Under the Mudarabah Al-Muqayyada model, we maintain
+            continuous veterinary oversight, biosecurity protocols, and
+            negligence-based loss accountability to manage systemic risk.
           </p>
           <p className="text-xs font-bold text-slate-400 uppercase tracking-widest border-t border-slate-100 pt-6">
             * These documents are for informational purposes. Investors should

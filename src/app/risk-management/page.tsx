@@ -192,14 +192,16 @@ export default function RiskManagementPage() {
               </div>
               <div>
                 <h3 className="text-lg font-bold text-primary mb-2 border-l-4 border-sky-500 pl-3">
-                  The FlockFund Reserve Fund
+                  Mudarabah Negligence Accountability
                 </h3>
                 <p className="text-sm text-slate-500 leading-relaxed">
-                  8% of FlockFund's profit share from every completed flock is
-                  allocated to a buffer. It protects principal in case of
-                  catastrophic loss (e.g. {">"} 15% mortality or culling).
-                  Capped at 20% of total active investments, with excess
-                  distributed as bonus birds to investors.
+                  Under the Mudarabah Al-Muqayyada model, financial loss from
+                  normal business operations is borne by the investor
+                  (Rabb-ul-Maal). However, if loss is caused by FlockFund&apos;s
+                  negligence — failure to follow biosecurity protocols, ignoring
+                  veterinary advice, or mismanagement — FlockFund (Mudarib) is
+                  liable to compensate the investor&apos;s full capital. All
+                  incidents are investigated and documented transparently.
                 </p>
               </div>
             </div>
@@ -281,7 +283,7 @@ export default function RiskManagementPage() {
               {
                 day: "Day 11",
                 label: "Assessment",
-                desc: "Reserve Fund calculated (e.g., covers 50% losses). FlockFund waives profit share for next 2 cycles as goodwill.",
+                desc: "Under Mudarabah rules, financial loss is assessed. If caused by negligence, FlockFund bears the loss. Otherwise, investors bear the financial loss. FlockFund may waive profit share for next cycles as goodwill.",
               },
               {
                 day: "Day 25",
@@ -323,15 +325,15 @@ export default function RiskManagementPage() {
             {[
               {
                 q: "Can I lose all my money?",
-                a: "Yes, it is possible. Poultry involves living creatures subject to disease. However, between strict biosecurity, veterinary oversight, the Reserve Fund, and diversification, we drastically reduce this likelihood.",
+                a: "Yes, it is possible. Under the Mudarabah model, investors bear financial loss from normal business operations (disease, natural disasters, market fluctuations). However, strict biosecurity, veterinary oversight, and diversification drastically reduce this likelihood.",
               },
               {
-                q: "How much might the Reserve Fund cover in a disaster?",
-                a: "There is no fixed percentage. It depends on the size of the fund at the time. Currently, coverage might be 20–40%, growing over time. It provides partial, not full, protection (it is not insurance).",
+                q: "What happens if FlockFund is negligent?",
+                a: "If an incident is caused by FlockFund's negligence (failure to follow biosecurity protocols, ignoring veterinary advice, misappropriation of funds, or gross mismanagement), FlockFund is fully liable and must compensate investors for their capital. All incidents are investigated and documented transparently.",
               },
               {
-                q: "What happens if there are no disasters?",
-                a: "The fund grows until it hits a 20% cap of total active investments. Anything above that is distributed quarterly as bonus birds to active investors.",
+                q: "How is negligence determined?",
+                a: "Every adverse event triggers a formal incident report. Our investigation process examines whether established protocols were followed. Findings are documented and shared with affected investors. If negligence is confirmed, FlockFund compensates the investor's full capital.",
               },
             ].map((faq, i) => (
               <details

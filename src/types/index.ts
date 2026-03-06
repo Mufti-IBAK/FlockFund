@@ -4,7 +4,7 @@
 
 // ----- database row types (mirror schema) -----
 
-export type UserRole = "admin" | "farm_manager" | "keeper" | "investor";
+export type UserRole = "admin" | "farm_manager" | "keeper" | "investor" | "accountant";
 
 export interface Profile {
   id: string;
@@ -63,6 +63,11 @@ export interface Investment {
   payment_transaction_id: string;
   blockchain_tx_hash: string | null;
   created_at: string;
+  // Mudarabah fields
+  capital_amount: number | null;
+  mudarabah_agreement_id: string | null;
+  profit_ratio_investor: number;
+  profit_ratio_mudarib: number;
 }
 
 export interface FarmReport {
@@ -108,6 +113,12 @@ export interface ProfitCycle {
   investor_pool: number;
   flockfund_share: number;
   calculated_at: string;
+  // Mudarabah capital-first fields
+  total_capital_returned: number;
+  total_costs_deducted: number;
+  net_profit: number;
+  investor_profit_share: number;
+  mudarib_profit_share: number;
 }
 
 export interface InvestorPayout {
@@ -210,5 +221,52 @@ export interface Vaccination {
   scheduled_date: string;
   administered_date: string | null;
   notes: string | null;
+  created_at: string;
+}
+
+// ===== Mudarabah-specific types =====
+
+export interface MudarabahAgreement {
+  id: string;
+  investment_id: string | null;
+  investor_id: string;
+  agreement_text: string;
+  ip_address: string | null;
+  user_agent: string | null;
+  signed_at: string;
+  restricted_business: string;
+  profit_share_agreed: string;
+  loss_liability: string;
+  negligence_definition: string | null;
+}
+
+export interface FlockCost {
+  id: string;
+  flock_id: string;
+  cost_category: 'feed' | 'drugs' | 'maintenance' | 'tax' | 'stamp_duty' | 'labor' | 'overhead' | 'other';
+  amount: number;
+  description: string | null;
+  incurred_date: string;
+  receipt_url: string | null;
+  verified: boolean;
+  verified_by: string | null;
+  verified_at: string | null;
+  created_at: string;
+}
+
+export type IncidentCause = 'disease' | 'natural_disaster' | 'negligence' | 'mismanagement' | 'other';
+
+export interface IncidentReport {
+  id: string;
+  flock_id: string;
+  incident_date: string;
+  description: string;
+  cause: IncidentCause;
+  investigation_notes: string | null;
+  findings: string | null;
+  negligence_found: boolean;
+  reported_by: string;
+  resolved_at: string | null;
+  compensation_required: number;
   created_at: string;
 }

@@ -45,6 +45,10 @@ export default function InvestPage() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [email, setEmail] = useState("");
+  const [agreementAccepted, setAgreementAccepted] = useState(false);
+  const [agreementId, setAgreementId] = useState<string | null>(null);
+  const [signingAgreement, setSigningAgreement] = useState(false);
+  const [showFullAgreement, setShowFullAgreement] = useState(false);
   const pageRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -104,7 +108,38 @@ export default function InvestPage() {
 
   const totalCost = birdCount * costPerBird;
 
+  async function handleSignAgreement() {
+    setSigningAgreement(true);
+    try {
+      const { createClient } = await import("@/lib/supabase/client");
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const res = await fetch("/api/mudarabah/agreement", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ investor_id: user.id }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setAgreementId(data.agreement_id);
+        setAgreementAccepted(true);
+      } else {
+        alert("Failed to sign agreement. Please try again.");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Failed to sign agreement.");
+    }
+    setSigningAgreement(false);
+  }
+
   async function handleInvest() {
+    if (!agreementAccepted || !agreementId) {
+      alert("You must sign the Mudarabah agreement before investing.");
+      return;
+    }
     const f = flocks.find(fl => fl.id === selectedFlock);
     const min = f?.min_birds_per_investment || 10;
     const max = f?.current_count || 1000;
@@ -135,6 +170,7 @@ export default function InvestPage() {
           gateway: "flutterwave",
           email: user.email,
           flock_id: selectedFlock,
+          mudarabah_agreement_id: agreementId,
         }),
       });
 
@@ -171,7 +207,7 @@ export default function InvestPage() {
           Invest in a Flock
         </h1>
         <p className="text-slate-400 text-sm mt-1">
-          Choose your flock, select bird count, and pay securely
+          Mudarabah Al-Muqayyada — Restricted Islamic Investment in Broiler Farming
         </p>
       </div>
 
@@ -342,13 +378,13 @@ export default function InvestPage() {
             </div>
           </div>
 
-          {/* Cost Breakdown — Transparency */}
+          {/* Cost Breakdown — Mudarabah Transparency */}
           {selectedFlock && (
             <div className="fade-in bg-white rounded-xl border border-slate-200/80 p-4 md:p-5">
               <div className="flex items-center gap-2 mb-4">
                 <span className="material-symbols-outlined text-accent text-lg">info</span>
                 <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
-                  How your money is spent (Per Bird)
+                  Estimated Cost Per Bird (Mudarabah Transparency)
                 </label>
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
@@ -371,9 +407,129 @@ export default function InvestPage() {
                 ))}
               </div>
               <p className="text-[9px] text-slate-400 mt-4 leading-relaxed">
-                * This breakdown represents the direct costs incurred to raise a single bird to maturity. 
-                Transparency is our core value; your investment directly funds these operational essentials.
+                * These are estimated costs. Under Mudarabah rules, <strong>actual verified costs</strong> will be
+                deducted from revenue before profit calculation. All costs are transparent and visible on your dashboard.
               </p>
+            </div>
+          )}
+
+          {/* Mudarabah Agreement — Required before payment */}
+          {selectedFlock && (
+            <div className="fade-in bg-white rounded-xl border border-slate-200/80 p-4 md:p-5">
+              <div className="flex items-center gap-2 mb-4">
+                <span className="material-symbols-outlined text-emerald-600 text-lg">gavel</span>
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                  Mudarabah Al-Muqayyada Agreement
+                </label>
+              </div>
+
+              {/* Agreement Summary */}
+              <div className="bg-emerald-50/50 border border-emerald-100 rounded-lg p-4 mb-4">
+                <h4 className="text-xs font-bold text-emerald-800 mb-3">Summary of Terms</h4>
+                <ul className="space-y-2 text-[11px] text-emerald-700">
+                  <li className="flex items-start gap-2">
+                    <span className="material-symbols-outlined text-xs mt-0.5">check_circle</span>
+                    <span><strong>Business Scope:</strong> Restricted to broiler chicken farming only (Al-Muqayyada)</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="material-symbols-outlined text-xs mt-0.5">check_circle</span>
+                    <span><strong>Profit Ratio:</strong> 70% FlockFund (Mudarib) / 30% Investor (Rabb-ul-Maal) of net profit</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="material-symbols-outlined text-xs mt-0.5">check_circle</span>
+                    <span><strong>Capital Priority:</strong> Your capital is returned first before any profit is calculated</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="material-symbols-outlined text-xs mt-0.5">warning</span>
+                    <span><strong>Loss Liability:</strong> Financial loss from normal operations is borne by the investor. FlockFund is liable only if negligence is proven</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="material-symbols-outlined text-xs mt-0.5">info</span>
+                    <span><strong>No Guaranteed Returns:</strong> Returns depend on actual farm performance. Capital may be at risk</span>
+                  </li>
+                </ul>
+              </div>
+
+              {/* Full Agreement Toggle */}
+              <button
+                onClick={() => setShowFullAgreement(!showFullAgreement)}
+                className="text-[10px] font-bold text-accent flex items-center gap-1 mb-3 hover:underline"
+              >
+                <span className="material-symbols-outlined text-xs">
+                  {showFullAgreement ? "expand_less" : "expand_more"}
+                </span>
+                {showFullAgreement ? "Hide Full Agreement" : "View Full Agreement"}
+              </button>
+              {showFullAgreement && (
+                <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 mb-4 max-h-64 overflow-y-auto">
+                  <pre className="text-[10px] text-slate-600 whitespace-pre-wrap font-sans leading-relaxed">
+{`MUDARABAH AL-MUQAYYADA (RESTRICTED MUDARABAH) AGREEMENT
+
+This agreement is entered into between:
+1. The RABB-UL-MAAL (Capital Provider / Investor)
+2. The MUDARIB (Fund Manager / FlockFund International)
+
+TERMS AND CONDITIONS:
+
+1. BUSINESS SCOPE (Al-Muqayyada Restriction)
+   The Mudarib shall use the invested capital exclusively for broiler chicken farming operations.
+
+2. PROFIT DISTRIBUTION
+   Net profit (revenue minus capital and verified costs) shall be distributed as follows:
+   - 70% to the Mudarib (FlockFund)
+   - 30% to the Rabb-ul-Maal (Investor)
+
+3. LOSS LIABILITY
+   Financial loss from normal operations is borne by the Rabb-ul-Maal (Investor).
+   The Mudarib is liable only if negligence or breach of protocols is proven.
+
+4. DEFINITION OF NEGLIGENCE
+   Includes: failure to follow biosecurity protocols, ignoring veterinary advice,
+   misappropriation of funds, investing in prohibited activities, gross mismanagement.
+
+5. CAPITAL PRIORITY
+   Capital must be returned before any profit calculation.
+
+6. COST TRANSPARENCY
+   All costs are itemized, verified, and visible to the Investor.
+
+7. NO GUARANTEED RETURNS
+   Returns depend entirely on actual farm performance.
+
+8. DISPUTE RESOLUTION
+   Disputes resolved through arbitration per Islamic commercial jurisprudence.`}
+                  </pre>
+                </div>
+              )}
+
+              {/* Agreement Acceptance */}
+              {agreementAccepted ? (
+                <div className="flex items-center gap-2 p-3 bg-emerald-50 border border-emerald-200 rounded-lg">
+                  <span className="material-symbols-outlined text-emerald-600">verified</span>
+                  <div>
+                    <p className="text-xs font-bold text-emerald-700">Agreement Signed</p>
+                    <p className="text-[9px] text-emerald-500">Your digital signature has been recorded</p>
+                  </div>
+                </div>
+              ) : (
+                <button
+                  onClick={handleSignAgreement}
+                  disabled={signingAgreement}
+                  className="w-full py-3 bg-emerald-600 text-white rounded-lg font-bold text-xs uppercase tracking-wider hover:bg-emerald-700 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {signingAgreement ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      Signing...
+                    </>
+                  ) : (
+                    <>
+                      <span className="material-symbols-outlined text-sm">draw</span>
+                      I Accept — Sign Mudarabah Agreement
+                    </>
+                  )}
+                </button>
+              )}
             </div>
           )}
         </div>
@@ -412,7 +568,7 @@ export default function InvestPage() {
 
             <button
               onClick={handleInvest}
-              disabled={submitting || flocks.length === 0}
+              disabled={submitting || flocks.length === 0 || !agreementAccepted}
               className="w-full py-3 md:py-3.5 bg-accent text-primary rounded-lg font-bold text-sm uppercase tracking-wider shadow-lg shadow-accent/20 hover:scale-[1.01] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {submitting ? (
@@ -420,19 +576,31 @@ export default function InvestPage() {
                   <div className="w-4 h-4 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
                   Processing...
                 </>
+              ) : !agreementAccepted ? (
+                <>
+                  <span className="material-symbols-outlined text-lg">lock</span>
+                  Sign Agreement First
+                </>
               ) : (
                 <>
                   <span className="material-symbols-outlined text-lg">
                     shopping_cart
                   </span>
-                  Pay Now
+                  Pay Now — Mudarabah Investment
                 </>
               )}
             </button>
 
             <p className="text-[10px] text-slate-300 text-center mt-3">
-              Secure payment powered by Flutterwave
+              Shariah-compliant investment • Secure payment via Flutterwave
             </p>
+
+            {/* Risk Disclaimer */}
+            <div className="mt-3 p-3 bg-amber-50/50 border border-amber-100 rounded-lg">
+              <p className="text-[9px] text-amber-700 leading-relaxed">
+                <strong>⚠️ Risk Notice:</strong> This is a Mudarabah investment. Returns are not guaranteed and depend on actual farm performance. Your capital may be at risk. Financial loss from normal business operations is borne by the investor (Rabb-ul-Maal).
+              </p>
+            </div>
           </div>
         </div>
       </div>

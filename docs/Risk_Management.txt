@@ -1,476 +1,592 @@
- FlockFund Risk Management Framework
- A Comprehensive Guide for Investors
+Based on my research into the **Mudarabah Al-Muqayyada (Restricted Mudarabah)** model, I've prepared this comprehensive technical specification document for your development team. This will guide the conversion of your existing codebase to the new Islamic investment structure.
 
 ---
 
- Table of Contents
+# FlockFund — Technical Specification Document
+## Mudarabah Al-Muqayyada (Restricted Mudarabah) Investment Model
 
-1. Introduction: Our Philosophy on Risk
-2. Understanding Agricultural Risk
-3. Our Multi‑Layer Defense System
-4. Layer 1: Prevention — Biosecurity & Veterinary Excellence
-5. Layer 2: The FlockFund Reserve Fund
-6. Layer 3: Diversification Strategy
-7. Layer 4: Legal Structure & Investor Protection
-8. What Happens in a Crisis — A Step‑by‑Step Simulation
-9. Transparency & Communication Commitment
-10. Frequently Asked Questions
-11. Glossary of Terms
+**Document Version:** 2.0
+**Date:** March 2026
+**Prepared For:** FlockFund Technical Team
+**Prepared By:** Product Management
 
 ---
 
- 1. Introduction: Our Philosophy on Risk
+## 1. Executive Summary
 
-At FlockFund, we believe that informed investors are confident investors. We do not hide from risk — we name it, study it, and build systems to manage it. Agriculture, by its nature, involves living creatures and natural processes. This brings inherent uncertainties that no amount of planning can eliminate entirely. However, what we can control is our preparation, our response, and our commitment to transparency.
+This document outlines the technical requirements for converting the FlockFund platform from its original investment model to a **Shariah-compliant Mudarabah Al-Muqayyada (Restricted Mudarabah)** structure.
 
-This document outlines every layer of protection we have built into the FlockFund model. Our goal is not to promise that losses will never happen — that would be dishonest. Our goal is to demonstrate that when challenges arise, we have a thoughtful, tested, and transparent system in place to protect your investment to the greatest extent possible.
+### Key Changes Summary
 
-We are in this together. Your success is our success. Your trust is our most valuable asset.
-
----
-
- 2. Understanding Agricultural Risk
-
-Before explaining our defenses, it is important to understand the specific risks we face. In poultry farming, risks generally fall into three categories:
-
- 2.1 Disease Outbreaks (The Most Significant Risk)
-
-| Risk Type | Description | Potential Impact |
-|-----------|-------------|------------------|
-| Endemic Diseases | Common poultry diseases (e.g., Newcastle, Gumboro, Coccidiosis) that can be managed with vaccines and good husbandry. | Usually 1–5% mortality; manageable with proper veterinary care. |
-| Epidemic Diseases | Highly contagious outbreaks (e.g., Avian Influenza, Infectious Bronchitis) that can spread rapidly. | Can cause 50–100% mortality; may trigger government culling orders. |
-| Zoonotic Concerns | Diseases that can transmit to humans (rare but serious). | May lead to quarantine, trade restrictions, and public health interventions. |
-
- 2.2 Operational Risks
-
-| Risk Type | Description | Mitigation |
-|-----------|-------------|------------|
-| Feed Quality Issues | Contaminated or nutritionally inadequate feed affecting growth. | Sourcing from reputable suppliers; regular quality testing. |
-| Equipment Failure | Brooder heaters failing, ventilation breakdown, water supply interruption. | Redundant systems; daily checks; backup power. |
-| Human Error | Mistakes in medication dosage, temperature control, or record‑keeping. | Training; standard operating procedures; supervisor oversight. |
-| Keeper Availability | Staff sickness or turnover disrupting daily care. | Cross‑training; backup personnel; documented routines. |
-
- 2.3 Market Risks
-
-| Risk Type | Description | Impact on Investors |
-|-----------|-------------|---------------------|
-| Price Fluctuation | Market price dropping below cost of production. | Reduced profits or small losses. |
-| Input Cost Increases | Sudden rise in feed or drug prices. | Affects future flocks; does not change existing investments. |
-| Sales Disruption | Market closures, transport bans, or buyer defaults. | Delayed sales; potential need for alternative channels. |
+| Area | Original Model | New Mudarabah Model |
+|------|----------------|---------------------|
+| **Reserve Fund** | 8% of FlockFund profits set aside | **REMOVED** — not permitted in Mudarabah |
+| **Profit Distribution** | 70% Investor / 30% FlockFund | **Capital returned first**, then 70% FlockFund / 30% Investor of **net profit** |
+| **Loss Liability** | Shared via reserve fund | **100% borne by investor** (unless FlockFund negligence proven) |
+| **Contract Requirement** | Standard Terms | **Formal Mudarabah Agreement** with specific clauses |
+| **Cost Recovery** | Included in cost per bird | **Itemized and transparent** — deducted before profit calculation |
 
 ---
 
- 3. Our Multi‑Layer Defense System
+## 2. Mudarabah Al-Muqayyada — Foundational Principles
 
-FlockFund employs a four‑layer defense system against these risks. Each layer is independent and reinforces the others:
+### 2.1 Definition
+
+Mudarabah is a form of partnership where one party provides the capital (**Rabb-ul-Maal** — the investor) while the other party provides expertise and management (**Mudarib** — FlockFund). The profit is shared according to a pre-agreed ratio, while financial loss is borne solely by the capital provider, provided the Mudarib has not been negligent .
+
+### 2.2 Al-Muqayyada (Restricted) Specification
+
+This is a **Restricted Mudarabah (Al-Mudarabah Al-Muqayyada)** , meaning the Rabb-ul-Maal (investor) gives specific instructions regarding the investment of funds — in our case, **exclusively for broiler chicken farming** . The Mudarib (FlockFund) must adhere to these restrictions and cannot divert funds to other activities.
+
+### 2.3 Core Rules Enforced by Shariah
+
+| Rule | Description | Source |
+|------|-------------|--------|
+| **Profit Share Must Be Pre-Agreed** | The profit-sharing ratio must be determined at contract inception (e.g., 70/30). |  |
+| **No Fixed Return** | Profit cannot be guaranteed as a fixed amount or percentage of capital — only as a share of actual profit. |  |
+| **Loss Borne by Investor** | Financial loss (unless from negligence) is borne entirely by the capital provider. |  |
+| **Mudarib Loses Effort** | The Mudarib loses time, effort, and resources — no compensation if no profit. |  |
+| **Negligence Liability** | If loss is caused by Mudarib's negligence or breach, Mudarib must compensate. |  |
+| **Capital Must Be Returned First** | Profit is only what exceeds the original capital. Losses are deducted from capital before profit calculation. |  |
+
+---
+
+## 3. Revised Investment Flow — Technical Implementation
+
+### 3.1 Investment Lifecycle
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                     Layer 4: Legal Structure                │
-│                 (Limited liability per flock)                │
-├─────────────────────────────────────────────────────────────┤
-│                  Layer 3: Diversification                    │
-│            (Geographic & temporal spread of flocks)          │
-├─────────────────────────────────────────────────────────────┤
-│                    Layer 2: Reserve Fund                     │
-│            (8% of FlockFund profits set aside)               │
-├─────────────────────────────────────────────────────────────┤
-│                   Layer 1: Prevention                         │
-│        (Biosecurity, veterinary care, expert management)     │
-└─────────────────────────────────────────────────────────────┘
+┌─────────────────┐
+│  Investor       │  Rabb-ul-Maal provides capital
+│  (Rabb-ul-Maal) │  → System records investment
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│  Contract       │  → Digital Mudarabah Agreement signed
+│  Execution      │  → Profit ratio (70/30) acknowledged
+└────────┬────────┘  → Investment restrictions acknowledged
+         │
+         ▼
+┌─────────────────┐
+│  Farm           │  → Flock purchased, raised, sold
+│  Operations     │  → Daily keeper reports (biosecurity, health)
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│  Flock Sale     │  → Revenue generated
+│  Complete       │  → System calculates:
+└────────┬────────┘    1. Return capital to investors
+                     2. Deduct actual costs
+                     3. Calculate net profit
+                     4. Apply 70/30 split
+         │
+         ▼
+┌─────────────────┐
+│  Distribution   │  → Capital + profit share → Investor
+│                 │  → FlockFund profit share → Platform
+└─────────────────┘
+```
+
+### 3.2 Database Schema Changes
+
+#### New/Modified Tables
+
+```sql
+-- 1. INVESTMENTS table (MODIFIED)
+CREATE TABLE investments (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    investor_id UUID REFERENCES profiles(id),
+    flock_id UUID REFERENCES flocks(id),
+    -- NEW FIELDS:
+    capital_amount DECIMAL NOT NULL, -- Original capital invested
+    mudarabah_agreement_id UUID REFERENCES mudarabah_agreements(id),
+    profit_ratio_investor DECIMAL DEFAULT 30, -- % of net profit
+    profit_ratio_mudarib DECIMAL DEFAULT 70, -- % of net profit
+    status VARCHAR(50) -- 'active', 'completed', 'lost'
+    -- EXISTING FIELDS RETAINED as needed
+);
+
+-- 2. MUDARABAH_AGREEMENTS table (NEW)
+CREATE TABLE mudarabah_agreements (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    investment_id UUID REFERENCES investments(id),
+    investor_id UUID REFERENCES profiles(id),
+    agreement_text TEXT, -- Full legal text
+    ip_address VARCHAR(45),
+    user_agent TEXT,
+    signed_at TIMESTAMP DEFAULT NOW(),
+    -- Core terms embedded
+    restricted_business TEXT DEFAULT 'Broiler chicken farming only',
+    profit_share_agreed VARCHAR(20) DEFAULT '70/30',
+    loss_liability TEXT DEFAULT 'Investor bears financial loss unless negligence proven',
+    negligence_definition TEXT -- Detailed definition
+);
+
+-- 3. FLOCK_COSTS table (NEW) — for transparent cost tracking
+CREATE TABLE flock_costs (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    flock_id UUID REFERENCES flocks(id),
+    cost_category VARCHAR(100), -- 'feed', 'drugs', 'maintenance', 'tax', 'stamp_duty'
+    amount DECIMAL,
+    description TEXT,
+    incurred_date DATE,
+    verified_by UUID REFERENCES profiles(id) -- Farm manager verification
+);
+
+-- 4. PROFIT_CALCULATIONS table (MODIFIED)
+CREATE TABLE profit_calculations (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    flock_id UUID REFERENCES flocks(id),
+    total_revenue DECIMAL,
+    -- NEW STRUCTURE:
+    total_capital_returned DECIMAL, -- Sum of all investor capital
+    total_costs_deducted DECIMAL, -- Verified farm costs
+    net_profit DECIMAL, -- Revenue - capital - costs
+    investor_profit_share DECIMAL, -- net_profit * 30%
+    mudarib_profit_share DECIMAL, -- net_profit * 70%
+    calculated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- 5. INCIDENT_REPORTS table (NEW) — for negligence tracking
+CREATE TABLE incident_reports (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    flock_id UUID REFERENCES flocks(id),
+    incident_date DATE,
+    description TEXT,
+    cause TEXT, -- 'disease', 'natural_disaster', 'negligence', 'mismanagement'
+    investigation_notes TEXT,
+    findings TEXT,
+    negligence_found BOOLEAN DEFAULT FALSE,
+    reported_by UUID REFERENCES profiles(id),
+    resolved_at TIMESTAMP,
+    -- If negligence found, loss becomes Mudarib liability
+    compensation_required DECIMAL DEFAULT 0
+);
+```
+
+### 3.3 Profit Calculation Logic — Pseudo-code
+
+```javascript
+function calculateFlockProfit(flockId) {
+    // 1. Get all investments for this flock
+    const investments = db.investments.find({ flock_id: flockId });
+    const totalCapital = sum(investments.map(i => i.capital_amount));
+    
+    // 2. Get total revenue from bird sales
+    const totalRevenue = db.sales.sum({ flock_id: flockId });
+    
+    // 3. Get verified costs (tax, stamp duty, operational)
+    // IMPORTANT: Costs must be actual, reasonable, and verifiable
+    const totalCosts = db.flock_costs.sum({ flock_id: flockId, verified: true });
+    
+    // 4. Calculate capital + costs
+    const capitalPlusCosts = totalCapital + totalCosts;
+    
+    // 5. If revenue < capitalPlusCosts → LOSS scenario
+    if (totalRevenue < capitalPlusCosts) {
+        // Check for negligence
+        const negligenceFound = db.incident_reports.findOne({ 
+            flock_id: flockId, 
+            negligence_found: true 
+        });
+        
+        if (negligenceFound) {
+            // FlockFund must compensate investors fully
+            triggerCompensation(flockId, totalCapital);
+            return {
+                status: 'LOSS_DUE_TO_NEGLIGENCE',
+                action: 'FlockFund liable for full capital return'
+            };
+        } else {
+            // Normal loss — investors bear proportionally
+            const recoveryRate = totalRevenue / capitalPlusCosts;
+            distributeLoss(flockId, recoveryRate);
+            return {
+                status: 'LOSS',
+                message: 'Investors receive proportional capital back',
+                recovery_rate: recoveryRate
+            };
+        }
+    }
+    
+    // 6. PROFIT scenario
+    // Revenue exceeds capital + costs
+    const netProfit = totalRevenue - capitalPlusCosts;
+    
+    // Apply 60/40 split
+    const investorProfit = netProfit * 0.3;
+    const mudaribProfit = netProfit * 0.7;
+    
+    // Each investor gets:
+    // - Their full capital back
+    // - Their share of investorProfit (proportional to their capital)
+    distributeProfits(flockId, totalCapital, investorProfit);
+    
+    return {
+        status: 'PROFIT',
+        net_profit: netProfit,
+        investor_pool: investorProfit,
+        mudarib_share: mudaribProfit
+    };
+}
 ```
 
 ---
 
- 4. Layer 1: Prevention — Biosecurity & Veterinary Excellence
+## 4. Critical Shariah Rules — Implementation Requirements
 
-The best way to manage risk is to prevent it from happening. FlockFund invests heavily in world‑class biosecurity protocols and veterinary oversight. This is not an expense — it is the foundation of everything we do.
+### 4.1 No Guarantee of Profit or Principal
 
- 4.1 Biosecurity Protocols
+**Rule:** The Mudarabah agreement cannot promise a fixed return or guarantee the capital .
 
-Every FlockFund farm operates under strict biosecurity measures:
+**Implementation:**
+- Remove any language suggesting "guaranteed returns" from UI
+- Add prominent disclaimer: "Investment returns are based on actual farm performance. Capital may be at risk."
+- In calculators, show **projections** not guarantees
+- All historical returns must be labeled as "past performance"
 
-Access Control
-- Farms are fenced with single controlled entry points.
-- Visitors are logged and restricted; only essential personnel enter.
-- Vehicles are disinfected before entering farm premises.
-- Dedicated footwear and clothing for each poultry house.
+### 4.2 Profit Sharing Ratio Must Be Pre-Agreed
 
-Hygiene Protocols
-- Footbaths with disinfectant at every entry point.
-- Hand washing stations with antiseptic soap.
-- Regular cleaning and disinfection of equipment.
-- All‑in, all‑out stocking between flocks to break disease cycles.
+**Rule:** The ratio (70/30) must be agreed before the contract begins .
 
-Isolation Measures
-- New birds are quarantined before introduction to existing flocks (where applicable).
-- Sick birds are immediately isolated and examined.
-- Separate tools for each house, never shared.
+**Implementation:**
+- During checkout, display profit-sharing ratio prominently
+- Require explicit acknowledgment before investment
+- Store agreed ratio in `investments` table
+- Ratio cannot change mid-cycle
 
-Wildlife Control
-- Netting and barriers to prevent wild birds from contacting domestic flocks.
-- Rodent control programs around all houses.
+### 4.3 Loss Liability — Investor Bears Financial Loss
 
- 4.2 Veterinary Oversight
+**Rule:** Financial loss from normal business operations is borne by the capital provider .
 
-Dedicated Farm Manager (Vet)
-- Each farm has a qualified veterinarian as Farm Manager.
-- Conducts weekly health inspections.
-- Reviews keeper reports daily.
-- Administers vaccination programs tailored to local disease risks.
+**Implementation:**
+- Remove Reserve Fund logic completely
+- Update risk disclosures
+- In loss scenarios, system automatically calculates proportional capital return
+- No recovery from FlockFund unless negligence proven
 
-Vaccination Schedule
-- Strict vaccination calendar for:
-  - Newcastle Disease
-  - Infectious Bursal Disease (Gumboro)
-  - Marek's Disease
-  - Fowl Pox (as needed)
-- Vaccines sourced from reputable manufacturers; cold chain maintained.
+### 4.4 Negligence Liability — FlockFund Bears Loss
 
-Daily Health Monitoring
-- Keepers record:
-  - Mortality count
-  - Clinical signs (lethargy, respiratory distress, diarrhea)
-  - Feed and water intake
-  - Temperature and environmental conditions
-- Any deviation from normal triggers immediate veterinary review.
+**Rule:** If loss is caused by Mudarib's negligence or breach, Mudarib is liable .
 
-Early Warning System
-- Automated alerts for:
-  - Mortality spikes (>2% in 24 hours)
-  - Temperature deviations beyond set range
-  - Reduced feed consumption
-- These trigger immediate investigation and intervention.
+**Implementation:**
 
- 4.3 Training & Standard Operating Procedures
+**Definition of Negligence (from Islamic scholarship)** :
+- Failure to follow agreed-upon biosecurity protocols
+- Ignoring veterinary advice
+- Misappropriation of funds
+- Investing in prohibited activities
+- Gross mismanagement
 
-Keeper Training
-- All keepers complete a certified training program before starting.
-- Annual refresher courses on disease recognition and biosecurity.
-- Performance reviews and competency assessments.
+**System Requirements:**
+- `incident_reports` table to document any adverse events
+- Farm Manager must investigate and document causes
+- If negligence found, flag `negligence_found = true`
+- Trigger compensation workflow (FlockFund must return capital)
 
-SOP Manual
-- Detailed written procedures for:
-  - Daily routines
-  - Medication administration
-  - Emergency response
-  - Reporting requirements
-- Available digitally and in print at every farm.
+### 4.5 Capital Must Be Returned Before Profit
+
+**Rule:** Profit is what exceeds the capital .
+
+**Implementation:**
+- In profit calculation, ensure `totalCapital` is subtracted first
+- UI should show breakdown:
+  - Your Capital: ₦X
+  - Farm Costs: ₦Y
+  - Net Profit: ₦Z
+  - Your 30% Profit Share: ₦Z × 0.3
+  - **Total to You: Capital + Profit Share**
 
 ---
 
- 5. Layer 2: The FlockFund Reserve Fund
+## 5. User Interface & Experience Changes
 
-Despite our best prevention efforts, no system is perfect. The FlockFund Reserve Fund is our financial buffer against the unexpected.
+### 5.1 Investment Checkout Flow — New Screens
 
- 5.1 How the Reserve Fund Works
+```
+Current Page: Flock Selection
+    ↓
+New Page: Mudarabah Agreement Preview
+    - Summary of terms (restricted to broiler farming)
+    - Profit ratio: 70% FlockFund / 30% Investor
+    - Loss liability explanation
+    - "View Full Agreement" link
+    - Checkbox: "I have read and agree"
+    ↓
+New Page: Cost Breakdown (Transparency)
+    - Estimated cost per bird breakdown:
+        • Feed: ₦X
+        • Drugs: ₦Y
+        • Maintenance: ₦Z
+        • Tax: ₦W
+        • Stamp duty: ₦V
+    - Note: Actual costs deducted; estimates provided
+    ↓
+New Page: Digital Signature
+    - Investor name field
+    - "I confirm this is a Mudarabah Al-Muqayyada investment"
+    - Timestamp + IP address recorded
+    ↓
+Payment Processing
+```
 
-Funding Source
-- 8% of FlockFund's profit share from every completed flock is allocated to the Reserve Fund.
-- This is taken after investor profits are distributed, not before. It does not reduce your returns.
+### 5.2 Investor Dashboard — New Components
 
-Example:
-| Item | Amount |
-|------|--------|
-| Total invested in flock (1,000 birds × ₦7,000) | ₦7,000,000 |
-| Total revenue (1,000 birds × ₦20,000) | ₦20,000,000 |
-| Total profit | ₦13,000,000 |
-| Investor share (70%) | ₦9,100,000 |
-| FlockFund share (30%) | ₦3,900,000 |
-| Reserve contribution (8% of FlockFund share) | ₦312,000 |
+**Investment Card Redesign:**
 
-This ₦312,000 goes into the Reserve Fund, available to protect future flocks.
+```
+┌─────────────────────────────────────────────┐
+│ Flock #4 — Broiler Cycle                    │
+├─────────────────────────────────────────────┤
+│ Your Capital: ₦70,000 (10 birds)            │
+│ Status: Active                               │
+│ Profit Ratio: 30% of net profit (agreed)     │
+├─────────────────────────────────────────────┤
+│ Live Farm Updates:                           │
+│ • Day 14 — Mortality: 2 birds (normal)      │
+│ • Day 14 — Avg Weight: 0.8kg                 │
+│ • Day 14 — Feed consumed: 45kg               │
+├─────────────────────────────────────────────┤
+│ Projection (not guaranteed):                  │
+│ Estimated net profit: ₦130,000               │
+│ Your estimated share (30%):    calc       │
+│ Total return (capital + profit): calc   │
+└─────────────────────────────────────────────┘
+```
 
- 5.2 Reserve Fund Size & Growth
+**Completed Flock Card — Profit Scenario:**
 
-The Reserve Fund is designed to grow over time, providing increasing protection as FlockFund matures.
+```
+┌─────────────────────────────────────────────┐
+│ Flock #3 — Completed                        │
+├─────────────────────────────────────────────┤
+│ Your Capital: ₦70,000                        │
+│ Total Revenue: ₦250,000                       │
+│ Costs Deducted: ₦30,000 (tax, stamp duty)    │
+│ Net Profit: ₦150,000                          │
+├─────────────────────────────────────────────┤
+│ Your Share (30% of profit): ₦60,000           │
+│ Capital Returned: ₦70,000                     │
+│ TOTAL RECEIVED: ₦130,000                       │
+└─────────────────────────────────────────────┘
+```
 
-| Flocks Completed | Total Reserve (approx) | Coverage Potential |
-|------------------|------------------------|---------------------|
-| 10 flocks | ₦3.1 million | ~45% of a single flock loss |
-| 20 flocks | ₦6.2 million | ~90% of a single flock loss |
-| 30 flocks | ₦9.3 million | ~130% of a single flock loss (excess can cover multiple events) |
+**Completed Flock Card — Loss Scenario (No Negligence):**
 
-Note: These figures assume consistent flock size and profitability. Actual growth may vary.
+```
+┌─────────────────────────────────────────────┐
+│ Flock #2 — Completed                        │
+├─────────────────────────────────────────────┤
+│ Your Capital: ₦70,000                        │
+│ Total Revenue: ₦50,000 (disease outbreak)    │
+│ Costs Deducted: ₦10,000                       │
+├─────────────────────────────────────────────┤
+│ Capital Recovery: ₦40,000 (57% of capital)   │
+│ No Profit — Loss from normal operations      │
+│                                                 │
+│ ℹ️ Under Mudarabah rules, financial loss      │
+│   from uncontrollable events is borne by      │
+│   investors. No negligence found.             │
+└─────────────────────────────────────────────┘
+```
 
- 5.3 Reserve Fund Cap & Excess Distribution
+**Completed Flock Card — Loss Scenario (Negligence Found):**
 
-To prevent the Reserve Fund from growing beyond reasonable needs, we have established a cap mechanism:
+```
+┌─────────────────────────────────────────────┐
+│ Flock #5 — Completed — ACTION REQUIRED      │
+├─────────────────────────────────────────────┤
+│ Your Capital: ₦70,000                        │
+│ Total Revenue: ₦20,000                        │
+├─────────────────────────────────────────────┤
+│ INVESTIGATION FINDING:                       │
+│ Negligence found — biosecurity protocols     │
+│ were not followed.                           │
+│                                                 │
+│ ✅ FlockFund is liable for full capital       │
+│   return. Your ₦70,000 will be compensated.   │
+│   Processing...                               │
+└─────────────────────────────────────────────┘
+```
 
-- Cap: The Reserve Fund will not exceed 20% of the total value of all active investments.
-- Excess Distribution: Once the cap is reached, any additional contributions are distributed quarterly as bonus birds to all investors with active investments, proportional to their investment size.
+### 5.3 Admin Dashboard — New Controls
 
-This ensures the fund remains a reasonable safety net while returning excess capital to investors.
+**New Settings Section: Mudarabah Configuration**
 
- 5.4 When the Reserve Fund Is Used
+- Profit ratio sliders (with validation — must sum to 100)
+- Negligence criteria definition editor
+- Incident report review interface
+- Cost verification workflows
 
-The Reserve Fund is deployed in the event of catastrophic losses — defined as:
+**Cost Management Interface:**
 
-- Mortality exceeding 15% of the flock due to a single event (disease outbreak, natural disaster, etc.).
-- Government‑mandated culling.
-- Total loss of birds due to fire, flood, or other uncontrollable events.
-
-What the Reserve Fund Covers:
-- A portion of the principal investment lost (after accounting for any salvage value).
-- The exact percentage covered depends on the size of the fund at that time and the severity of the loss.
-
-Example Scenario:
-- Flock of 1,000 birds, total investment ₦7,000,000.
-- Avian flu outbreak; all birds culled.
-- No salvage value.
-- Reserve Fund balance: ₦5,000,000.
-- FlockFund applies ₦3,500,000 from the Reserve Fund to cover 50% of investor losses.
-- Investors receive 50% of their principal back from the Reserve Fund.
-
-Important: The Reserve Fund provides partial, not full, protection. It is not insurance. It is a shared buffer that softens the impact of catastrophic events.
-
- 5.5 Transparency & Reporting
-
-- The Reserve Fund balance is publicly visible in the investor dashboard.
-- Every contribution and withdrawal is logged and auditable.
-- Investors can see exactly how the fund has grown and how it has been used.
-
----
-
- 6. Layer 3: Diversification Strategy
-
-"Don't put all your eggs in one basket" is more than a proverb — it is a core risk management principle at FlockFund.
-
- 6.1 Geographic Diversification
-
-We operate farms in multiple locations, separated by sufficient distance to reduce the risk that a single disease outbreak affects all farms simultaneously.
-
-| Farm Location | Region | Distance from Others |
-|---------------|--------|----------------------|
-| Farm A | Ogun State | 120km from Farm B |
-| Farm B | Oyo State | 150km from Farm C |
-| Farm C | Osun State | 90km from Farm A |
-
-Actual locations will be shared with investors as farms become operational.
-
- 6.2 Temporal Diversification
-
-Flocks are staggered in time, so not all birds are at the same age or stage simultaneously.
-
-- New flocks start every 4–6 weeks.
-- This means that a disease affecting young chicks may not affect older birds, and vice versa.
-- It also smooths cash flow and reduces operational pressure.
-
- 6.3 Investor Diversification Tools
-
-As an investor, you have the option to:
-
-- Auto‑diversify: Your investment is automatically split across multiple active flocks.
-- Manual selection: Choose which specific flocks to invest in.
-- Portfolio view: See your total exposure across all flocks.
-
-Recommended: For your first investment, we suggest using auto‑diversify to spread risk. As you become more familiar with the platform, you may choose to concentrate investments.
-
----
-
- 7. Layer 4: Legal Structure & Investor Protection
-
- 7.1 Separate Legal Entities per Flock
-
-Each flock operates under a separate legal entity (a Special Purpose Vehicle or SPV). This means:
-
-- The assets and liabilities of each flock are ring‑fenced.
-- A catastrophic loss in one flock does not affect the others.
-- Investor liability is limited to the amount invested in that specific flock.
-
- 7.2 Clear Terms & Disclosures
-
-Every investment agreement includes:
-
-- Explicit risk disclosure: Investors acknowledge that they may lose part or all of their capital.
-- Force majeure clause: Protects FlockFund from liability in case of government action, natural disasters, or other uncontrollable events.
-- Governing law: Specifies the jurisdiction and legal framework.
-
- 7.3 Segregated Accounts
-
-- Investor funds are held in separate bank accounts from operational accounts.
-- Funds are only released for approved purposes (bird purchase, feed, etc.).
-- Regular third‑party audits ensure compliance.
-
----
-
- 8. What Happens in a Crisis — A Step‑by‑Step Simulation
-
-Let's walk through a realistic scenario so you understand exactly what to expect.
-
- Scenario: Avian Influenza Confirmed in Flock 4
-
-Day 1 — Suspicion
-- Keeper notices increased lethargy and respiratory distress.
-- Mortality rises from 2 birds to 10 birds in 24 hours.
-- Keeper flags in report; Farm Manager alerted automatically.
-
-Day 2 — Investigation
-- Farm Manager (vet) visits farm, collects samples.
-- Preliminary diagnosis: possible Avian Influenza.
-- Immediate quarantine measures implemented.
-- Affected investors receive first notification:
-  > "We have detected unusual symptoms in Flock 4. Samples have been sent for testing. We have quarantined the house and are taking all precautions. We will update you within 48 hours."
-
-Day 4 — Confirmation
-- Lab results confirm highly pathogenic Avian Influenza.
-- Government veterinary services notified; mandatory culling ordered.
-- Second notification sent to investors:
-  > "We regret to inform you that Avian Influenza has been confirmed in Flock 4. Government authorities have ordered culling of all birds. We are working with officials to ensure humane and safe disposal. Your investment in this flock is affected. We will provide a full accounting within 7 days."
-
-Day 5–10 — Culling & Salvage
-- Birds are culled under government supervision.
-- No salvage value (birds cannot be sold).
-- Farm undergoes disinfection and will remain empty for 30 days.
-
-Day 11 — Financial Assessment
-- Total invested in Flock 4: ₦7,000,000.
-- Reserve Fund balance: ₦5,000,000.
-- FlockFund Board meets to determine allocation:
-  - Reserve Fund contributes ₦3,500,000 (50% of losses).
-  - FlockFund waives its profit share for the next two cycles as goodwill.
-- Third notification sent to investors:
-  > "We have completed our assessment of Flock 4 losses. The Reserve Fund will cover 50% of your invested capital, meaning you will receive ₦3,500 back for every ₦7,000 invested. Payments will be processed within 14 days. We have also waived our profit share for the next two cycles to strengthen the Reserve Fund and demonstrate our commitment. A full report on the incident and new prevention measures is attached."
-
-Day 25 — Payment
-- Investors receive funds via their chosen payment method.
-- Dashboard updated with transaction records.
-
-Day 30 — Review & Rebuild
-- Detailed incident report published.
-- Town hall webinar held; investors can ask questions.
-- Enhanced biosecurity measures implemented based on lessons learned.
-- FlockFund continues operations with renewed focus on prevention.
-
- What This Simulation Demonstrates
-
-- Speed: Investors are notified within 48 hours of suspicion.
-- Transparency: Every step is communicated clearly.
-- Fairness: The Reserve Fund is deployed as intended.
-- Commitment: FlockFund shares the pain by waiving future profits.
-- Learning: We use every incident to improve.
+```
+┌─────────────────────────────────────────────┐
+│ Flock #7 — Cost Tracking                     │
+├─────────────────────────────────────────────┤
+│ Add Cost:                                    │
+│ Category: [Feed ▼] Amount: [_____]          │
+│ Description: [________________________]      │
+│ Receipt: [Upload]                            │
+│ [Add Cost]                                    │
+├─────────────────────────────────────────────┤
+│ Verified Costs:                               │
+│ • Feed: ₦50,000 (verified by Farm Manager)   │
+│ • Drugs: ₦8,000 (verified)                    │
+│ • Tax: ₦5,000 (pending)                       │
+│ • Stamp duty: ₦2,000 (pending)                │
+└─────────────────────────────────────────────┘
+```
 
 ---
 
- 9. Transparency & Communication Commitment
+## 6. Legal & Compliance Requirements
 
-We believe that trust is built through consistent, honest communication — especially when things go wrong.
+### 6.1 Mudarabah Agreement — Required Clauses
 
- 9.1 Regular Reporting
+Based on Shariah requirements , the agreement must include:
 
-| Report Type | Frequency | Content |
-|--------------|-----------|---------|
-| Daily Farm Reports | Real‑time | Mortality, temperature, feed/water status, clinical signs (approved reports only) |
-| Weekly Summary | Every Monday | Highlights of farm activities, any incidents, upcoming milestones |
-| Flock Completion Report | End of cycle | Full financial breakdown, profit distribution |
-| Reserve Fund Statement | Monthly | Current balance, contributions, withdrawals |
+| Clause | Content |
+|--------|---------|
+| **Parties** | Full names and identification of Rabb-ul-Maal (investor) and Mudarib (FlockFund) |
+| **Capital** | Amount provided, currency, and delivery method |
+| **Business Scope** | Restricted to broiler chicken farming only (Al-Muqayyada)  |
+| **Profit Ratio** | 60% to Mudarib, 40% to Rabb-ul-Maal — agreed upfront  |
+| **Loss Provision** | Financial loss borne by Rabb-ul-Maal unless caused by Mudarib's negligence  |
+| **Negligence Definition** | Clear definition of what constitutes negligence (failure to follow protocols, ignoring vet advice, etc.) |
+| **Costs** | Which costs are deductible before profit calculation (must be actual and reasonable) |
+| **Duration** | Expected duration of the Mudarabah (flock cycle) |
+| **Termination** | How the contract can be terminated early (if applicable) |
+| **Dispute Resolution** | Mechanism for resolving disputes (arbitration recommended) |
 
- 9.2 Incident Communication Protocol
+### 6.2 Digital Signature Implementation
 
-In the event of any significant incident:
-
-| Timing | Communication |
-|--------|---------------|
-| Within 24 hours | Initial alert — what we know, what we're doing |
-| Every 48 hours | Updates — test results, actions taken |
-| Within 7 days | Financial impact assessment |
-| Within 14 days | Payment/distribution (if applicable) |
-| Within 30 days | Full incident report and prevention measures |
-
- 9.3 Investor Channels
-
-- Dashboard: All notifications, reports, and documents in one place.
-- Email: Critical updates delivered directly.
-- SMS: Emergency alerts (optional).
-- Town Hall Webinars: Quarterly and after major incidents.
-- Community Forum: Discuss with other investors and FlockFund team.
-
----
-
- 10. Frequently Asked Questions
-
- Q1: Can I lose all my money?
-
-A: Yes, it is possible to lose part or all of your investment in a specific flock. Poultry farming involves living creatures and is subject to disease, market fluctuations, and other risks. However, our multi‑layer defense system — including strict biosecurity, veterinary oversight, the Reserve Fund, and diversification — is designed to reduce both the likelihood and impact of such losses.
-
- Q2: How much of my money might the Reserve Fund cover in a disaster?
-
-A: There is no fixed percentage. The Reserve Fund covers a portion of losses based on its size at the time of the incident. In our early stages, coverage may be 20–40% of a total loss. As the fund grows, coverage could reach 50–80% or more. The fund is never intended to provide 100% coverage — that would require insurance, which we do not currently have.
-
- Q3: Why don't you have insurance?
-
-A: Livestock insurance is available but often prohibitively expensive for new ventures. Premiums would significantly increase the cost per bird, reducing returns for investors. We have chosen to build our own Reserve Fund as a more cost‑effective alternative that keeps more money in your pocket while still providing meaningful protection. As we scale, we will revisit insurance options.
-
- Q4: What happens to the Reserve Fund if there are no disasters?
-
-A: The fund grows until it reaches a cap (20% of total active investments). Once the cap is reached, excess funds are distributed quarterly as bonus birds to all active investors. This ensures the fund doesn't grow beyond reasonable needs and that you benefit directly from its success.
-
- Q5: How do I know the Reserve Fund is real?
-
-A: The Reserve Fund balance is displayed in your dashboard and updated monthly. All transactions are logged and auditable. We are committed to full transparency — you can see exactly how much is in the fund and how it has been used.
-
- Q6: Can I withdraw my investment at any time?
-
-A: No. Investments are locked for the duration of the flock cycle (typically 6–8 weeks). After a flock is sold, profits are distributed. For the first three cycles, 20% of your profit must be reinvested. After three cycles, you may withdraw any or all of your funds.
-
- Q7: What if I want to invest but I'm worried about risk?
-
-A: We recommend:
-- Start with a small amount you are comfortable losing.
-- Use the auto‑diversify feature to spread your investment across multiple flocks.
-- Read all reports and stay engaged.
-- Attend our investor education webinars.
-
- Q8: How do you ensure keepers are reliable?
-
-A: All keepers undergo thorough training and background checks. They are supervised by the Farm Manager (vet) and subject to performance reviews. Their reports are verified through spot checks and cross‑referenced with other data (e.g., feed orders, weight samples).
-
- Q9: What happens if the Farm Manager is unavailable?
-
-A: We have multiple veterinarians on retainer. In case of absence, a backup vet steps in immediately. All protocols are documented, so anyone trained can follow them.
-
- Q10: How often are biosecurity protocols updated?
-
-A: Our protocols are reviewed quarterly by our veterinary team and updated whenever new risks emerge or industry best practices change. Investors are notified of significant changes.
+```javascript
+// Function to capture investor agreement
+async function captureMudarabahAgreement(investmentId, investorId, ipAddress, userAgent) {
+    const agreementText = generateAgreementText(investmentId); // Pulls from template
+    
+    await db.mudarabah_agreements.insert({
+        investment_id: investmentId,
+        investor_id: investorId,
+        agreement_text: agreementText,
+        ip_address: ipAddress,
+        user_agent: userAgent,
+        signed_at: new Date()
+    });
+    
+    // Update investment record
+    await db.investments.update(investmentId, {
+        mudarabah_agreement_id: newAgreementId,
+        status: 'agreement_signed'
+    });
+    
+    // Proceed to payment
+    return { success: true };
+}
+```
 
 ---
 
- 11. Glossary of Terms
+## 7. Risk Management Under New Model
 
-| Term | Definition |
-|------|------------|
-| Biosecurity | Measures taken to prevent disease introduction and spread on farms. |
-| Broiler | A chicken raised for meat production. |
-| Culling | The removal of birds from a flock, often for disease control. |
-| FCR (Feed Conversion Ratio) | The amount of feed required to produce 1kg of body weight. Lower is better. |
-| Flock | A group of birds raised together in a single cycle. |
-| Force Majeure | Unforeseeable circumstances that prevent fulfillment of obligations. |
-| Mortality Buffer | A portion of the cost per bird set aside to cover expected deaths. |
-| Reserve Fund | A pool of funds built from FlockFund profits to cover catastrophic losses. |
-| SPV (Special Purpose Vehicle) | A separate legal entity created for each flock to isolate risk. |
-| Staggered Flocks | Starting flocks at different times to reduce risk concentration. |
+### 7.1 Risk Allocation Summary
+
+| Risk Type | Who Bears | Notes |
+|-----------|-----------|-------|
+| **Disease outbreak (no negligence)** | Investor | Financial loss borne by capital provider  |
+| **Market price drop** | Investor | Part of normal business risk |
+| **Natural disaster** | Investor | Force majeure — investor bears loss |
+| **Negligence/mismanagement** | FlockFund | Must compensate investors  |
+| **Operational inefficiency** | Shared | Lower profits affect both parties |
+
+### 7.2 Protection for Investors (Non-Financial)
+
+While investors bear financial loss, they have important protections under Shariah :
+
+1. **Right to transparency** — All farm activities visible in real-time
+2. **Right to restrict investment** — Al-Muqayyada ensures funds used only for poultry
+3. **Right to hold Mudarib accountable** — If negligence proven, Mudarib liable
+4. **Right to profit share** — 40% of any net profit
+5. **Right to capital priority** — Capital returned before profit calculated 
+
+### 7.3 Negligence Investigation Workflow
+
+```mermaid
+graph TD
+    A[Incident Reported by Keeper] --> B[Farm Manager Investigates]
+    B --> C{Cause Determined?}
+    C -->|Disease/Market/Natural| D[Document as Normal Loss]
+    C -->|Protocol Breach| E[Flag as Potential Negligence]
+    E --> F[Admin Review]
+    F --> G{Negligence Confirmed?}
+    G -->|Yes| H[Compensate Investors from FlockFund]
+    G -->|No| D
+```
 
 ---
 
- Conclusion: Our Commitment to You
+## 8. Implementation Timeline
 
-FlockFund was built on a simple belief: that transparency and trust are the foundations of successful investing. We do not promise that losses will never happen — that would be a lie. But we do promise:
-
-- ✅ We will prevent everything we can through world‑class biosecurity and veterinary care.
-- ✅ We will prepare for everything we cannot prevent through a growing Reserve Fund and diversification.
-- ✅ We will communicate everything, always — good news and bad — with honesty and speed.
-- ✅ We will learn from every incident and share those lessons with you.
-- ✅ We will treat your investment as if it were our own.
-
-Because in a very real sense, it is. We are investors too. We eat our own cooking. And we are building this together — flock by flock, bird by bird.
-
-Welcome to the flock. Let's grow together.
+| Phase | Focus | Duration |
+|-------|-------|----------|
+| **Phase 1** | Database schema changes, remove reserve fund logic | 1 week |
+| **Phase 2** | Profit calculation engine rewrite | 2 weeks |
+| **Phase 3** | Investor dashboard UI updates | 2 weeks |
+| **Phase 4** | Mudarabah agreement flow + digital signatures | 1 week |
+| **Phase 5** | Admin tools (cost tracking, incident reports) | 2 weeks |
+| **Phase 6** | Testing, Shariah review, compliance sign-off | 2 weeks |
 
 ---
 
-Last updated: March 2026
-Version 1.2
+## 9. Technical Requirements Summary
+
+| Area | Requirements |
+|------|--------------|
+| **Backend** | Update profit calculation logic; remove reserve fund; add incident tracking |
+| **Database** | New tables: `mudarabah_agreements`, `flock_costs`, `incident_reports` |
+| **Frontend** | Redesign investment flow; new dashboard components for Mudarabah terms |
+| **Legal** | Digital agreement capture with IP/user-agent tracking |
+| **Compliance** | No guaranteed returns messaging; clear loss disclosures |
+| **Shariah** | 60/40 profit ratio; capital-first calculation; negligence liability |
 
 ---
 
-This document is for informational purposes only and does not constitute financial advice. Investments involve risk, including possible loss of principal. Past performance is not indicative of future results. Please read all investment agreements carefully before investing.
+## 10. References & Resources
+
+For deeper understanding, the development team should review:
+
+1. **Mudarabah definition and rules** — Pakistan Kuwait Investment Company 
+2. **Profit calculation (capital first)** — Jordan Fatwa Department 
+3. **Negligence liability** — IslamWeb fatwa 
+4. **Risk allocation principles** — Islamic Finance concept of "al-ghurm bi al-ghunm" 
+5. **Loss distribution rules** — Askimam.org guidance 
+6. **Contractual requirements** — COMCEC Islamic finance glossary 
+7. **Mudarabah Muqayyada specifics** — Masarif.ae glossary 
+8. **Sample contract clauses** — Law Insider 
+9. **Muhammad Taqi Usmani's work** — The definitive text on Islamic finance 
+
+---
+
+## 11. Final Checklist for Technical Team
+
+- [ ] Remove all Reserve Fund logic from codebase
+- [ ] Update `profit_calculations` table schema
+- [ ] Create `mudarabah_agreements` table
+- [ ] Create `flock_costs` table with verification workflow
+- [ ] Create `incident_reports` table for negligence tracking
+- [ ] Rewrite profit distribution algorithm (capital first, then 70/30)
+- [ ] Remove all "guaranteed return" language from UI
+- [ ] Add prominent risk disclosures
+- [ ] Implement digital signature capture during checkout
+- [ ] Add negligence investigation workflow in admin panel
+- [ ] Update investor dashboard to show capital/profit breakdown
+- [ ] Create loss scenario UI components
+- [ ] Test all edge cases (total loss, partial loss, profit scenarios)
+- [ ] Shariah compliance review before deployment
+
+---
+
+This document represents the complete technical specification for converting FlockFund to the Mudarabah Al-Muqayyada model. The development team should use this as the primary reference for all coding changes. Any deviations from these specifications must be approved by product management and reviewed for Shariah compliance.
