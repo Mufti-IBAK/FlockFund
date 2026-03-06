@@ -137,6 +137,8 @@ export async function PATCH(req: NextRequest) {
       payload.investigation_started_at = updates.investigation_started_at;
     if (updates.resolved) payload.resolved_at = new Date().toISOString();
 
+    payload.updated_at = new Date().toISOString();
+
     const { data, error } = await supabase
       .from("incident_reports")
       .update(payload)
