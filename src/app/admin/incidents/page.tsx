@@ -46,8 +46,8 @@ const STATUS_STYLES: Record<string, string> = {
 };
 
 const DETERMINATION_LABELS = {
-  resolved_no_neg: "Resolved (No Negligence)",
-  risk_alert_no_neg: "Risk Alert (No Negligence)",
+  resolved_no_neg: "Resolved (No Negligence Found)",
+  risk_alert_no_neg: "Risk Alert (No Negligence Found)",
   risk_neg_found: "Risk (Negligence Found)",
 };
 
@@ -233,28 +233,16 @@ export default function AdminIncidentsPage() {
               )}
 
               {/* Admin Actions */}
-              {incident.status !== "resolved" &&
-                incident.status !== "dismissed" && (
-                  <div className="flex flex-wrap gap-2 pt-3 border-t border-slate-100">
-                    {incident.status === "reported" && (
-                      <button
-                        onClick={() =>
-                          updateIncident(incident.id, {
-                            status: "investigating",
-                          })
-                        }
-                        disabled={updating === incident.id}
-                        className="px-3 py-1.5 bg-amber-500 text-white rounded-lg text-xs font-bold hover:bg-amber-600 transition-colors disabled:opacity-50"
-                      >
-                        Begin Investigation
-                      </button>
-                    )}
-                    {incident.status === "investigating" && (
-                      <>
-                        <div className="w-full mb-4 bg-slate-50 rounded-xl p-4 border border-slate-100">
-                          <h4 className="text-[10px] font-bold text-primary uppercase tracking-wider mb-3">
-                            VET Investigation Report
-                          </h4>
+              {incident.status !== 'resolved' && incident.status !== 'dismissed' && (
+                <div className="flex flex-wrap gap-2 pt-3 border-t border-slate-100">
+                  {(incident.status === 'reported' || incident.status === 'investigating') && (
+                    <div className="w-full mb-4 bg-slate-50 rounded-xl p-4 border border-slate-100">
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="text-[10px] font-bold text-primary uppercase tracking-wider">VET Investigation Report</h4>
+                        {incident.status === 'reported' && (
+                          <span className="text-[9px] bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded-full font-bold">REPORT READY</span>
+                        )}
+                      </div>
                           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
                             <div className="p-2 bg-white rounded border border-slate-100">
                               <p className="text-[8px] text-slate-400 uppercase font-bold">
@@ -308,63 +296,52 @@ export default function AdminIncidentsPage() {
                             </div>
                           </div>
                         </div>
+                  )}
 
-                        <button
-                          onClick={() => {
-                            const resolution = prompt(
-                              "Enter resolution summary:",
-                            );
-                            if (resolution)
-                              updateIncident(incident.id, {
-                                status: "resolved",
-                                resolution,
-                                admin_determination: "resolved_no_neg",
-                              });
-                          }}
-                          disabled={updating === incident.id}
-                          className="px-3 py-1.5 bg-emerald-500 text-white rounded-lg text-xs font-bold hover:bg-emerald-600 transition-colors disabled:opacity-50"
-                        >
-                          Resolved (No Negligence)
-                        </button>
+                      {incident.status === 'reported' ? (
+                         <button
+                         onClick={() => updateIncident(incident.id, { status: 'investigating' })}
+                         disabled={updating === incident.id}
+                         className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-xs font-bold hover:bg-indigo-700 transition-colors disabled:opacity-50 shadow-lg shadow-indigo-200"
+                       >
+                         Begin Investigation
+                       </button>
+                      ) : (
+                        <div className="flex flex-wrap gap-2 w-full pt-2">
+                          <button
+                            onClick={() => {
+                              const resolution = prompt('Enter resolution summary:');
+                              if (resolution) updateIncident(incident.id, { status: 'resolved', resolution, admin_determination: 'resolved_no_neg' });
+                            }}
+                            disabled={updating === incident.id}
+                            className="px-3 py-1.5 bg-emerald-500 text-white rounded-lg text-xs font-bold hover:bg-emerald-600 transition-colors disabled:opacity-50"
+                          >
+                            Resolved (No Negligence)
+                          </button>
 
-                        <button
-                          onClick={() => {
-                            const resolution = prompt(
-                              "Enter Risk Alert details:",
-                            );
-                            if (resolution)
-                              updateIncident(incident.id, {
-                                status: "resolved",
-                                resolution,
-                                admin_determination: "risk_alert_no_neg",
-                              });
-                          }}
-                          disabled={updating === incident.id}
-                          className="px-3 py-1.5 bg-amber-500 text-white rounded-lg text-xs font-bold hover:bg-amber-600 transition-colors disabled:opacity-50"
-                        >
-                          Risk Alert (No Negligence)
-                        </button>
+                          <button
+                            onClick={() => {
+                              const resolution = prompt('Enter Risk Alert details:');
+                              if (resolution) updateIncident(incident.id, { status: 'resolved', resolution, admin_determination: 'risk_alert_no_neg' });
+                            }}
+                            disabled={updating === incident.id}
+                            className="px-3 py-1.5 bg-amber-500 text-white rounded-lg text-xs font-bold hover:bg-amber-600 transition-colors disabled:opacity-50"
+                          >
+                            Risk Alert (No Negligence)
+                          </button>
 
-                        <button
-                          onClick={() => {
-                            const resolution = prompt(
-                              "Enter Risk determination details:",
-                            );
-                            if (resolution)
-                              updateIncident(incident.id, {
-                                status: "resolved",
-                                resolution,
-                                admin_determination: "risk_neg_found",
-                                negligence_determined: true,
-                              });
-                          }}
-                          disabled={updating === incident.id}
-                          className="px-3 py-1.5 bg-rose-500 text-white rounded-lg text-xs font-bold hover:bg-rose-600 transition-colors disabled:opacity-50"
-                        >
-                          Risk (Negligence Found)
-                        </button>
-                      </>
-                    )}
+                          <button
+                            onClick={() => {
+                              const resolution = prompt('Enter Risk determination details:');
+                              if (resolution) updateIncident(incident.id, { status: 'resolved', resolution, admin_determination: 'risk_neg_found', negligence_determined: true });
+                            }}
+                            disabled={updating === incident.id}
+                            className="px-3 py-1.5 bg-rose-500 text-white rounded-lg text-xs font-bold hover:bg-rose-600 transition-colors disabled:opacity-50"
+                          >
+                            Risk (Negligence Found)
+                          </button>
+                        </div>
+                      )}
                     <button
                       onClick={() =>
                         updateIncident(incident.id, { status: "dismissed" })

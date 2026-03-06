@@ -12,21 +12,21 @@ This agreement is entered into between:
 TERMS AND CONDITIONS:
 
 1. BUSINESS SCOPE (Al-Muqayyada Restriction)
-   The Mudarib shall use the invested capital exclusively for broiler chicken farming operations.
+   The Flockfund shall use the invested capital exclusively for broiler chicken farming operations.
    No funds shall be diverted to any other business activity.
 
 2. PROFIT DISTRIBUTION
    Net profit (revenue minus capital and verified costs) shall be distributed as follows:
-   - 70% to the Mudarib (FlockFund)
-   - 30% to the Rabb-ul-Maal (Investor)
+   - 70% to the Flockfund (FlockFund)
+   - 30% to the Investor (Investor)
    Profit is defined as what exceeds the original capital after deducting verified operational costs.
 
 3. LOSS LIABILITY
    - Financial loss arising from normal business operations (disease, market fluctuations,
-     natural disasters) shall be borne entirely by the Rabb-ul-Maal (Investor).
-   - The Mudarib loses time, effort, and resources — receiving no compensation if no profit is generated.
-   - If loss is caused by the Mudarib's negligence or breach of agreed protocols,
-     the Mudarib shall compensate the Rabb-ul-Maal for the full capital amount.
+     natural disasters) shall be borne entirely by the Investor (Investor).
+   - The Flockfund loses time, effort, and resources — receiving no compensation if no profit is generated.
+   - If loss is caused by the Flockfund's negligence or breach of agreed protocols,
+     the Flockfund shall compensate the Investor for the full capital amount.
 
 4. DEFINITION OF NEGLIGENCE
    Negligence includes but is not limited to:
@@ -37,7 +37,7 @@ TERMS AND CONDITIONS:
    - Gross mismanagement of farm operations
 
 5. CAPITAL PRIORITY
-   Capital must be returned to the Rabb-ul-Maal before any profit calculation.
+   Capital must be returned to the Investor before any profit calculation.
    Profit is only what exceeds the original capital invested.
 
 6. COST TRANSPARENCY
@@ -74,13 +74,13 @@ export async function POST(req: NextRequest) {
     if (!investor_id) {
       return NextResponse.json(
         { error: "Missing investor_id" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
     );
 
     // Capture metadata
@@ -113,7 +113,7 @@ export async function POST(req: NextRequest) {
       console.error("Agreement insert error:", error);
       return NextResponse.json(
         { error: `Failed to create agreement: ${error.message}` },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -131,10 +131,10 @@ export async function POST(req: NextRequest) {
       signed_at: agreement.signed_at,
     });
   } catch (error) {
-    console.error("Mudarabah agreement error:", error);
+    console.error("Islamic Finance Agreement error:", error);
     return NextResponse.json(
       { error: "Failed to capture agreement" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

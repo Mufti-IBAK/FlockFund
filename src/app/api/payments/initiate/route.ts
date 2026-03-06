@@ -2,11 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
 // POST /api/payments/initiate
-// Body: { investor_id, birds_count, gateway: 'flutterwave', email, flock_id, mudarabah_agreement_id }
+// Body: { investor_id, birds_count, gateway: 'flutterwave', email, flock_id, agreement_id }
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { investor_id, birds_count, gateway, flock_id, callback_url, mudarabah_agreement_id } = body;
+    const { investor_id, birds_count, gateway, flock_id, callback_url, agreement_id } = body;
 
     if (!investor_id || !birds_count) {
       return NextResponse.json(
@@ -15,8 +15,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Mudarabah agreement is required for new investments
-    if (!mudarabah_agreement_id) {
+    // Islamic Finance Agreement required for new investments
+    if (!agreement_id) {
       return NextResponse.json(
         { error: "Mudarabah agreement must be signed before investing" },
         { status: 400 },
@@ -40,13 +40,13 @@ export async function POST(req: NextRequest) {
     const { data: agreement } = await supabase
       .from("mudarabah_agreements")
       .select("id")
-      .eq("id", mudarabah_agreement_id)
+      .eq("id", agreement_id)
       .eq("investor_id", investor_id)
       .single();
 
     if (!agreement) {
       return NextResponse.json(
-        { error: "Invalid or missing Mudarabah agreement" },
+        { error: "Invalid or missing Islamic Finance agreement" },
         { status: 400 },
       );
     }
@@ -80,7 +80,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Create pending investment with Mudarabah fields
+    // Create pending investment with Islamic Finance fields
     const { data: investment, error: invError } = await supabase
       .from("investments")
       .insert({
@@ -90,7 +90,7 @@ export async function POST(req: NextRequest) {
         cost_paid: amount,
         amount_invested: amount,
         capital_amount: amount,
-        mudarabah_agreement_id,
+        agreement_id,
         profit_ratio_investor: investorRatio,
         profit_ratio_mudarib: mudaribRatio,
         status: "pending",
@@ -113,7 +113,7 @@ export async function POST(req: NextRequest) {
     await supabase
       .from("mudarabah_agreements")
       .update({ investment_id: investment.id })
-      .eq("id", mudarabah_agreement_id);
+      .eq("id", agreement_id);
 
     // Generate checkout URL
     let checkoutUrl = "";

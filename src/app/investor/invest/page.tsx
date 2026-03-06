@@ -14,11 +14,11 @@ interface Flock {
   cost_per_bird?: number;
   min_birds_per_investment?: number;
   cost_breakdown?: {
-    doc: number;
+    bird_purchase: number;
     feed: number;
     medication: number;
-    labor: number;
-    overhead: number;
+    combined_operational_fees: number;
+    other: number;
   };
 }
 
@@ -29,11 +29,11 @@ function formatNaira(n: number): string {
 }
 
 const DEFAULT_BREAKDOWN = {
-  doc: 800,
+  bird_purchase: 800,
   feed: 2200,
   medication: 350,
-  labor: 500,
-  overhead: 400,
+  combined_operational_fees: 900,
+  other: 0,
 };
 
 export default function InvestPage() {
@@ -154,7 +154,7 @@ export default function InvestPage() {
 
   async function handleInvest() {
     if (!agreementAccepted || !agreementId) {
-      alert("You must sign the Mudarabah agreement before investing.");
+      alert("You must sign the Agreement before investing.");
       return;
     }
     const f = flocks.find(fl => fl.id === selectedFlock);
@@ -224,7 +224,7 @@ export default function InvestPage() {
           Invest in a Flock
         </h1>
         <p className="text-slate-400 text-sm mt-1">
-          Islamic Finance — We strictly follow the Mudarabah Al-Muqayyad model of Islamic finance and investment.
+          Islamic Finance — We strictly follow the Mudarabah Al-Muqayyad model of islamic finance and investment.
         </p>
       </div>
 
@@ -404,21 +404,21 @@ export default function InvestPage() {
                   Estimated Cost Per Bird (Transparency)
                 </label>
               </div>
-              <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
                 {[
-                  { label: "Birds (DOC)", key: "doc", icon: "egg" },
+                  { label: "Bird Purchase", key: "bird_purchase", icon: "egg" },
                   { label: "Feed", key: "feed", icon: "bakery_dining" },
-                  { label: "Meds", key: "medication", icon: "vaccines" },
-                  { label: "Labor", key: "labor", icon: "engineering" },
-                  { label: "Overhead", key: "overhead", icon: "factory" },
+                  { label: "Medication", key: "medication", icon: "vaccines" },
+                  { label: "Op. Fees", key: "combined_operational_fees", icon: "engineering" },
+                  { label: "Other", key: "other", icon: "factory" },
                 ].map((item) => (
                   <div key={item.key} className="p-3 bg-slate-50 rounded-lg border border-slate-100/50">
                     <div className="flex items-center gap-1.5 mb-1 opacity-40">
                       <span className="material-symbols-outlined text-[10px]">{item.icon}</span>
                       <p className="text-[8px] font-bold uppercase tracking-tight">{item.label}</p>
                     </div>
-                    <p className="text-xs font-mono font-bold text-primary">
-                      ₦{costBreakdown[item.key]?.toLocaleString() || "0"}
+                    <p className="text-sm font-mono font-bold text-primary">
+                      ₦{costBreakdown[item.key as keyof typeof DEFAULT_BREAKDOWN]?.toLocaleString() || "0"}
                     </p>
                   </div>
                 ))}
@@ -436,7 +436,7 @@ export default function InvestPage() {
               <div className="flex items-center gap-2 mb-4">
                 <span className="material-symbols-outlined text-emerald-600 text-lg">gavel</span>
                 <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
-                  Mudarabah Al-Muqayyada Agreement
+                  Signatory Agreement
                 </label>
               </div>
 
@@ -458,7 +458,7 @@ export default function InvestPage() {
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="material-symbols-outlined text-xs mt-0.5">warning</span>
-                    <span><strong>Loss Liability:</strong> Financial loss from normal operations is borne by the investor. FlockFund is liable only if negligence is proven</span>
+                    <span><strong>Loss Liability:</strong> Financial loss from normal operations is borne by the Investor. FlockFund is liable only if negligence is proven</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="material-symbols-outlined text-xs mt-0.5">info</span>
@@ -596,14 +596,14 @@ TERMS AND CONDITIONS:
               ) : !agreementAccepted ? (
                 <>
                   <span className="material-symbols-outlined text-lg">lock</span>
-                  Sign Agreement First
+                  Sign Agreement
                 </>
               ) : (
                 <>
                   <span className="material-symbols-outlined text-lg">
                     shopping_cart
                   </span>
-                  Pay Now — Invest
+                  Pay Now — Islamic Finance Investment
                 </>
               )}
             </button>

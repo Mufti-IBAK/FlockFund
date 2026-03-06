@@ -29,7 +29,7 @@ const steps = [
   {
     num: "04",
     title: "Sale & Distribution",
-    desc: "At approximately Day 28, birds are sold to our network of buyers. Under the Mudarabah model, your capital is returned first, then net profit is split — 70% to FlockFund (Mudarib) and 30% to investors (Rabb-ul-Maal). Your share is credited directly to your wallet.",
+    desc: "At approximately Day 28, birds are sold to our network of buyers. Under the Islamic Finance model, your capital is returned first, then net profit is split — 70% to FlockFund (Flockfund) and 30% to investors (Investor). Your share is credited directly to your wallet.",
     icon: "account_balance",
     color: "from-violet-500 to-purple-600",
   },
@@ -76,11 +76,11 @@ const faqs = [
   },
   {
     q: "Is my profit guaranteed?",
-    a: "No. Under the Mudarabah Al-Muqayyada model, returns are based on actual farm performance. Your capital may be at risk. Financial loss from normal business operations is borne by investors. FlockFund is liable only if negligence is proven.",
+    a: "No. Under the Islamic Finance Al-Muqayyada model, returns are based on actual farm performance. Your capital may be at risk. Financial loss from normal business operations is borne by investors. FlockFund is liable only if negligence is proven.",
   },
   {
-    q: "What is the 70/30 Mudarabah profit split?",
-    a: "After the birds are sold, your capital is returned first. Then verified costs (feed, drugs, maintenance, tax) are deducted. The remaining net profit is split: 70% to FlockFund (Mudarib) for operational management, and 30% to you (Rabb-ul-Maal / Investor).",
+    q: "What is the 70/30 Islamic Finance profit split?",
+    a: "After the birds are sold, your capital is returned first. Then verified costs (feed, drugs, maintenance, tax) are deducted. The remaining net profit is split: 70% to FlockFund (Flockfund) for operational management, and 30% to you (Investor / Investor).",
   },
   {
     q: "How do I withdraw my earnings?",
@@ -146,7 +146,7 @@ export default function HowToInvestPage() {
     if (s.num === "04")
       return {
         ...s,
-        desc: `At approximately Day ${cycleDuration}, birds are sold to our network of buyers. Under the Mudarabah model, your capital is returned first, then net profit is split — ${100 - investorShare}% to FlockFund (Mudarib) and ${investorShare}% to investors (Rabb-ul-Maal). Your share is credited directly to your wallet.`,
+        desc: `At approximately Day ${cycleDuration}, birds are sold to our network of buyers. Under the Islamic Finance model, your capital is returned first, then net profit is split — ${100 - investorShare}% to FlockFund (Flockfund) and ${investorShare}% to investors (Investor). Your share is credited directly to your wallet.`,
       };
     return s;
   });

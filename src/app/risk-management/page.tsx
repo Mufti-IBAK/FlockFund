@@ -192,14 +192,14 @@ export default function RiskManagementPage() {
               </div>
               <div>
                 <h3 className="text-lg font-bold text-primary mb-2 border-l-4 border-sky-500 pl-3">
-                  Mudarabah Negligence Accountability
+                  Islamic Finance Negligence Accountability
                 </h3>
                 <p className="text-sm text-slate-500 leading-relaxed">
-                  Under the Mudarabah Al-Muqayyada model, financial loss from
+                  Under the Islamic Finance Al-Muqayyada model, financial loss from
                   normal business operations is borne by the investor
-                  (Rabb-ul-Maal). However, if loss is caused by FlockFund&apos;s
+                  (Investor). However, if loss is caused by FlockFund&apos;s
                   negligence — failure to follow biosecurity protocols, ignoring
-                  veterinary advice, or mismanagement — FlockFund (Mudarib) is
+                  veterinary advice, or mismanagement — FlockFund (Flockfund) is
                   liable to compensate the investor&apos;s full capital. All
                   incidents are investigated and documented transparently.
                 </p>
@@ -283,7 +283,7 @@ export default function RiskManagementPage() {
               {
                 day: "Day 11",
                 label: "Assessment",
-                desc: "Under Mudarabah rules, financial loss is assessed. If caused by negligence, FlockFund bears the loss. Otherwise, investors bear the financial loss. FlockFund may waive profit share for next cycles as goodwill.",
+                desc: "Under Islamic Finance rules, financial loss is assessed. If caused by negligence, FlockFund bears the loss. Otherwise, investors bear the financial loss. FlockFund may waive profit share for next cycles as goodwill.",
               },
               {
                 day: "Day 25",
@@ -325,7 +325,7 @@ export default function RiskManagementPage() {
             {[
               {
                 q: "Can I lose all my money?",
-                a: "Yes, it is possible. Under the Mudarabah model, investors bear financial loss from normal business operations (disease, natural disasters, market fluctuations). However, strict biosecurity, veterinary oversight, and diversification drastically reduce this likelihood.",
+                a: "Yes, it is possible. Under the Islamic Finance model, investors bear financial loss from normal business operations (disease, natural disasters, market fluctuations). However, strict biosecurity, veterinary oversight, and diversification drastically reduce this likelihood.",
               },
               {
                 q: "What happens if FlockFund is negligent?",

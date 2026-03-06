@@ -91,9 +91,9 @@ export default function CompliancePage() {
               <span className="material-symbols-outlined text-accent text-xl mb-2">
                 monitoring
               </span>
-              <p className="text-sm text-white/90 font-bold mb-1">
-                Performance Based
-              </p>
+              <p className="text-slate-400 text-sm mt-1">
+          Shariah Compliance & Legal Framework — We strictly follow the Mudarabah Al-Muqayyad model of islamic finance and investment.
+        </p>
               <p className="text-xs text-white/50">
                 Profits are strictly shared based on actual farm sale
                 performance.
@@ -195,7 +195,7 @@ export default function CompliancePage() {
                 </h3>
                 <p className="text-sm text-slate-500 leading-relaxed">
                   FlockFund pays all applicable corporate taxes on its 70%
-                  Mudarib share. Individual investors are responsible for reporting and
+                  Flockfund share. Individual investors are responsible for reporting and
                   paying taxes on their 30% profit share based on their
                   jurisdiction.
                 </p>
@@ -211,7 +211,7 @@ export default function CompliancePage() {
           <p className="text-sm text-slate-500 max-w-2xl mx-auto leading-relaxed mb-6">
             Our marketing is honest and transparent. We never make exaggerated
             claims, guarantee specific returns, or target vulnerable
-            populations. Under the Mudarabah Al-Muqayyada model, we maintain
+            populations. Under the Islamic Finance Al-Muqayyada model, we maintain
             continuous veterinary oversight, biosecurity protocols, and
             negligence-based loss accountability to manage systemic risk.
           </p>

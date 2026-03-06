@@ -31,6 +31,9 @@ function ROICalculator({ settings }: { settings: any }) {
       <h3 className="font-heading text-lg font-extrabold text-primary mb-1 tracking-tight">
         Investment Calculator
       </h3>
+      <p className="text-slate-400 text-sm mt-1">
+        How your profit is calculated — We strictly follow the Mudarabah Al-Muqayyad model of islamic finance and investment.
+      </p>
       <p className="text-slate-400 text-xs mb-6">
         Drag the slider to see projections for different flock sizes
       </p>
@@ -395,9 +398,9 @@ export default function ReturnsPage() {
               </div>
               <p className="text-white/40 text-xs leading-relaxed">
                 The {100 - (settings.investor_share_percentage || 30)}/
-                {settings.investor_share_percentage || 30} Mudarabah split is
-                fixed. {100 - (settings.investor_share_percentage || 30)}% goes to FlockFund (Mudarib) for management,{" "}
-                {settings.investor_share_percentage || 30}% goes to investors (Rabb-ul-Maal).
+                {settings.investor_share_percentage || 30} Islamic Finance split is
+                fixed. {100 - (settings.investor_share_percentage || 30)}% goes to FlockFund (Flockfund) for management,{" "}
+                {settings.investor_share_percentage || 30}% goes to investors (Investor).
                 Capital is returned first before profit calculation. No hidden fees.
               </p>
             </div>
@@ -508,7 +511,7 @@ export default function ReturnsPage() {
                       {settings.market_floor_price?.toLocaleString()}/bird
                     </p>
                     <p className="text-white/40 text-xs">
-                      Target minimum via bulk buyers and processor contracts (not guaranteed under Mudarabah)
+                      Target minimum via bulk buyers and processor contracts (not guaranteed under Islamic Finance)
                     </p>
                   </div>
                 </div>

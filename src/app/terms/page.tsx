@@ -29,7 +29,7 @@ const investmentServices = [
   },
   {
     title: "Profit Distribution",
-    desc: "Under the Mudarabah Al-Muqayyada model, net profit (revenue minus returned capital and verified costs) is split 70/30 — 70% to FlockFund (Mudarib) and 30% to investors (Rabb-ul-Maal). Capital is returned to investors first before any profit is calculated.",
+    desc: "Under the Islamic Finance Al-Muqayyada model, net profit (revenue minus returned capital and verified costs) is split 70/30 — 70% to FlockFund (Flockfund) and 30% to investors (Investor). Capital is returned to investors first before any profit is calculated.",
   },
   {
     title: "Reinvestment Rule",
@@ -121,6 +121,10 @@ export default function TermsPage() {
               <h2 className="font-heading text-2xl font-bold text-primary">
                 Investment Services
               </h2>
+              <p className="text-slate-400 text-sm mt-1">
+                Last updated: {new Date().toLocaleDateString()} — We strictly
+                follow the Islamic Finance Al-Muqayyad model of investment.
+              </p>
               <p className="text-slate-500 text-sm">
                 Understanding your SLIU (Short-cycle Livestock Investment Units)
               </p>
@@ -159,15 +163,27 @@ export default function TermsPage() {
             <ul className="space-y-4 text-white/70 text-sm relative z-10">
               <li className="flex items-start gap-3">
                 <span className="text-accent mt-1">•</span>
-                Under Mudarabah rules, <strong>financial loss from normal business operations</strong> (disease, market fluctuations, natural events) is borne entirely by the investor (Rabb-ul-Maal).
+                Under Mudarabah rules,{" "}
+                <strong>
+                  financial loss from normal business operations
+                </strong>{" "}
+                (disease, market fluctuations, natural events) is borne entirely
+                by the investor (Rabb-ul-Maal).
               </li>
               <li className="flex items-start gap-3">
                 <span className="text-accent mt-1">•</span>
-                If loss is caused by <strong>FlockFund&apos;s negligence or breach of protocols</strong>, FlockFund (Mudarib) is liable to compensate investors for their full capital.
+                If loss is caused by{" "}
+                <strong>
+                  FlockFund&apos;s negligence or breach of protocols
+                </strong>
+                , FlockFund (Mudarib) is liable to compensate investors for
+                their full capital.
               </li>
               <li className="flex items-start gap-3">
                 <span className="text-accent mt-1">•</span>
-                Negligence includes: failure to follow biosecurity protocols, ignoring veterinary advice, misappropriation of funds, or gross mismanagement.
+                Negligence includes: failure to follow biosecurity protocols,
+                ignoring veterinary advice, misappropriation of funds, or gross
+                mismanagement.
               </li>
             </ul>
           </section>
