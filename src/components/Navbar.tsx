@@ -12,12 +12,29 @@ const DASHBOARD_ROUTES = [
   "/investor",
   "/accountant",
   "/community",
+  "/sales-manager",
 ];
 
 export default function Navbar() {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navRef = useRef<HTMLElement>(null);
+  const mobileMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        mobileMenuRef.current && 
+        !mobileMenuRef.current.contains(event.target as Node) &&
+        navRef.current &&
+        !navRef.current.contains(event.target as Node)
+      ) {
+        setMobileMenuOpen(false);
+      }
+    }
+    if (mobileMenuOpen) document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [mobileMenuOpen]);
 
   // Check if we should hide the navbar on dashboard routes
   const isDashboard = DASHBOARD_ROUTES.some(
@@ -125,6 +142,7 @@ export default function Navbar() {
       {/* Mobile Menu Overlay */}
       {mobileMenuOpen && (
         <div
+          ref={mobileMenuRef}
           className={`lg:hidden absolute top-[80px] left-6 right-6 ${isHomePage ? "bg-primary/95 border-white/10" : "bg-white/95 border-slate-200"} backdrop-blur-xl border rounded-2xl p-6 shadow-2xl flex flex-col gap-6 animate-fade-in-down`}
         >
           <div className="flex flex-col gap-4">

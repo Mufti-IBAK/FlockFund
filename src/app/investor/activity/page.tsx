@@ -153,23 +153,24 @@ export default function InvestorActivity() {
             let detail = "";
 
             if (isIncident) {
+              const incidentTitle = r.cause ? r.cause.replace(/_/g, ' ').toUpperCase() : 'FARM INCIDENT';
               if (r.status === "received") {
-                title = `VET Alerted: ${r.title}`;
+                title = `VET Alerted: ${incidentTitle}`;
                 icon = "notification_important";
                 color = "bg-amber-100 text-amber-600";
               } else if (r.status === "investigating") {
-                title = `Investigation in Progress: ${r.title}`;
+                title = `Investigation in Progress: ${incidentTitle}`;
                 icon = "sync";
                 color = "bg-amber-50 text-amber-500";
               } else if (r.status === "reported") {
-                title = `Incident Report Submitted: ${r.title}`;
+                title = `Incident Report Submitted: ${incidentTitle}`;
                 icon = "medical_services";
                 color = "bg-indigo-100 text-indigo-600";
               } else if (r.status === "resolved") {
                 const isRisk = r.admin_determination === "risk_neg_found";
                 title = isRisk
-                  ? `Risk Found: ${r.title}`
-                  : `Incident Resolved: ${r.title}`;
+                  ? `Risk Found: ${incidentTitle}`
+                  : `Incident Resolved: ${incidentTitle}`;
                 icon = isRisk ? "gavel" : "verified";
                 color = isRisk
                   ? "bg-rose-100 text-rose-600"

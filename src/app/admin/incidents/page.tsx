@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 interface Incident {
   id: string;
   flock_id: string;
-  title: string;
+  cause: string;
   description: string;
   severity: "low" | "medium" | "high" | "critical";
   status: "received" | "investigating" | "resolved" | "reported" | "dismissed";
@@ -188,7 +188,7 @@ export default function AdminIncidentsPage() {
               <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-3 mb-4">
                 <div>
                   <h3 className="text-base font-bold text-primary">
-                    {incident.title}
+                    {incident.cause ? incident.cause.replace(/_/g, ' ').toUpperCase() : 'FARM INCIDENT'}
                   </h3>
                   <p className="text-xs text-slate-400 mt-1">
                     Flock: {incident.flock_id.slice(0, 8)} •{" "}

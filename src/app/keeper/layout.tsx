@@ -13,6 +13,7 @@ const navItems = [
   { icon: "add_circle", label: "New Report", href: "/keeper/new-report" },
   { icon: "assignment", label: "My Reports", href: "/keeper/reports" },
   { icon: "payments", label: "Fund Requests", href: "/keeper/requests" },
+  { icon: "shopping_bag", label: "Sales Review", href: "/keeper/sales" },
   { icon: "settings", label: "Settings", href: "/keeper/settings" },
 ];
 

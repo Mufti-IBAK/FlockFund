@@ -78,9 +78,11 @@ export default function ManagerIncidents() {
 
   async function updateStatus(id: string, status: Incident['status']) {
     try {
-      const { createClient } = await import('@/lib/supabase/client');
-      const supabase = createClient();
-      await supabase.from("incident_reports").update({ status }).eq("id", id);
+      await fetch('/api/incidents', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, status })
+      });
       await loadData();
     } catch (err) {
       console.error(err);
@@ -91,12 +93,11 @@ export default function ManagerIncidents() {
     if (!inspecting) return;
     setSubmitting(true);
     try {
-      const { createClient } = await import('@/lib/supabase/client');
-      const supabase = createClient();
-      
-      const { error } = await supabase
-        .from("incident_reports")
-        .update({
+      const res = await fetch('/api/incidents', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: inspecting.id,
           status: 'reported',
           birds_dead: birdsDead,
           birds_culled: birdsCulled,
@@ -108,12 +109,11 @@ export default function ManagerIncidents() {
           action_plan: actionPlan,
           recommendations: recommendations,
           history: history,
-          affected_flock_ids: selectedFlockIds,
-          resolved_at: new Date().toISOString()
+          affected_flock_ids: selectedFlockIds
         })
-        .eq("id", inspecting.id);
+      });
 
-      if (error) throw error;
+      if (!res.ok) throw new Error("API failed");
       
       alert("Professional VET Report Submitted to Admin.");
       setShowReportModal(false);

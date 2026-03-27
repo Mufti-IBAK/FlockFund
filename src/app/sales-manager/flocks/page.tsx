@@ -10,6 +10,8 @@ interface Flock {
   current_count: number;
   start_date: string;
   status: string;
+  sold_birds?: number;
+  remaining_birds?: number;
 }
 
 export default function SalesManagerFlocks() {
@@ -27,7 +29,30 @@ export default function SalesManagerFlocks() {
           .select("id, name, total_birds, current_count, start_date, status")
           .eq("status", "active")
           .order("created_at", { ascending: false });
-        setFlocks(data || []);
+
+        const { data: salesData } = await supabase
+          .from("sales_reports")
+          .select("flock_id, amount_birds, is_manure, keeper_status, accountant_status");
+
+        const soldMap: Record<string, number> = {};
+        if (salesData) {
+          salesData.forEach(sale => {
+            if (!sale.is_manure) {
+              soldMap[sale.flock_id] = (soldMap[sale.flock_id] || 0) + (sale.amount_birds || 0);
+            }
+          });
+        }
+
+        const enrichedFlocks = (data || []).map(f => {
+          const sold = soldMap[f.id] || 0;
+          return {
+            ...f,
+            sold_birds: sold,
+            remaining_birds: Math.max(0, f.current_count - sold)
+          };
+        });
+
+        setFlocks(enrichedFlocks || []);
       } catch (err) {
         console.error("Load failed:", err);
       } finally {
@@ -82,14 +107,18 @@ export default function SalesManagerFlocks() {
                  <span className="px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-[10px] font-bold uppercase tracking-wider">Active</span>
                </div>
                
-               <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-50">
+               <div className="grid grid-cols-3 gap-4 pt-4 border-t border-slate-50">
                   <div>
                     <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-1">Total Birds</p>
                     <p className="font-mono font-bold text-primary">{f.total_birds.toLocaleString()}</p>
                   </div>
                   <div>
-                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-1">Current</p>
-                    <p className="font-mono font-bold text-accent">{f.current_count.toLocaleString()}</p>
+                    <p className="text-[10px] text-emerald-400 font-bold uppercase tracking-widest mb-1">Sold Live</p>
+                    <p className="font-mono font-bold text-emerald-600">{f.sold_birds?.toLocaleString()}</p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] text-accent/70 font-bold uppercase tracking-widest mb-1">Remaining</p>
+                    <p className="font-mono font-bold text-accent">{f.remaining_birds?.toLocaleString()}</p>
                   </div>
                </div>
                

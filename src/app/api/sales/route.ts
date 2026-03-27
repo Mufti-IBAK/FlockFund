@@ -25,7 +25,9 @@ export async function POST(request: Request) {
   const { data, error } = await supabase.from('sales_reports').insert({
     ...body,
     sales_manager_id: user.id,
-    sale_timestamp: new Date().toISOString()
+    sale_timestamp: new Date().toISOString(),
+    accountant_status: 'pending',
+    keeper_status: 'pending'
   }).select().single();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
@@ -36,16 +38,16 @@ export async function POST(request: Request) {
 
   const { data: recipients } = await supabase
     .from('profiles')
-    .select('id')
-    .in('role', ['admin', 'accountant']);
+    .select('id, role')
+    .in('role', ['admin', 'accountant', 'keeper']);
 
   if (recipients) {
     const notifs = recipients.map(r => ({
       user_id: r.id,
       title: body.is_manure ? '💩 Manure Sale Reported' : '🍗 Bird Sale Reported',
-      message: `${name} recorded a sale of ${body.amount_birds || 0} birds/items for ₦${body.total_revenue?.toLocaleString()}`,
+      message: `${name} recorded a sale of ${body.amount_birds || 0} birds/items for ₦${body.total_revenue?.toLocaleString()}. Needs review.`,
       type: 'system',
-      redirect_url: '/accountant/sales'
+      redirect_url: r.role === 'keeper' ? '/keeper/sales' : (r.role === 'accountant' ? '/accountant/sales' : '/admin/sales')
     }));
     await supabase.from('notifications').insert(notifs);
   }

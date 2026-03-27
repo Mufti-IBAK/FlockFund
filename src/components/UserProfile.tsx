@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 
 interface UserInfo {
@@ -141,6 +141,17 @@ export function TopBarUserProfile() {
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
   const [isSwitching, setIsSwitching] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setMenuOpen(false);
+      }
+    }
+    if (menuOpen) document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [menuOpen]);
 
   const canSwitchRole =
     user?.role === "admin" ||
@@ -193,7 +204,7 @@ export function TopBarUserProfile() {
   }
 
   return (
-    <div className="relative">
+    <div className="relative" ref={menuRef}>
       <button
         onClick={() => setMenuOpen(!menuOpen)}
         className="flex items-center gap-3 hover:bg-slate-50 rounded-xl px-3 py-2 transition-all duration-300 group"
@@ -218,10 +229,6 @@ export function TopBarUserProfile() {
       {/* Dropdown menu */}
       {menuOpen && (
         <>
-          <div
-            className="fixed inset-0 z-40"
-            onClick={() => setMenuOpen(false)}
-          />
           <div className="absolute right-0 top-full mt-2 w-56 bg-white rounded-xl border border-slate-200 shadow-2xl shadow-black/10 z-50 overflow-hidden animate-fade-in-up">
             <div className="p-4 border-b border-slate-100">
               <p className="text-sm font-bold text-primary truncate">

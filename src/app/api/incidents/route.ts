@@ -137,6 +137,19 @@ export async function PATCH(req: NextRequest) {
       payload.investigation_started_at = updates.investigation_started_at;
     if (updates.resolved) payload.resolved_at = new Date().toISOString();
 
+    // VET Report Fields
+    if (updates.birds_dead !== undefined) payload.birds_dead = updates.birds_dead;
+    if (updates.birds_culled !== undefined) payload.birds_culled = updates.birds_culled;
+    if (updates.birds_isolated !== undefined) payload.birds_isolated = updates.birds_isolated;
+    if (updates.birds_recovered !== undefined) payload.birds_recovered = updates.birds_recovered;
+    if (updates.birds_sold !== undefined) payload.birds_sold = updates.birds_sold;
+    if (updates.clinical_exam !== undefined) payload.clinical_exam = updates.clinical_exam;
+    if (updates.physical_exam !== undefined) payload.physical_exam = updates.physical_exam;
+    if (updates.action_plan !== undefined) payload.action_plan = updates.action_plan;
+    if (updates.recommendations !== undefined) payload.recommendations = updates.recommendations;
+    if (updates.history !== undefined) payload.history = updates.history;
+    if (updates.affected_flock_ids !== undefined) payload.affected_flock_ids = updates.affected_flock_ids;
+
     payload.updated_at = new Date().toISOString();
 
     const { data, error } = await supabase

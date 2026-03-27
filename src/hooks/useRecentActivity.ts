@@ -35,6 +35,7 @@ export function useRecentActivity(limit = 9) {
         recentInvestments,
         recentReports,
         recentIncidents,
+        recentSales,
       ] = await Promise.all([
         supabase
           .from("profiles")
@@ -58,6 +59,11 @@ export function useRecentActivity(limit = 9) {
           .select("title, status, admin_determination, created_at, updated_at")
           .order("updated_at", { ascending: false })
           .limit(limit),
+        supabase
+          .from("sales_reports")
+          .select("amount_birds, is_manure, total_revenue, sale_timestamp")
+          .order("sale_timestamp", { ascending: false })
+          .limit(limit),
       ]);
 
       const items: ActivityItem[] = [];
@@ -70,6 +76,17 @@ export function useRecentActivity(limit = 9) {
           time: timeAgo(p.created_at),
           color: "text-emerald-500",
           sortDate: new Date(p.created_at).getTime(),
+        });
+      });
+
+      (recentSales.data || []).forEach((sale) => {
+        items.push({
+          icon: sale.is_manure ? "compost" : "inventory_2",
+          text: sale.is_manure ? "Manure Batch Sold" : "Birds Sold & Dispatched",
+          detail: `Revenue: ₦${(sale.total_revenue || 0).toLocaleString()}${sale.is_manure ? "" : ` · ${sale.amount_birds} birds`}`,
+          time: timeAgo(sale.sale_timestamp),
+          color: "text-emerald-500",
+          sortDate: new Date(sale.sale_timestamp).getTime(),
         });
       });
 
@@ -195,11 +212,21 @@ export function useRecentActivity(limit = 9) {
       )
       .subscribe();
 
+    const salesSub = supabase
+      .channel("sales_changes")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "sales_reports" },
+        () => fetchActivity(),
+      )
+      .subscribe();
+
     return () => {
       supabase.removeChannel(profilesSub);
       supabase.removeChannel(investmentsSub);
       supabase.removeChannel(reportsSub);
       supabase.removeChannel(incidentsSub);
+      supabase.removeChannel(salesSub);
     };
   }, []);
 
