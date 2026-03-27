@@ -91,6 +91,8 @@ export default function AdminOverview() {
           recentInvestorsRes,
           recentInvestmentsRes,
           recentReportsRes,
+          salesThisMonthRes,
+          salesPrevMonthRes,
         ] = await Promise.all([
           // KPI: Active Flocks count
           supabase
@@ -162,6 +164,19 @@ export default function AdminOverview() {
             .select("mortality_count, created_at, status")
             .order("created_at", { ascending: false })
             .limit(5),
+          // KPI/Sales: Revenue this month mapped from actual sales
+          supabase
+            .from("sales_reports")
+            .select("total_revenue")
+            .eq("accountant_status", "confirmed")
+            .gte("sale_timestamp", startOfMonth),
+          // KPI/Sales: Revenue previous month mapped from actual sales
+          supabase
+            .from("sales_reports")
+            .select("total_revenue")
+            .eq("accountant_status", "confirmed")
+            .gte("sale_timestamp", startOfPrevMonth)
+            .lte("sale_timestamp", endOfPrevMonth),
         ]);
 
         /* ── KPI 1: Active Flocks ── */
@@ -173,14 +188,13 @@ export default function AdminOverview() {
         const investorsNewThisWeek = investorsThisWeekRes.count ?? 0;
 
         /* ── KPI 3: Revenue MTD ── */
-        const revThisMonth = (revThisMonthRes.data || []).reduce(
-          (s, r) => s + (r.amount_invested || 0),
-          0,
-        );
-        const revPrevMonth = (revPrevMonthRes.data || []).reduce(
-          (s, r) => s + (r.amount_invested || 0),
-          0,
-        );
+        const investmentsRevThisMonth = (revThisMonthRes.data || []).reduce((s, r) => s + (r.amount_invested || 0), 0);
+        const salesRevThisMonth = (salesThisMonthRes.data || []).reduce((s, r) => s + (r.total_revenue || 0), 0);
+        const revThisMonth = investmentsRevThisMonth + salesRevThisMonth;
+
+        const investmentsRevPrevMonth = (revPrevMonthRes.data || []).reduce((s, r) => s + (r.amount_invested || 0), 0);
+        const salesRevPrevMonth = (salesPrevMonthRes.data || []).reduce((s, r) => s + (r.total_revenue || 0), 0);
+        const revPrevMonth = investmentsRevPrevMonth + salesRevPrevMonth;
         const revChangePct =
           revPrevMonth > 0
             ? ((revThisMonth - revPrevMonth) / revPrevMonth) * 100

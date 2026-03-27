@@ -49,6 +49,12 @@ export async function GET(req: Request) {
       .from("profit_cycles")
       .select("id, total_revenue, calculated_at");
 
+    // c) Confirmed Direct Sales (from sales_reports)
+    const { data: salesRevenues } = await supabaseAdmin
+      .from("sales_reports")
+      .select("id, total_revenue, is_manure, sale_timestamp")
+      .eq("accountant_status", "confirmed");
+
     // 3. Fetch Outflows
     // a) Fund Requests (farm ops)
     const { data: fundRequests } = await supabaseAdmin
@@ -102,9 +108,20 @@ export async function GET(req: Request) {
       ledger.push({
         id: cyc.id,
         type: "INFLOW",
-        source: "Flock Sale Revenue",
+        source: "Flock Sale Revenue (Profit Cycle)",
         amount: cyc.total_revenue,
         date: cyc.calculated_at,
+        status: "completed",
+      });
+    });
+
+    (salesRevenues || []).forEach((sale) => {
+      ledger.push({
+        id: sale.id,
+        type: "INFLOW",
+        source: sale.is_manure ? "Manure Batch Sale" : "Bird Stock Sale",
+        amount: sale.total_revenue || 0,
+        date: sale.sale_timestamp,
         status: "completed",
       });
     });
