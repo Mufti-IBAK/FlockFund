@@ -76,12 +76,63 @@ export default function InvestorActivity() {
             type: "report",
             sortDate: new Date(r.created_at).getTime(),
           })),
-          ...(incidentsRes.data || []).map((i) => ({
-            ...i,
-            type: "incident",
-            sortDate: new Date(i.updated_at).getTime(),
-          })),
         ];
+
+        (incidentsRes.data || []).forEach((inc) => {
+          const causeTitle = inc.cause ? inc.cause.replace(/_/g, ' ').toUpperCase() : 'FARM INCIDENT';
+
+          combined.push({
+            id: `${inc.id}-alert`,
+            type: "incident_custom",
+            title: `Keeper Alerted: ${causeTitle}`,
+            icon: "notification_important",
+            color: "bg-amber-100 text-amber-600",
+            detail: inc.description?.slice(0, 80) + "...",
+            sortDate: new Date(inc.created_at).getTime(),
+            dateDisplay: inc.created_at
+          });
+
+          if (inc.investigation_started_at) {
+            combined.push({
+              id: `${inc.id}-investigating`,
+              type: "incident_custom",
+              title: `Investigation Started: ${causeTitle}`,
+              icon: "sync",
+              color: "bg-amber-50 text-amber-500",
+              detail: "VET is on-site examining the situation.",
+              sortDate: new Date(inc.investigation_started_at).getTime(),
+              dateDisplay: inc.investigation_started_at
+            });
+          }
+
+          if (inc.status === "reported" || inc.status === "resolved") {
+            const rDate = inc.updated_at || inc.created_at;
+            combined.push({
+              id: `${inc.id}-reported`,
+              type: "incident_custom",
+              title: `VET Report Submitted: ${causeTitle}`,
+              icon: "medical_services",
+              color: "bg-indigo-100 text-indigo-600",
+              detail: "VET report submitted and pending Admin review.",
+              sortDate: new Date(rDate).getTime(),
+              dateDisplay: rDate
+            });
+          }
+
+          if (inc.status === "resolved" && inc.admin_determination) {
+            const isRisk = inc.admin_determination === "risk_neg_found";
+            combined.push({
+              id: `${inc.id}-resolved`,
+              type: "incident_custom",
+              title: isRisk ? `Risk Found: ${causeTitle}` : `Incident Resolved: ${causeTitle}`,
+              icon: isRisk ? "gavel" : "verified",
+              color: isRisk ? "bg-rose-100 text-rose-600" : "bg-emerald-100 text-emerald-600",
+              detail: inc.admin_resolution_notes || inc.resolution || "Admin concluded this issue.",
+              sortDate: new Date(inc.resolved_at || inc.updated_at).getTime(),
+              dateDisplay: inc.resolved_at || inc.updated_at
+            });
+          }
+        });
 
         combined.sort((a, b) => b.sortDate - a.sortDate);
         setReports(combined);
@@ -142,41 +193,21 @@ export default function InvestorActivity() {
       ) : (
         <div className="space-y-4">
           {reports.map((r: any) => {
-            const isIncident = r.type === "incident";
+            const isReport = r.type === "report";
 
-            let title = `Daily Health Report — ${r.mortality_count === 0 ? "All Clear" : `${r.mortality_count} mortality`}`;
-            let icon = r.mortality_count > 0 ? "warning" : "check_circle";
-            let color =
-              r.mortality_count > 0
-                ? "bg-rose-100 text-rose-500"
-                : "bg-emerald-100 text-emerald-600";
-            let detail = "";
+            let title = r.title;
+            let icon = r.icon;
+            let color = r.color;
+            let detail = r.detail;
 
-            if (isIncident) {
-              const incidentTitle = r.cause ? r.cause.replace(/_/g, ' ').toUpperCase() : 'FARM INCIDENT';
-              if (r.status === "received") {
-                title = `VET Alerted: ${incidentTitle}`;
-                icon = "notification_important";
-                color = "bg-amber-100 text-amber-600";
-              } else if (r.status === "investigating") {
-                title = `Investigation in Progress: ${incidentTitle}`;
-                icon = "sync";
-                color = "bg-amber-50 text-amber-500";
-              } else if (r.status === "reported") {
-                title = `Incident Report Submitted: ${incidentTitle}`;
-                icon = "medical_services";
-                color = "bg-indigo-100 text-indigo-600";
-              } else if (r.status === "resolved") {
-                const isRisk = r.admin_determination === "risk_neg_found";
-                title = isRisk
-                  ? `Risk Found: ${incidentTitle}`
-                  : `Incident Resolved: ${incidentTitle}`;
-                icon = isRisk ? "gavel" : "verified";
-                color = isRisk
-                  ? "bg-rose-100 text-rose-600"
+            if (isReport) {
+              title = `Daily Health Report — ${r.mortality_count === 0 ? "All Clear" : `${r.mortality_count} mortality`}`;
+              icon = r.mortality_count > 0 ? "warning" : "check_circle";
+              color =
+                r.mortality_count > 0
+                  ? "bg-rose-100 text-rose-500"
                   : "bg-emerald-100 text-emerald-600";
-                detail = r.admin_resolution_notes || r.resolution || "";
-              }
+              detail = "";
             }
 
             return (
@@ -199,7 +230,7 @@ export default function InvestorActivity() {
                       {title}
                     </p>
                     <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1 text-[10px] text-slate-400">
-                      {!isIncident && (
+                      {isReport && (
                         <>
                           {r.temperature_celsius && (
                             <span>🌡 {r.temperature_celsius}°C</span>
@@ -212,19 +243,16 @@ export default function InvestorActivity() {
                           )}
                         </>
                       )}
-                      {isIncident && r.description && (
-                        <span>{r.description.slice(0, 80)}...</span>
-                      )}
-                      {detail && (
+                      {!isReport && detail && (
                         <span className="text-slate-600 font-medium italic">
-                          Outcome: {detail}
+                          {detail}
                         </span>
                       )}
                     </div>
                   </div>
                   <span className="text-[10px] text-slate-300 font-mono whitespace-nowrap">
                     {new Date(
-                      r.report_date || r.updated_at || r.created_at,
+                      r.dateDisplay || r.report_date || r.created_at,
                     ).toLocaleDateString()}
                   </span>
                 </div>

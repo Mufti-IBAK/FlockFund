@@ -56,7 +56,7 @@ export function useRecentActivity(limit = 9) {
           .limit(limit),
         supabase
           .from("incident_reports")
-          .select("title, status, admin_determination, created_at, updated_at")
+          .select("cause, description, status, admin_determination, created_at, updated_at, investigation_started_at, resolved_at")
           .order("updated_at", { ascending: false })
           .limit(limit),
         supabase
@@ -124,42 +124,49 @@ export function useRecentActivity(limit = 9) {
       });
 
       (recentIncidents.data || []).forEach((inc) => {
-        if (inc.status === "received") {
-          items.push({
-            icon: "notification_important",
-            text: "VET Alerted",
-            detail: inc.title,
-            time: timeAgo(inc.created_at),
-            color: "text-amber-500",
-            sortDate: new Date(inc.created_at).getTime(),
-          });
-        } else if (inc.status === "investigating") {
+        const causeTitle = inc.cause ? inc.cause.replace(/_/g, " ").toUpperCase() : "FARM INCIDENT";
+
+        items.push({
+          icon: "notification_important",
+          text: "Incident Alert Raised",
+          detail: `Keeper reported: ${causeTitle}`,
+          time: timeAgo(inc.created_at),
+          color: "text-amber-500",
+          sortDate: new Date(inc.created_at).getTime(),
+        });
+
+        if (inc.investigation_started_at) {
           items.push({
             icon: "sync",
             text: "Investigation Started",
-            detail: `VET started on-site investigation for: ${inc.title}`,
-            time: timeAgo(inc.updated_at || inc.created_at),
-            color: "text-amber-500",
-            sortDate: new Date(inc.updated_at || inc.created_at).getTime(),
+            detail: `VET on-site examination for: ${causeTitle}`,
+            time: timeAgo(inc.investigation_started_at),
+            color: "text-amber-600",
+            sortDate: new Date(inc.investigation_started_at).getTime(),
           });
-        } else if (inc.status === "reported") {
+        }
+
+        if (inc.status === "reported" || inc.status === "resolved") {
+          const reportTime = inc.updated_at || inc.created_at;
           items.push({
             icon: "medical_services",
-            text: "Incident Reported",
-            detail: `VET report submitted for: ${inc.title}`,
-            time: timeAgo(inc.updated_at),
+            text: "VET Report Submitted",
+            detail: `Professional checkup filed for: ${causeTitle}`,
+            time: timeAgo(reportTime),
             color: "text-indigo-500",
-            sortDate: new Date(inc.updated_at).getTime(),
+            sortDate: new Date(reportTime).getTime(),
           });
-        } else if (inc.status === "resolved" && inc.admin_determination) {
+        }
+
+        if (inc.status === "resolved" && inc.admin_determination) {
           const isRisk = inc.admin_determination === "risk_neg_found";
           items.push({
             icon: isRisk ? "gavel" : "check_circle",
             text: isRisk ? "Risk (Negligence Found)" : "Incident Resolved",
-            detail: inc.title,
-            time: timeAgo(inc.updated_at),
+            detail: `Admin ruling for: ${causeTitle}`,
+            time: timeAgo(inc.resolved_at || inc.updated_at),
             color: isRisk ? "text-rose-600" : "text-emerald-600",
-            sortDate: new Date(inc.updated_at).getTime(),
+            sortDate: new Date(inc.resolved_at || inc.updated_at).getTime(),
           });
         }
       });

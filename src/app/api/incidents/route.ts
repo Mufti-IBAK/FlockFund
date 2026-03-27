@@ -127,6 +127,8 @@ export async function PATCH(req: NextRequest) {
       payload.status = updates.status;
       if (updates.status === "resolved") {
         payload.resolved_at = new Date().toISOString();
+      } else if (updates.status === "investigating") {
+        payload.investigation_started_at = new Date().toISOString();
       }
     }
     if (updates.admin_determination !== undefined)
@@ -156,10 +158,34 @@ export async function PATCH(req: NextRequest) {
       .from("incident_reports")
       .update(payload)
       .eq("id", id)
-      .select()
+      .select("*, flocks(name)")
       .single();
 
     if (error) throw error;
+
+    if (updates.status === "resolved") {
+      const { data: investors } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("role", "investor");
+
+      if (investors && investors.length > 0) {
+        const titleStr = payload.admin_determination === "risk_neg_found"
+          ? "Incident Risk Found"
+          : "Incident Resolved";
+        const msgStr = `The reported incident on flock ${data.flocks?.name || 'Unknown'} has been reviewed by the Admin.`;
+        
+        const notifs = investors.map((inv: any) => ({
+          user_id: inv.id,
+          title: titleStr,
+          message: msgStr,
+          type: "system",
+          redirect_url: "/investor/activity"
+        }));
+
+        await supabase.from("notifications").insert(notifs);
+      }
+    }
 
     return NextResponse.json({ success: true, data });
   } catch (error) {
