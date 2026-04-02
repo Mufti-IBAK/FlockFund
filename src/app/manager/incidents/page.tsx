@@ -18,6 +18,7 @@ interface Incident {
   birds_isolated?: number;
   birds_recovered?: number;
   birds_sold?: number;
+  initial_bird_count?: number;
 }
 
 export default function ManagerIncidents() {
@@ -121,7 +122,7 @@ export default function ManagerIncidents() {
       await loadData();
     } catch (err) {
       console.error(err);
-      alert("Failed to submit report.");
+      alert(err instanceof Error ? err.message : "Failed to submit report.");
     } finally {
       setSubmitting(false);
     }
@@ -219,7 +220,31 @@ export default function ManagerIncidents() {
             </div>
 
             <div className="p-8 space-y-6 max-h-[70vh] overflow-y-auto custom-scrollbar">
-              {/* Bird Stats */}
+              {/* Bird Stats Overview */}
+              <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200 flex flex-col md:flex-row justify-between items-center gap-4">
+                <div>
+                  <h4 className="text-sm font-bold text-slate-700 uppercase tracking-widest">Flock Capacity Baseline</h4>
+                  <p className="text-[10px] text-slate-500 font-medium">Recorded at exactly {new Date(inspecting.incident_date).toLocaleDateString()}</p>
+                </div>
+                <div className="flex items-center gap-6">
+                 <div className="text-center">
+                    <span className="block text-3xl font-black text-slate-800">{inspecting?.initial_bird_count || 0}</span>
+                    <span className="text-[9px] uppercase tracking-widest font-bold text-slate-400">Total Recorded</span>
+                  </div>
+                  <div className="text-center border-l border-slate-200 pl-6">
+                    <span className={`block text-3xl font-black ${
+                      (birdsDead + birdsCulled + birdsIsolated + birdsRecovered + birdsSold) > (inspecting?.initial_bird_count || 0) && (inspecting?.initial_bird_count || 0) > 0 
+                      ? 'text-rose-500' 
+                      : 'text-emerald-600'
+                    }`}>
+                      {birdsDead + birdsCulled + birdsIsolated + birdsRecovered + birdsSold}
+                    </span>
+                    <span className="text-[9px] uppercase tracking-widest font-bold text-slate-400">Total Accounted</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Bird Stats Inputs */}
               <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                 {[
                   { label: "Dead", val: birdsDead, set: setBirdsDead, color: "rose" },
@@ -289,10 +314,10 @@ export default function ManagerIncidents() {
 
               <button 
                 onClick={handleSubmitReport}
-                disabled={submitting}
-                className="w-full py-4 bg-emerald-600 text-white font-bold uppercase tracking-widest rounded-2xl shadow-xl shadow-emerald-600/20 hover:scale-[1.01] active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                disabled={submitting || ((inspecting?.initial_bird_count || 0) > 0 && (birdsDead + birdsCulled + birdsIsolated + birdsRecovered + birdsSold) > (inspecting?.initial_bird_count || 0))}
+                className="w-full py-4 bg-emerald-600 text-white font-bold uppercase tracking-widest rounded-2xl shadow-xl shadow-emerald-600/20 hover:scale-[1.01] active:scale-[0.98] transition-all disabled:opacity-50 disabled:hover:scale-100 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
-                {submitting ? "Processing..." : "Submit Professional Report"}
+                {submitting ? "Processing..." : ((inspecting?.initial_bird_count || 0) > 0 && (birdsDead + birdsCulled + birdsIsolated + birdsRecovered + birdsSold) > (inspecting?.initial_bird_count || 0)) ? "Limit Exceeded" : "Submit Professional Report"}
               </button>
             </div>
           </div>

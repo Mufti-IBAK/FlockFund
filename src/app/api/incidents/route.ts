@@ -70,6 +70,14 @@ export async function POST(req: NextRequest) {
       process.env.SUPABASE_SERVICE_ROLE_KEY!,
     );
 
+    const { data: flockData } = await supabase
+      .from("flocks")
+      .select("current_count")
+      .eq("id", flock_id)
+      .single();
+    
+    const initial_bird_count = flockData?.current_count || 0;
+
     const { data, error } = await supabase
       .from("incident_reports")
       .insert({
@@ -78,6 +86,7 @@ export async function POST(req: NextRequest) {
         cause,
         reported_by,
         incident_date: new Date().toISOString().split("T")[0],
+        initial_bird_count
       })
       .select()
       .single();
@@ -149,6 +158,18 @@ export async function PATCH(req: NextRequest) {
     if (updates.recommendations !== undefined) payload.recommendations = updates.recommendations;
     if (updates.history !== undefined) payload.history = updates.history;
     if (updates.affected_flock_ids !== undefined) payload.affected_flock_ids = updates.affected_flock_ids;
+
+    const submittingBirds = updates.birds_dead !== undefined || updates.birds_culled !== undefined || updates.birds_isolated !== undefined || updates.birds_recovered !== undefined || updates.birds_sold !== undefined;
+    
+    if (submittingBirds) {
+      const { data: incData } = await supabase.from("incident_reports").select("initial_bird_count").eq("id", id).single();
+      const maxCount = incData?.initial_bird_count || 0;
+      const totalSubmitted = (updates.birds_dead || 0) + (updates.birds_culled || 0) + (updates.birds_isolated || 0) + (updates.birds_recovered || 0) + (updates.birds_sold || 0);
+
+      if (totalSubmitted > maxCount && maxCount > 0) {
+        return NextResponse.json({ error: `Total affected birds (${totalSubmitted}) exceeds the flock size at the time of report (${maxCount}).` }, { status: 400 });
+      }
+    }
 
     payload.updated_at = new Date().toISOString();
 

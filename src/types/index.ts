@@ -280,6 +280,7 @@ export interface IncidentReport {
   admin_resolution_notes?: string | null;
   investigation_started_at?: string;
   updated_at?: string;
+  initial_bird_count?: number;
   birds_dead?: number;
   birds_culled?: number;
   birds_isolated?: number;

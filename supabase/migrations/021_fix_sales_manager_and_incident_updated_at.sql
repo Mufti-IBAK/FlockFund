@@ -16,6 +16,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- 3. Apply trigger to incident_reports
+ALTER TABLE public.incident_reports ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT NOW();
 DROP TRIGGER IF EXISTS set_incident_updated_at ON public.incident_reports;
 CREATE TRIGGER set_incident_updated_at
 BEFORE UPDATE ON public.incident_reports
