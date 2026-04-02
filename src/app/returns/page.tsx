@@ -6,7 +6,20 @@ import Link from "next/link";
 
 /* ───── ROI Calculator (interactive) ───── */
 function ROICalculator({ settings }: { settings: any }) {
-  const [birds, setBirds] = useState(settings?.min_birds_per_investment || 10);
+  const [selectedPkg, setSelectedPkg] = useState<"basic"|"standard"|"premium">("basic");
+
+  const basicQty = settings?.package_basic_birds || 10;
+  const stdQty = settings?.package_standard_birds || 25;
+  const premQty = settings?.package_premium_birds || 50;
+
+  const packageNames = {
+    basic: settings?.package_basic_name || "Basic",
+    standard: settings?.package_standard_name || "Standard",
+    premium: settings?.package_premium_name || "Premium",
+  };
+  
+  const pkgMap = { basic: basicQty, standard: stdQty, premium: premQty };
+  const birds = pkgMap[selectedPkg];
 
   const costPerBird = settings?.cost_per_bird || 4250;
   const targetPrice = settings?.selling_price_per_bird || 10000;
@@ -35,31 +48,32 @@ function ROICalculator({ settings }: { settings: any }) {
         How your profit is calculated — We strictly follow the Mudarabah Al-Muqayyad model of islamic finance and investment.
       </p>
       <p className="text-slate-400 text-xs mb-6">
-        Drag the slider to see projections for different flock sizes
+        Select a package to see projections
       </p>
 
       <div className="mb-6">
         <div className="flex items-center justify-between mb-2">
           <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-            Number of Birds
+            Investment Package
           </span>
           <span className="font-mono text-2xl font-extrabold text-accent">
-            {birds}
+            {birds} Birds
           </span>
         </div>
-        <input
-          type="range"
-          min="10"
-          max="100"
-          step="5"
-          value={birds}
-          onChange={(e) => setBirds(Number(e.target.value))}
-          className="w-full h-2 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-accent"
-        />
-        <div className="flex justify-between text-[10px] text-slate-300 mt-1">
-          <span>10</span>
-          <span>50</span>
-          <span>100</span>
+        <div className="flex gap-2">
+          {(["basic", "standard", "premium"] as const).map((pkg) => (
+            <button
+              key={pkg}
+              onClick={() => setSelectedPkg(pkg)}
+              className={`flex-1 py-3 rounded-lg text-xs font-bold capitalize transition-all ${
+                selectedPkg === pkg
+                  ? "bg-accent text-primary shadow-sm ring-1 ring-accent/20"
+                  : "bg-slate-50 text-slate-500 hover:bg-slate-100"
+              }`}
+            >
+              {packageNames[pkg]}
+            </button>
+          ))}
         </div>
       </div>
 
@@ -210,41 +224,36 @@ export default function ReturnsPage() {
     return () => ctx.revert();
   }, []);
 
-  const minBirds = settings?.min_birds_per_investment || 10;
+  const basicQty = settings?.package_basic_birds || 10;
+  const stdQty = settings?.package_standard_birds || 25;
+  const premQty = settings?.package_premium_birds || 50;
+
+  const basicName = settings?.package_basic_name || "Basic";
+  const stdName = settings?.package_standard_name || "Standard";
+  const premName = settings?.package_premium_name || "Premium";
+
   const costPerBird = settings?.cost_per_bird || 3700;
   const targetPrice = settings?.selling_price_per_bird || 10000;
   const investorShare = (settings?.investor_share_percentage || 30) / 100;
 
-  const tiers = [
-    {
-      birds: minBirds,
-      cost: minBirds * costPerBird,
-      targetRev: minBirds * targetPrice,
-      profit: (minBirds * targetPrice - minBirds * costPerBird) * investorShare,
-      roi: `${((((minBirds * targetPrice - minBirds * costPerBird) * investorShare) / (minBirds * costPerBird)) * 100).toFixed(0)}%`,
-      popular: false,
-    },
-    {
-      birds: minBirds * 2,
-      cost: minBirds * 2 * costPerBird,
-      targetRev: minBirds * 2 * targetPrice,
-      profit:
-        (minBirds * 2 * targetPrice - minBirds * 2 * costPerBird) *
-        investorShare,
-      roi: `${((((minBirds * 2 * targetPrice - minBirds * 2 * costPerBird) * investorShare) / (minBirds * 2 * costPerBird)) * 100).toFixed(0)}%`,
-      popular: true,
-    },
-    {
-      birds: minBirds * 3,
-      cost: minBirds * 3 * costPerBird,
-      targetRev: minBirds * 3 * targetPrice,
-      profit:
-        (minBirds * 3 * targetPrice - minBirds * 3 * costPerBird) *
-        investorShare,
-      roi: `${((((minBirds * 3 * targetPrice - minBirds * 3 * costPerBird) * investorShare) / (minBirds * 3 * costPerBird)) * 100).toFixed(0)}%`,
-      popular: false,
-    },
+  const tierSettings = [
+    { name: basicName, birds: basicQty, popular: false },
+    { name: stdName, birds: stdQty, popular: true },
+    { name: premName, birds: premQty, popular: false },
   ];
+
+  const tiers = tierSettings.map((t) => {
+    const qty = t.birds;
+    return {
+      name: t.name,
+      birds: qty,
+      cost: qty * costPerBird,
+      targetRev: qty * targetPrice,
+      profit: (qty * targetPrice - qty * costPerBird) * investorShare,
+      roi: `${((((qty * targetPrice - qty * costPerBird) * investorShare) / (qty * costPerBird)) * 100).toFixed(0)}%`,
+      popular: t.popular,
+    };
+  });
 
   if (loading || !settings) {
     return (
@@ -311,6 +320,7 @@ export default function ReturnsPage() {
                     egg_alt
                   </span>
                 </div>
+                <p className="text-primary font-bold text-sm uppercase tracking-wider mb-2">{t.name} Package</p>
                 <p className="font-mono text-4xl font-extrabold text-primary">
                   {t.birds}
                 </p>
@@ -521,8 +531,8 @@ export default function ReturnsPage() {
                 {[
                   {
                     cycle: "Cycle 1",
-                    value: `₦${(settings.cost_per_bird * minBirds + (settings.selling_price_per_bird - settings.cost_per_bird) * minBirds * investorShare).toLocaleString()}`,
-                    gain: `+₦${((settings.selling_price_per_bird - settings.cost_per_bird) * minBirds * investorShare).toLocaleString()}`,
+                    value: `₦${(settings.cost_per_bird * basicQty + (settings.selling_price_per_bird - settings.cost_per_bird) * basicQty * investorShare).toLocaleString()}`,
+                    gain: `+₦${((settings.selling_price_per_bird - settings.cost_per_bird) * basicQty * investorShare).toLocaleString()}`,
                   },
                 ].map((c, i) => (
                   <div

@@ -13,6 +13,12 @@ interface Flock {
   status: string;
   cost_per_bird?: number;
   min_birds_per_investment?: number;
+  package_basic_birds?: number;
+  package_standard_birds?: number;
+  package_premium_birds?: number;
+  package_basic_name?: string;
+  package_standard_name?: string;
+  package_premium_name?: string;
   cost_breakdown?: Record<string, number>;
 }
 
@@ -33,7 +39,7 @@ const DEFAULT_BREAKDOWN: Record<string, number> = {
 export default function InvestPage() {
   const [flocks, setFlocks] = useState<Flock[]>([]);
   const [selectedFlock, setSelectedFlock] = useState("");
-  const [birdCount, setBirdCount] = useState(10);
+  const [selectedPackage, setSelectedPackage] = useState<"basic" | "standard" | "premium">("basic");
   const [costPerBird, setCostPerBird] = useState(4250);
   const [costBreakdown, setBreakdown] = useState<any>(DEFAULT_BREAKDOWN);
   const [loading, setLoading] = useState(true);
@@ -43,6 +49,7 @@ export default function InvestPage() {
   const [agreementId, setAgreementId] = useState<string | null>(null);
   const [signingAgreement, setSigningAgreement] = useState(false);
   const [showFullAgreement, setShowFullAgreement] = useState(false);
+  const [qty, setQty] = useState(1);
   const pageRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -58,7 +65,7 @@ export default function InvestPage() {
 
         const { data: globalSettings } = await supabase
           .from("settings")
-          .select("cost_per_bird, cost_breakdown")
+          .select("cost_per_bird, cost_breakdown, package_basic_name, package_standard_name, package_premium_name")
           .single();
         
         const defaultCost = globalSettings?.cost_per_bird || 4250;
@@ -69,7 +76,7 @@ export default function InvestPage() {
         const { data: flockData } = await supabase
           .from("flocks")
           .select(
-            "id, name, flock_name, current_count, total_birds, batch_size, status, cost_per_bird, min_birds_per_investment, cost_breakdown",
+            "id, name, flock_name, current_count, total_birds, batch_size, status, cost_per_bird, min_birds_per_investment, package_basic_birds, package_standard_birds, package_premium_birds, package_basic_name, package_standard_name, package_premium_name, cost_breakdown",
           )
           .eq("status", "active");
 
@@ -100,6 +107,18 @@ export default function InvestPage() {
     return () => ctx.revert();
   }, [loading]);
 
+  const activeFlock = flocks.find((fl) => fl.id === selectedFlock);
+  const packageBirds = {
+    basic: activeFlock?.package_basic_birds || 10,
+    standard: activeFlock?.package_standard_birds || 25,
+    premium: activeFlock?.package_premium_birds || 50,
+  };
+  const packageNames = {
+    basic: activeFlock?.package_basic_name || "Basic",
+    standard: activeFlock?.package_standard_name || "Standard",
+    premium: activeFlock?.package_premium_name || "Premium",
+  };
+  const birdCount = packageBirds[selectedPackage] * qty;
   const totalCost = birdCount * costPerBird;
 
   async function handleSignAgreement() {
@@ -152,15 +171,14 @@ export default function InvestPage() {
       return;
     }
     const f = flocks.find(fl => fl.id === selectedFlock);
-    const min = f?.min_birds_per_investment || 10;
     const max = f?.current_count || 1000;
     
-    if (!selectedFlock || birdCount < min) {
-      alert(`Minimum investment for this flock is ${min} birds.`);
+    if (!selectedFlock) {
+      alert(`Please select a flock first.`);
       return;
     }
     if (birdCount > max) {
-      alert(`Only ${max} birds available in this flock.`);
+      alert(`Only ${max} birds available in this flock. Please select a smaller package.`);
       return;
     }
     setSubmitting(true);
@@ -243,9 +261,7 @@ export default function InvestPage() {
                       setSelectedFlock(f.id);
                       if (f.cost_per_bird) setCostPerBird(f.cost_per_bird);
                       if (f.cost_breakdown) setBreakdown(f.cost_breakdown);
-                      const min = f.min_birds_per_investment || 10;
-                      if (birdCount < min) setBirdCount(min);
-                      if (birdCount > (f.current_count || 0)) setBirdCount(f.current_count || 0);
+                      // Switch to basic automatically if current selected is out of stock (will handle gracefully in UI anyway)
                     }}
                     className={`text-left p-4 rounded-lg border-2 transition-all ${
                       selectedFlock === f.id
@@ -278,71 +294,43 @@ export default function InvestPage() {
             )}
           </div>
 
-          {/* Bird count */}
+          {/* Investment Package */}
           <div className="fade-in bg-white rounded-xl border border-slate-200/80 p-4 md:p-5">
             <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-3">
-              Number of Birds
+              Select Investment Package
             </label>
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => {
-                  const min = flocks.find(f => f.id === selectedFlock)?.min_birds_per_investment || 10;
-                  setBirdCount(Math.max(min, birdCount - 5));
-                }}
-                className="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center hover:bg-slate-200 transition-colors"
-              >
-                <span className="material-symbols-outlined text-lg text-slate-600">
-                  remove
-                </span>
-              </button>
-              <input
-                type="number"
-                min={flocks.find(f => f.id === selectedFlock)?.min_birds_per_investment || 10}
-                max={flocks.find(f => f.id === selectedFlock)?.current_count || 1000}
-                value={birdCount}
-                onChange={(e) => {
-                  const val = parseInt(e.target.value) || 0;
-                  const f = flocks.find(fl => fl.id === selectedFlock);
-                  const min = f?.min_birds_per_investment || 10;
-                  const max = f?.current_count || 1000;
-                  setBirdCount(Math.min(max, Math.max(0, val))); // Allowed to type 0 while typing, but handleInvest will block
-                }}
-                className="flex-1 text-center text-2xl font-mono font-bold text-primary bg-slate-50 rounded-lg py-3 border border-slate-200 focus:border-accent focus:ring-1 focus:ring-accent/20 outline-none"
-              />
-              <button
-                onClick={() => {
-                  const max = flocks.find(f => f.id === selectedFlock)?.current_count || 1000;
-                  setBirdCount(Math.min(max, birdCount + 5));
-                }}
-                className="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center hover:bg-slate-200 transition-colors"
-              >
-                <span className="material-symbols-outlined text-lg text-slate-600">
-                  add
-                </span>
-              </button>
-            </div>
-            <div className="flex gap-2 mt-3">
-              {[10, 25, 50, 100].map((n) => {
-                const f = flocks.find(fl => fl.id === selectedFlock);
-                const max = f?.current_count || 1000;
-                const min = f?.min_birds_per_investment || 10;
-                const disabled = n < min || n > max;
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {(["basic", "standard", "premium"] as const).map((pkg) => {
+                const birds = packageBirds[pkg];
+                const pkgCost = birds * costPerBird;
+                const outOfStock = birds > (activeFlock?.current_count || 1000);
                 return (
                   <button
-                    key={n}
-                    disabled={disabled}
-                    onClick={() => setBirdCount(n)}
-                    className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all ${
-                      birdCount === n
-                        ? "bg-accent text-primary"
-                        : "bg-slate-50 text-slate-400 hover:bg-slate-100 disabled:opacity-30 disabled:hover:bg-slate-50"
-                    }`}
+                    key={pkg}
+                    disabled={outOfStock}
+                    onClick={() => { setSelectedPackage(pkg); setQty(1); }}
+                    className={`text-left p-3 md:p-4 rounded-xl border-2 transition-all ${
+                      selectedPackage === pkg
+                        ? "border-accent bg-accent/5 ring-1 ring-accent/20"
+                        : "border-slate-200 hover:border-slate-300"
+                    } ${outOfStock ? "opacity-50 cursor-not-allowed grayscale" : ""}`}
                   >
-                    {n} birds
+                    <div className="flex items-center justify-between mb-2">
+                      <p className="text-sm font-bold capitalize text-primary">{packageNames[pkg]}</p>
+                      {selectedPackage === pkg && (
+                        <span className="material-symbols-outlined text-sm text-accent">check_circle</span>
+                      )}
+                    </div>
+                    <p className="text-xl font-mono font-bold text-primary mb-1">{birds} Birds</p>
+                    <p className="text-xs font-bold text-slate-400">₦{(pkgCost).toLocaleString()}</p>
+                    {outOfStock && <p className="text-[10px] text-rose-500 font-bold mt-1 uppercase">Out of Stock</p>}
                   </button>
                 );
               })}
             </div>
+            <p className="text-[10px] text-slate-400 mt-4 leading-relaxed bg-slate-50 p-2 rounded-md">
+              * Note: Investments are restricted to these packages to simplify cash flow management and maintain Islamic Finance pooling compliance.
+            </p>
           </div>
 
           {/* Payment gateway — only Flutterwave active */}
@@ -551,6 +539,14 @@ TERMS AND CONDITIONS:
                 <span className="font-mono font-bold text-primary">
                   ₦{costPerBird.toLocaleString()}
                 </span>
+              </div>
+              <div className="flex justify-between items-center text-sm">
+                <span className="text-slate-400">Package Quantity</span>
+                <div className="flex items-center gap-3 bg-slate-50 border border-slate-200 rounded-lg p-0.5">
+                  <button onClick={() => setQty(Math.max(1, qty - 1))} className="w-7 h-7 flex items-center justify-center rounded-md bg-white shadow-sm border border-slate-100 text-slate-500 hover:text-primary transition-colors">-</button>
+                  <span className="font-mono font-bold text-primary w-4 text-center">{qty}</span>
+                  <button onClick={() => setQty(qty + 1)} className="w-7 h-7 flex items-center justify-center rounded-md bg-white shadow-sm border border-slate-100 text-slate-500 hover:text-primary transition-colors">+</button>
+                </div>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-slate-400">Birds</span>

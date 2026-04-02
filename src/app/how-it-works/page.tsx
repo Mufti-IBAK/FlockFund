@@ -23,9 +23,9 @@ const steps = [
     num: "02",
     title: "Choose & Fund Your Birds",
     description:
-      "Browse active flock cycles and choose your investment tier — 10, 20, or 30 birds. The cost-per-bird is dynamically calculated based on current Day-Old Chick (DOC) prices, feed costs, and overhead. Pay securely through your preferred gateway.",
+      "Browse active flock cycles and choose your investment package. The cost-per-package is dynamically calculated based on current Day-Old Chick (DOC) prices, feed costs, and overhead. Pay securely through your preferred gateway.",
     details: [
-      "Investment tiers: 10 birds (₦37K), 20 birds (₦74K), or 30 birds (₦111K)",
+      "Investment packages configured dynamically by the farm settings",
       "Pay via Flutterwave, Paystack, or PayPal",
       "System generates Investment ID, MoU contract, and timeline",
       "Investment goes active immediately upon payment confirmation",
@@ -213,15 +213,23 @@ export default function HowItWorks() {
   const floorPrice = settings?.market_floor_price || 8000;
   const investorShare = settings?.investor_share_percentage || 70;
 
+  const basicQty = settings?.package_basic_birds || 10;
+  const stdQty = settings?.package_standard_birds || 25;
+  const premQty = settings?.package_premium_birds || 50;
+
+  const basicName = settings?.package_basic_name || "Basic";
+  const stdName = settings?.package_standard_name || "Standard";
+  const premName = settings?.package_premium_name || "Premium";
+
   const dynamicSteps = [
     {
       ...steps[0],
     },
     {
       ...steps[1],
-      description: `Browse active flock cycles and choose your investment tier — ${minBirds}, ${minBirds * 2}, or ${minBirds * 3} birds. The cost-per-bird is dynamically calculated based on current Day-Old Chick (DOC) prices, feed costs, and overhead. Pay securely through your preferred gateway.`,
+      description: `Browse active flock cycles and choose your investment package — ${basicName} (${basicQty} birds), ${stdName} (${stdQty} birds), or ${premName} (${premQty} birds). The cost-per-bird is dynamically calculated based on current Day-Old Chick (DOC) prices, feed costs, and overhead. You can also multiply quantities. Pay securely through your preferred gateway.`,
       details: [
-        `Investment tiers: ${minBirds} birds (₦${((minBirds * costPerBird) / 1000).toFixed(0)}K), ${minBirds * 2} birds (₦${((minBirds * 2 * costPerBird) / 1000).toFixed(0)}K), or ${minBirds * 3} birds (₦${((minBirds * 3 * costPerBird) / 1000).toFixed(0)}K)`,
+        `Investment packages: ${basicName} (₦${((basicQty * costPerBird) / 1000).toFixed(0)}K), ${stdName} (₦${((stdQty * costPerBird) / 1000).toFixed(0)}K), or ${premName} (₦${((premQty * costPerBird) / 1000).toFixed(0)}K)`,
         "Pay via Flutterwave, Paystack, or PayPal",
         "System generates Investment ID, MoU contract, and timeline",
         "Investment goes active immediately upon payment confirmation",

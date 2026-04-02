@@ -20,14 +20,15 @@ export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navRef = useRef<HTMLElement>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
+  const toggleButtonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (
         mobileMenuRef.current && 
         !mobileMenuRef.current.contains(event.target as Node) &&
-        navRef.current &&
-        !navRef.current.contains(event.target as Node)
+        toggleButtonRef.current &&
+        !toggleButtonRef.current.contains(event.target as Node)
       ) {
         setMobileMenuOpen(false);
       }
@@ -69,7 +70,7 @@ export default function Navbar() {
   const activeLinkClass = isHomePage ? "text-accent" : "text-accent";
 
   return (
-    <nav ref={navRef} className="fixed top-0 left-0 right-0 z-50 px-6 py-4">
+    <nav ref={navRef} className="sticky top-0 z-50 px-6 py-4">
       <div
         className={`max-w-7xl mx-auto flex items-center justify-between backdrop-blur-xl ${navBgClass} rounded-2xl px-8 py-3 border shadow-2xl shadow-black/20`}
       >
@@ -130,6 +131,7 @@ export default function Navbar() {
         </div>
         {/* Mobile Menu Toggle */}
         <button
+          ref={toggleButtonRef}
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           className={`lg:hidden w-10 h-10 flex items-center justify-center rounded-xl ${isHomePage ? "bg-white/5 border-white/10 text-white" : "bg-slate-100 border-slate-200 text-primary"} border`}
         >

@@ -19,6 +19,12 @@ interface Settings {
   data_monetization_enabled: boolean;
   cycle_duration_days: number;
   min_birds_per_investment: number;
+  package_basic_birds: number;
+  package_standard_birds: number;
+  package_premium_birds: number;
+  package_basic_name: string;
+  package_standard_name: string;
+  package_premium_name: string;
 }
 
 const DEFAULT_SETTINGS: Settings = {
@@ -43,6 +49,12 @@ const DEFAULT_SETTINGS: Settings = {
   data_monetization_enabled: false,
   cycle_duration_days: 28,
   min_birds_per_investment: 10,
+  package_basic_birds: 10,
+  package_standard_birds: 25,
+  package_premium_birds: 50,
+  package_basic_name: "Basic",
+  package_standard_name: "Standard",
+  package_premium_name: "Premium",
 };
 
 function SettingCard({
@@ -112,6 +124,33 @@ function NumberField({
           </span>
         )}
       </div>
+    </div>
+  );
+}
+
+function TextField({
+  label,
+  value,
+  onChange,
+  disabled = false,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  disabled?: boolean;
+}) {
+  return (
+    <div className="space-y-1.5">
+      <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+        {label}
+      </label>
+      <input
+        type="text"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        disabled={disabled}
+        className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-primary text-sm font-bold focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all duration-300 hover:border-slate-300 disabled:opacity-50 disabled:bg-slate-100"
+      />
     </div>
   );
 }
@@ -206,6 +245,12 @@ export default function AdminSettings() {
             min_birds_per_investment:
               data.min_birds_per_investment ??
               DEFAULT_SETTINGS.min_birds_per_investment,
+            package_basic_birds: data.package_basic_birds ?? DEFAULT_SETTINGS.package_basic_birds,
+            package_standard_birds: data.package_standard_birds ?? DEFAULT_SETTINGS.package_standard_birds,
+            package_premium_birds: data.package_premium_birds ?? DEFAULT_SETTINGS.package_premium_birds,
+            package_basic_name: data.package_basic_name ?? DEFAULT_SETTINGS.package_basic_name,
+            package_standard_name: data.package_standard_name ?? DEFAULT_SETTINGS.package_standard_name,
+            package_premium_name: data.package_premium_name ?? DEFAULT_SETTINGS.package_premium_name,
           });
         }
       } catch (err) {
@@ -275,6 +320,12 @@ export default function AdminSettings() {
           rounds_before_withdrawal: payload.rounds_before_withdrawal,
           cycle_duration_days: payload.cycle_duration_days,
           min_birds_per_investment: payload.min_birds_per_investment,
+          package_basic_birds: payload.package_basic_birds,
+          package_standard_birds: payload.package_standard_birds,
+          package_premium_birds: payload.package_premium_birds,
+          package_basic_name: payload.package_basic_name,
+          package_standard_name: payload.package_standard_name,
+          package_premium_name: payload.package_premium_name,
         };
         const { error: err } = await supabase
           .from("flocks")
@@ -560,11 +611,48 @@ export default function AdminSettings() {
               }
             />
             <NumberField
-              label="Min birds per unit"
-              value={settings.min_birds_per_investment}
+              label="Basic Pkg Birds"
+              value={settings.package_basic_birds}
               suffix="birds"
               onChange={(v) =>
-                setSettings((s) => ({ ...s, min_birds_per_investment: v }))
+                setSettings((s) => ({ ...s, package_basic_birds: v }))
+              }
+            />
+            <NumberField
+              label="Standard Pkg Birds"
+              value={settings.package_standard_birds}
+              suffix="birds"
+              onChange={(v) =>
+                setSettings((s) => ({ ...s, package_standard_birds: v }))
+              }
+            />
+            <NumberField
+              label="Premium Pkg Birds"
+              value={settings.package_premium_birds}
+              suffix="birds"
+              onChange={(v) =>
+                setSettings((s) => ({ ...s, package_premium_birds: v }))
+              }
+            />
+            <TextField
+              label="Basic Pkg Name"
+              value={settings.package_basic_name}
+              onChange={(v) =>
+                setSettings((s) => ({ ...s, package_basic_name: v }))
+              }
+            />
+            <TextField
+              label="Standard Pkg Name"
+              value={settings.package_standard_name}
+              onChange={(v) =>
+                setSettings((s) => ({ ...s, package_standard_name: v }))
+              }
+            />
+            <TextField
+              label="Premium Pkg Name"
+              value={settings.package_premium_name}
+              onChange={(v) =>
+                setSettings((s) => ({ ...s, package_premium_name: v }))
               }
             />
             <NumberField

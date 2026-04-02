@@ -143,7 +143,13 @@ export async function POST(req: NextRequest) {
       }),
     });
     const flwData = await flwResponse.json();
-    checkoutUrl = flwData?.data?.link || "";
+    
+    if (flwData.status === "error" || !flwData.data?.link) {
+      console.error("Flutterwave API Error:", flwData);
+      return NextResponse.json({ error: "Failed to generate payment link: " + (flwData.message || "Unknown error") }, { status: 500 });
+    }
+    
+    checkoutUrl = flwData.data.link;
 
     // Store the payment reference
     await supabase
