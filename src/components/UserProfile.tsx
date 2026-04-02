@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { ROLE_LABELS, ROLE_COLORS, ROLE_DASHBOARD_MAP } from "@/lib/constants";
 
 interface UserInfo {
   email: string;
@@ -9,22 +10,6 @@ interface UserInfo {
   role: string;
   avatarUrl?: string;
 }
-
-const ROLE_LABELS: Record<string, string> = {
-  admin: "Administrator",
-  farm_manager: "Farm Manager",
-  keeper: "Keeper",
-  investor: "Investor",
-  sales_manager: "Sales Manager",
-  accountant: "Accountant",
-};
-
-const ROLE_COLORS: Record<string, string> = {
-  admin: "bg-rose-100 text-rose-700",
-  farm_manager: "bg-sky-100 text-sky-700",
-  keeper: "bg-amber-100 text-amber-700",
-  investor: "bg-emerald-100 text-emerald-700",
-};
 
 export function useUserInfo() {
   const [user, setUser] = useState<UserInfo | null>(null);
@@ -167,20 +152,16 @@ export function TopBarUserProfile() {
         body: JSON.stringify({ role: newRole }),
       });
       if (res.ok) {
-        // Redirect to new role dashboard
-        let dest = "/investor";
-        if (newRole === "admin") dest = "/admin";
-        if (newRole === "farm_manager") dest = "/manager";
-        if (newRole === "keeper") dest = "/keeper";
-        if (newRole === "accountant") dest = "/accountant";
-        if (newRole === "sales_manager") dest = "/sales-manager";
+        // Use the shared dashboard map for redirect
+        const dest = ROLE_DASHBOARD_MAP[newRole] || "/investor";
         window.location.href = dest;
       } else {
-        alert("Failed to switch role");
+        const body = await res.json().catch(() => ({}));
+        alert(body.error || "Failed to switch role");
       }
     } catch (err) {
       console.error(err);
-      alert("Failed to switch role");
+      alert("Failed to switch role — network error");
     } finally {
       setIsSwitching(false);
     }

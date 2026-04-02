@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import gsap from "gsap";
+import { ROLES, ROLE_COLORS, ROLE_LABELS } from "@/lib/constants";
 
 interface Profile {
   id: string;
@@ -11,31 +12,12 @@ interface Profile {
   email?: string;
 }
 
-const ROLE_COLORS: Record<string, string> = {
-  admin: "bg-rose-100 text-rose-700",
-  farm_manager: "bg-sky-100 text-sky-700",
-  keeper: "bg-amber-100 text-amber-700",
-  investor: "bg-emerald-100 text-emerald-700",
-  sales_manager: "bg-purple-100 text-purple-700",
-  accountant: "bg-blue-100 text-blue-700",
-};
-
-const ROLE_LABELS: Record<string, string> = {
-  admin: "Admin",
-  farm_manager: "Farm Manager",
-  keeper: "Keeper",
-  investor: "Investor",
-  sales_manager: "Sales Manager",
-  accountant: "Accountant",
-};
-
-const ROLES = ["admin", "farm_manager", "keeper", "investor", "sales_manager", "accountant"];
-
 export default function AdminUsers() {
   const [users, setUsers] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
   const [filterRole, setFilterRole] = useState<string>("all");
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [statusMsg, setStatusMsg] = useState<{ type: "ok" | "err"; text: string } | null>(null);
   const contentRef = useRef<HTMLDivElement>(null);
 
   async function loadUsers() {
@@ -79,34 +61,43 @@ export default function AdminUsers() {
     }
   }, [loading, users, filterRole]);
 
+  /**
+   * Change another user's role via the admin-only API endpoint.
+   * Uses the service-role-backed /api/user/change-role to bypass RLS.
+   */
   async function changeRole(userId: string, newRole: string) {
+    setStatusMsg(null);
     try {
-      const { createClient } = await import("@/lib/supabase/client");
-      const supabase = createClient();
-      const { error } = await supabase
-        .from("profiles")
-        .update({ role: newRole })
-        .eq("id", userId);
-      if (error) throw error;
+      const res = await fetch("/api/user/change-role", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId, newRole }),
+      });
+
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.error || `HTTP ${res.status}`);
+      }
+
       setEditingId(null);
+      setStatusMsg({ type: "ok", text: `Role updated to ${ROLE_LABELS[newRole]}` });
       await loadUsers();
-    } catch (err) {
+
+      // Auto-dismiss success message
+      setTimeout(() => setStatusMsg(null), 3000);
+    } catch (err: any) {
       console.error("Failed to change role:", err);
+      setStatusMsg({ type: "err", text: err.message || "Failed to change role" });
     }
   }
 
   const filteredUsers =
     filterRole === "all" ? users : users.filter((u) => u.role === filterRole);
 
-  const roleCounts = {
-    all: users.length,
-    admin: users.filter((u) => u.role === "admin").length,
-    farm_manager: users.filter((u) => u.role === "farm_manager").length,
-    keeper: users.filter((u) => u.role === "keeper").length,
-    investor: users.filter((u) => u.role === "investor").length,
-    sales_manager: users.filter((u) => u.role === "sales_manager").length,
-    accountant: users.filter((u) => u.role === "accountant").length,
-  };
+  const roleCounts: Record<string, number> = { all: users.length };
+  ROLES.forEach((r) => {
+    roleCounts[r] = users.filter((u) => u.role === r).length;
+  });
 
   return (
     <div ref={contentRef}>
@@ -118,6 +109,19 @@ export default function AdminUsers() {
           View and manage all registered users
         </p>
       </div>
+
+      {/* ── Status Message ── */}
+      {statusMsg && (
+        <div
+          className={`mb-4 px-4 py-3 rounded-xl text-sm font-bold border ${
+            statusMsg.type === "ok"
+              ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+              : "bg-rose-50 text-rose-700 border-rose-200"
+          }`}
+        >
+          {statusMsg.text}
+        </div>
+      )}
 
       {/* ── Role Filter Tabs ── */}
       <div className="flex gap-2 mb-6 flex-wrap">
@@ -160,7 +164,7 @@ export default function AdminUsers() {
                 filterRole === tab.key ? "bg-white/20" : "bg-slate-100"
               }`}
             >
-              {roleCounts[tab.key as keyof typeof roleCounts]}
+              {roleCounts[tab.key] ?? 0}
             </span>
           </button>
         ))}

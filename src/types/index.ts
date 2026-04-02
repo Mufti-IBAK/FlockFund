@@ -48,6 +48,8 @@ export interface Flock {
   start_date: string;
   expected_end_date: string;
   total_birds: number;
+  batch_size: number | null;      // alias used in some queries
+  current_count: number;          // live bird count after mortality
   status: "active" | "completed" | "cancelled";
   created_at: string;
 }
@@ -58,6 +60,8 @@ export interface Investment {
   flock_id: string;
   birds_owned: number;
   cost_paid: number;
+  amount_invested: number;        // total amount invested (used in dashboard queries)
+  status: "pending" | "active" | "completed" | "cancelled";
   round_count: number;
   payment_gateway_used: string;
   payment_transaction_id: string;
@@ -285,5 +289,7 @@ export interface SalesReport {
   is_manure: boolean;
   total_revenue: number;
   sale_timestamp: string;
+  accountant_status: 'pending' | 'confirmed' | 'rejected';
+  keeper_status: 'pending' | 'confirmed' | 'rejected';
   created_at: string;
 }

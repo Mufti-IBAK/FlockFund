@@ -1,13 +1,17 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { createMiddlewareClient } from "@/lib/supabase/middleware";
 
-// Dashboard routes — all require login, but admins can access any of them
+// ── Dashboard routes — all require authentication ──
+// Keep in sync with DASHBOARD_ROUTES in lib/constants.ts
+// (We can't dynamically import from constants here because
+//  Next.js middleware runs in the Edge runtime.)
 const DASHBOARD_ROUTES = [
   "/admin",
   "/manager",
   "/keeper",
   "/investor",
   "/accountant",
+  "/sales-manager",
   "/community",
 ];
 
@@ -57,21 +61,16 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  // ── 4. Dashboard route check role access ──
+  // ── 4. Dashboard route — check role access ──
   const { data: profile, error: profileError } = await supabase
     .from("profiles")
     .select("role")
     .eq("id", user.id)
     .single();
 
-  console.log(
-    "[Middleware] User:",
-    user.email,
-    "| Profile:",
-    profile,
-    "| Error:",
-    profileError,
-  );
+  if (profileError) {
+    console.error("[Middleware] Profile fetch error:", profileError.message);
+  }
 
   const userRole = profile?.role || "investor";
 
@@ -93,6 +92,10 @@ export async function middleware(request: NextRequest) {
   return response;
 }
 
+/**
+ * Maps a user role to its dashboard base path.
+ * Keep in sync with ROLE_DASHBOARD_MAP in lib/constants.ts.
+ */
 function getRoleDashboard(role?: string): string {
   switch (role) {
     case "admin":
@@ -103,6 +106,8 @@ function getRoleDashboard(role?: string): string {
       return "/keeper";
     case "accountant":
       return "/accountant";
+    case "sales_manager":
+      return "/sales-manager";
     case "investor":
     default:
       return "/investor";

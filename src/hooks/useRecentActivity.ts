@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { timeAgo } from "@/lib/utils";
 
 export interface ActivityItem {
   icon: string;
@@ -12,21 +13,12 @@ export interface ActivityItem {
   sortDate: number;
 }
 
-function timeAgo(dateStr: string): string {
-  const diff = Date.now() - new Date(dateStr).getTime();
-  const mins = Math.floor(diff / 60_000);
-  if (mins < 1) return "just now";
-  if (mins < 60) return `${mins} min ago`;
-  const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `${hrs} hr${hrs > 1 ? "s" : ""} ago`;
-  const days = Math.floor(hrs / 24);
-  return `${days} day${days > 1 ? "s" : ""} ago`;
-}
-
 export function useRecentActivity(limit = 9) {
   const [activity, setActivity] = useState<ActivityItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const supabase = createClient();
+  // Use ref to avoid re-creating the client on every render
+  const supabaseRef = useRef(createClient());
+  const supabase = supabaseRef.current;
 
   const fetchActivity = async () => {
     try {
