@@ -119,8 +119,6 @@ export async function PATCH(req: NextRequest) {
     if (updates.findings !== undefined) payload.findings = updates.findings;
     if (updates.negligence_found !== undefined)
       payload.negligence_found = updates.negligence_found;
-    if (updates.negligence_determined !== undefined)
-      payload.negligence_determined = updates.negligence_determined;
     if (updates.compensation_required !== undefined)
       payload.compensation_required = updates.compensation_required;
     if (updates.status !== undefined) {

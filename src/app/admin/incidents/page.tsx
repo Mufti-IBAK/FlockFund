@@ -13,7 +13,7 @@ interface Incident {
   investigation_notes: string | null;
   resolution: string | null;
   admin_resolution_notes: string | null;
-  negligence_determined: boolean;
+  negligence_found: boolean;
   created_at: string;
   updated_at: string;
   investigation_started_at?: string;
@@ -143,7 +143,7 @@ export default function AdminIncidentsPage() {
           },
           {
             label: "Negligence Found",
-            value: incidents.filter((i) => i.negligence_determined).length,
+            value: incidents.filter((i) => i.negligence_found).length,
             icon: "gavel",
             color: "text-rose-600",
           },
@@ -206,7 +206,7 @@ export default function AdminIncidentsPage() {
                   >
                     {incident.status}
                   </span>
-                  {incident.negligence_determined && (
+                  {incident.negligence_found && (
                     <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-rose-100 text-rose-700">
                       ⚠ Negligence
                     </span>
@@ -419,7 +419,7 @@ export default function AdminIncidentsPage() {
                       status: "resolved",
                       admin_determination: selectedDetermination!,
                       admin_resolution_notes: adminSummary,
-                      negligence_determined:
+                      negligence_found:
                         selectedDetermination === "risk_neg_found",
                     });
                     setShowSummaryModal(false);

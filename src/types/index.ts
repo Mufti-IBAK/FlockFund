@@ -275,6 +275,22 @@ export interface IncidentReport {
   urgency_grade: 'low' | 'medium' | 'high' | 'critical';
   is_emergency: boolean;
   created_at: string;
+  status?: 'received' | 'investigating' | 'resolved' | 'reported' | 'dismissed';
+  admin_determination?: 'resolved_no_neg' | 'risk_alert_no_neg' | 'risk_neg_found';
+  admin_resolution_notes?: string | null;
+  investigation_started_at?: string;
+  updated_at?: string;
+  birds_dead?: number;
+  birds_culled?: number;
+  birds_isolated?: number;
+  birds_recovered?: number;
+  birds_sold?: number;
+  clinical_exam?: string | null;
+  physical_exam?: string | null;
+  recommendations?: string | null;
+  action_plan?: string | null;
+  history?: string | null;
+  affected_flock_ids?: string[] | null;
 }
 
 export interface SalesReport {
