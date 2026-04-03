@@ -27,6 +27,7 @@ const navItems = [
   { icon: "payments", label: "Fund Requests", href: "/manager/requests" },
   { icon: "vaccines", label: "Vaccinations", href: "/manager/vaccinations" },
   { icon: "report_problem", label: "Incidents", href: "/manager/incidents" },
+  { icon: "list_alt", label: "Daily Tasks", href: "/manager/tasks" },
   { icon: "receipt_long", label: "Flock Costs", href: "/manager/flock-costs" },
   { icon: "settings", label: "Settings", href: "/manager/settings" },
 ];
