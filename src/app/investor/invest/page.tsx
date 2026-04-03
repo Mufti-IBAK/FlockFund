@@ -39,7 +39,7 @@ const DEFAULT_BREAKDOWN: Record<string, number> = {
 export default function InvestPage() {
   const [flocks, setFlocks] = useState<Flock[]>([]);
   const [selectedFlock, setSelectedFlock] = useState("");
-  const [selectedPackage, setSelectedPackage] = useState<"basic" | "standard" | "premium">("basic");
+  const [selectedPackage, setSelectedPackage] = useState<string>("basic");
   const [costPerBird, setCostPerBird] = useState(4250);
   const [costBreakdown, setBreakdown] = useState<any>(DEFAULT_BREAKDOWN);
   const [loading, setLoading] = useState(true);
@@ -108,17 +108,39 @@ export default function InvestPage() {
   }, [loading]);
 
   const activeFlock = flocks.find((fl) => fl.id === selectedFlock);
-  const packageBirds = {
+  const maxCapacity = activeFlock?.current_count || 0;
+
+  useEffect(() => {
+    if (activeFlock) {
+       const basicBirds = activeFlock.package_basic_birds || 10;
+       if (maxCapacity > 0 && maxCapacity < basicBirds && selectedPackage !== "fractional") {
+           setSelectedPackage("fractional");
+       } else if (maxCapacity >= basicBirds && selectedPackage === "fractional") {
+           setSelectedPackage("basic");
+       }
+    }
+  }, [activeFlock, maxCapacity]);
+
+  const packageBirds: Record<string, number> = {
     basic: activeFlock?.package_basic_birds || 10,
     standard: activeFlock?.package_standard_birds || 25,
     premium: activeFlock?.package_premium_birds || 50,
+    fractional: maxCapacity,
   };
-  const packageNames = {
+  const packageNames: Record<string, string> = {
     basic: activeFlock?.package_basic_name || "Basic",
     standard: activeFlock?.package_standard_name || "Standard",
     premium: activeFlock?.package_premium_name || "Premium",
+    fractional: "Cleanup (Fractional)",
   };
-  const birdCount = packageBirds[selectedPackage] * qty;
+  
+  const selectedBirdsPerPkg = packageBirds[selectedPackage] || 0;
+  const maxAllowedQty = Math.max(0, Math.floor(maxCapacity / (selectedBirdsPerPkg || 1)));
+  
+  // Ensure we don't hold a qty > maxAllowedQty via race conditions or package switching implicitly
+  const effectiveQty = Math.min(qty, Math.max(1, maxAllowedQty));
+  
+  const birdCount = selectedBirdsPerPkg * effectiveQty;
   const totalCost = birdCount * costPerBird;
 
   async function handleSignAgreement() {
@@ -190,7 +212,7 @@ export default function InvestPage() {
       } = await supabase.auth.getUser();
       if (!user) return;
 
-      const res = await fetch("/api/payments/initiate", {
+    const res = await fetch("/api/payments/initiate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -200,6 +222,7 @@ export default function InvestPage() {
           email: user.email,
           flock_id: selectedFlock,
           mudarabah_agreement_id: agreementId,
+          callback_url: `${window.location.origin}${window.location.pathname.replace('/invest', '')}/payment/callback`,
         }),
       });
 
@@ -223,8 +246,8 @@ export default function InvestPage() {
   if (loading) {
     return (
       <div className="animate-pulse">
-        <div className="h-7 bg-slate-200 rounded-lg w-48 mb-6" />
-        <div className="h-64 bg-slate-100 rounded-xl" />
+        <div className="h-7 bg-slate-200 rounded-md w-48 mb-6" />
+        <div className="h-64 bg-slate-100 rounded-md" />
       </div>
     );
   }
@@ -244,7 +267,7 @@ export default function InvestPage() {
         {/* Left: Form */}
         <div className="lg:col-span-2 space-y-4">
           {/* Flock selector */}
-          <div className="fade-in bg-white rounded-xl border border-slate-200/80 p-4 md:p-5">
+          <div className="fade-in bg-white rounded-md border border-slate-200/80 p-4 md:p-5">
             <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-3">
               Select a Flock
             </label>
@@ -263,7 +286,7 @@ export default function InvestPage() {
                       if (f.cost_breakdown) setBreakdown(f.cost_breakdown);
                       // Switch to basic automatically if current selected is out of stock (will handle gracefully in UI anyway)
                     }}
-                    className={`text-left p-4 rounded-lg border-2 transition-all ${
+                    className={`text-left p-4 rounded-md border-2 transition-all ${
                       selectedFlock === f.id
                         ? "border-accent bg-accent/5"
                         : "border-slate-200 hover:border-slate-300"
@@ -271,7 +294,7 @@ export default function InvestPage() {
                   >
                     <div className="flex items-center gap-3">
                       <div
-                        className={`w-10 h-10 rounded-lg flex items-center justify-center ${selectedFlock === f.id ? "bg-accent/10" : "bg-slate-50"}`}
+                        className={`w-10 h-10 rounded-md flex items-center justify-center ${selectedFlock === f.id ? "bg-accent/10" : "bg-slate-50"}`}
                       >
                         <span
                           className={`material-symbols-outlined text-lg ${selectedFlock === f.id ? "text-accent" : "text-slate-400"}`}
@@ -295,38 +318,58 @@ export default function InvestPage() {
           </div>
 
           {/* Investment Package */}
-          <div className="fade-in bg-white rounded-xl border border-slate-200/80 p-4 md:p-5">
-            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-3">
-              Select Investment Package
-            </label>
+          <div className="fade-in bg-white rounded-md border border-slate-200/80 p-4 md:p-5">
+            <div className="flex items-center justify-between mb-3">
+              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                Select Investment Package
+              </label>
+              {activeFlock && (
+                <span className="text-[10px] font-bold text-slate-500 bg-slate-50 px-2 py-0.5 rounded border border-slate-200">
+                  {maxCapacity.toLocaleString()} birds remaining in flock
+                </span>
+              )}
+            </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              {(["basic", "standard", "premium"] as const).map((pkg) => {
+              {(() => {
+                const pkgs = ["basic", "standard", "premium"];
+                const basicBirds = activeFlock?.package_basic_birds || 10;
+                if (maxCapacity > 0 && maxCapacity < basicBirds) {
+                  pkgs.push("fractional");
+                }
+                return pkgs.map((pkg) => {
                 const birds = packageBirds[pkg];
                 const pkgCost = birds * costPerBird;
-                const outOfStock = birds > (activeFlock?.current_count || 1000);
+                const outOfStock = birds > maxCapacity;
+                const isFractional = pkg === "fractional";
+                
                 return (
                   <button
                     key={pkg}
                     disabled={outOfStock}
                     onClick={() => { setSelectedPackage(pkg); setQty(1); }}
-                    className={`text-left p-3 md:p-4 rounded-xl border-2 transition-all ${
+                    className={`text-left p-3 md:p-4 rounded-md border-2 transition-all ${
                       selectedPackage === pkg
                         ? "border-accent bg-accent/5 ring-1 ring-accent/20"
                         : "border-slate-200 hover:border-slate-300"
-                    } ${outOfStock ? "opacity-50 cursor-not-allowed grayscale" : ""}`}
+                    } ${outOfStock ? "opacity-50 cursor-not-allowed grayscale" : ""} ${isFractional ? "col-span-1 sm:col-span-3 bg-amber-50/50 border-amber-200" : ""}`}
                   >
                     <div className="flex items-center justify-between mb-2">
-                      <p className="text-sm font-bold capitalize text-primary">{packageNames[pkg]}</p>
-                      {selectedPackage === pkg && (
+                      <p className={`text-sm font-bold capitalize ${isFractional ? "text-amber-700" : "text-primary"}`}>{packageNames[pkg]}</p>
+                      {selectedPackage === pkg && !outOfStock && (
                         <span className="material-symbols-outlined text-sm text-accent">check_circle</span>
                       )}
                     </div>
-                    <p className="text-xl font-mono font-bold text-primary mb-1">{birds} Birds</p>
+                    <p className={`text-xl font-mono font-bold mb-1 ${isFractional ? "text-amber-800" : "text-primary"}`}>{birds} Birds</p>
                     <p className="text-xs font-bold text-slate-400">₦{(pkgCost).toLocaleString()}</p>
-                    {outOfStock && <p className="text-[10px] text-rose-500 font-bold mt-1 uppercase">Out of Stock</p>}
+                    {isFractional && <p className="text-[10px] text-amber-600 mt-2 font-medium">Automatic fractional tier offered because remaining capacity ({maxCapacity} birds) is smaller than standard packages.</p>}
+                    {!isFractional && outOfStock ? (
+                       <p className="text-[10px] text-rose-500 font-bold mt-1 uppercase">Out of Stock</p>
+                    ) : !isFractional ? (
+                       <p className="text-[9px] text-emerald-600 font-bold mt-1 uppercase bg-emerald-50 inline-block px-1 rounded-sm">Available (Max {Math.floor(maxCapacity/(birds||1))})</p>
+                    ) : null}
                   </button>
                 );
-              })}
+              })})()}
             </div>
             <p className="text-[10px] text-slate-400 mt-4 leading-relaxed bg-slate-50 p-2 rounded-md">
               * Note: Investments are restricted to these packages to simplify cash flow management and maintain Islamic Finance pooling compliance.
@@ -334,24 +377,24 @@ export default function InvestPage() {
           </div>
 
           {/* Payment gateway — only Flutterwave active */}
-          <div className="fade-in bg-white rounded-xl border border-slate-200/80 p-4 md:p-5">
+          <div className="fade-in bg-white rounded-md border border-slate-200/80 p-4 md:p-5">
             <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-3">
               Payment Method
             </label>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               {/* Flutterwave — active */}
-              <div className="p-4 rounded-lg border-2 border-accent bg-accent/5">
+              <div className="p-4 rounded-md border-2 border-accent bg-accent/5">
                 <span className="material-symbols-outlined text-xl mb-2 text-accent">
                   credit_card
                 </span>
                 <p className="text-sm font-bold text-primary">Flutterwave</p>
                 <p className="text-[10px] text-slate-400">Cards, Bank, USSD</p>
-                <span className="inline-block mt-2 text-[9px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full uppercase tracking-wider">
+                <span className="inline-block mt-2 text-[9px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-sm uppercase tracking-wider">
                   Active
                 </span>
               </div>
               {/* Paystack — unavailable */}
-              <div className="p-4 rounded-lg border-2 border-slate-200 bg-slate-50/50 opacity-60 cursor-not-allowed relative">
+              <div className="p-4 rounded-md border-2 border-slate-200 bg-slate-50/50 opacity-60 cursor-not-allowed relative">
                 <span className="material-symbols-outlined text-xl mb-2 text-slate-300">
                   account_balance
                 </span>
@@ -359,18 +402,18 @@ export default function InvestPage() {
                 <p className="text-[10px] text-slate-300">
                   Cards, Bank Transfer
                 </p>
-                <span className="inline-block mt-2 text-[9px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full uppercase tracking-wider">
+                <span className="inline-block mt-2 text-[9px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-sm uppercase tracking-wider">
                   Unavailable
                 </span>
               </div>
               {/* PayPal — unavailable */}
-              <div className="p-4 rounded-lg border-2 border-slate-200 bg-slate-50/50 opacity-60 cursor-not-allowed relative">
+              <div className="p-4 rounded-md border-2 border-slate-200 bg-slate-50/50 opacity-60 cursor-not-allowed relative">
                 <span className="material-symbols-outlined text-xl mb-2 text-slate-300">
                   language
                 </span>
                 <p className="text-sm font-bold text-slate-400">PayPal</p>
                 <p className="text-[10px] text-slate-300">International</p>
-                <span className="inline-block mt-2 text-[9px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full uppercase tracking-wider">
+                <span className="inline-block mt-2 text-[9px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-sm uppercase tracking-wider">
                   Unavailable
                 </span>
               </div>
@@ -379,7 +422,7 @@ export default function InvestPage() {
 
           {/* Cost Breakdown — Islamic Finance Transparency */}
           {selectedFlock && (
-            <div className="fade-in bg-white rounded-xl border border-slate-200/80 p-4 md:p-5">
+            <div className="fade-in bg-white rounded-md border border-slate-200/80 p-4 md:p-5">
               <div className="flex items-center gap-2 mb-4">
                 <span className="material-symbols-outlined text-accent text-lg">info</span>
                 <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
@@ -388,7 +431,7 @@ export default function InvestPage() {
               </div>
               <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
                 {Object.entries(costBreakdown).map(([label, value]: [string, any]) => (
-                  <div key={label} className="p-3 bg-slate-50 rounded-lg border border-slate-100/50">
+                  <div key={label} className="p-3 bg-slate-50 rounded-md border border-slate-100/50">
                     <div className="flex items-center gap-1.5 mb-1 opacity-40">
                       <span className="material-symbols-outlined text-[10px]">payments</span>
                       <p className="text-[8px] font-bold uppercase tracking-tight">{label}</p>
@@ -408,7 +451,7 @@ export default function InvestPage() {
 
           {/* Mudarabah Agreement — Required before payment */}
           {selectedFlock && (
-            <div className="fade-in bg-white rounded-xl border border-slate-200/80 p-4 md:p-5">
+            <div className="fade-in bg-white rounded-md border border-slate-200/80 p-4 md:p-5">
               <div className="flex items-center gap-2 mb-4">
                 <span className="material-symbols-outlined text-emerald-600 text-lg">gavel</span>
                 <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
@@ -417,7 +460,7 @@ export default function InvestPage() {
               </div>
 
               {/* Agreement Summary */}
-              <div className="bg-emerald-50/50 border border-emerald-100 rounded-lg p-4 mb-4">
+              <div className="bg-emerald-50/50 border border-emerald-100 rounded-md p-4 mb-4">
                 <h4 className="text-xs font-bold text-emerald-800 mb-3">Summary of Terms</h4>
                 <ul className="space-y-2 text-[11px] text-emerald-700">
                   <li className="flex items-start gap-2">
@@ -454,7 +497,7 @@ export default function InvestPage() {
                 {showFullAgreement ? "Hide Full Agreement" : "View Full Agreement"}
               </button>
               {showFullAgreement && (
-                <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 mb-4 max-h-64 overflow-y-auto">
+                <div className="bg-slate-50 border border-slate-200 rounded-md p-4 mb-4 max-h-64 overflow-y-auto">
                   <pre className="text-[10px] text-slate-600 whitespace-pre-wrap font-sans leading-relaxed">
 {`ISLAMIC FINANCE INVESTMENT AGREEMENT
 
@@ -497,7 +540,7 @@ TERMS AND CONDITIONS:
 
               {/* Agreement Acceptance */}
               {agreementAccepted ? (
-                <div className="flex items-center gap-2 p-3 bg-emerald-50 border border-emerald-200 rounded-lg">
+                <div className="flex items-center gap-2 p-3 bg-emerald-50 border border-emerald-200 rounded-md">
                   <span className="material-symbols-outlined text-emerald-600">verified</span>
                   <div>
                     <p className="text-xs font-bold text-emerald-700">Agreement Signed</p>
@@ -508,7 +551,7 @@ TERMS AND CONDITIONS:
                 <button
                   onClick={handleSignAgreement}
                   disabled={signingAgreement}
-                  className="w-full py-3 bg-emerald-600 text-white rounded-lg font-bold text-xs uppercase tracking-wider hover:bg-emerald-700 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                  className="w-full py-3 bg-emerald-600 text-white rounded-md font-bold text-xs uppercase tracking-wider hover:bg-emerald-700 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
                 >
                   {signingAgreement ? (
                     <>
@@ -529,7 +572,7 @@ TERMS AND CONDITIONS:
 
         {/* Right: Summary */}
         <div className="fade-in">
-          <div className="bg-white rounded-xl border border-slate-200/80 p-4 md:p-5 sticky top-20">
+          <div className="bg-white rounded-md border border-slate-200/80 p-4 md:p-5 sticky top-20">
             <h3 className="text-sm font-heading font-bold text-primary uppercase tracking-wider mb-4">
               Investment Summary
             </h3>
@@ -542,10 +585,10 @@ TERMS AND CONDITIONS:
               </div>
               <div className="flex justify-between items-center text-sm">
                 <span className="text-slate-400">Package Quantity</span>
-                <div className="flex items-center gap-3 bg-slate-50 border border-slate-200 rounded-lg p-0.5">
-                  <button onClick={() => setQty(Math.max(1, qty - 1))} className="w-7 h-7 flex items-center justify-center rounded-md bg-white shadow-sm border border-slate-100 text-slate-500 hover:text-primary transition-colors">-</button>
-                  <span className="font-mono font-bold text-primary w-4 text-center">{qty}</span>
-                  <button onClick={() => setQty(qty + 1)} className="w-7 h-7 flex items-center justify-center rounded-md bg-white shadow-sm border border-slate-100 text-slate-500 hover:text-primary transition-colors">+</button>
+                <div className="flex items-center gap-3 bg-slate-50 border border-slate-200 rounded-md p-0.5">
+                  <button onClick={() => setQty(Math.max(1, effectiveQty - 1))} className="w-7 h-7 flex items-center justify-center rounded-sm bg-white shadow-sm border border-slate-100 text-slate-500 hover:text-primary transition-colors">-</button>
+                  <span className="font-mono font-bold text-primary w-4 text-center">{effectiveQty}</span>
+                  <button disabled={effectiveQty >= maxAllowedQty} onClick={() => setQty(Math.min(maxAllowedQty, effectiveQty + 1))} className="w-7 h-7 flex items-center justify-center rounded-sm bg-white shadow-sm border border-slate-100 text-slate-500 hover:text-primary transition-colors disabled:opacity-30 disabled:cursor-not-allowed">+</button>
                 </div>
               </div>
               <div className="flex justify-between text-sm">
@@ -569,8 +612,8 @@ TERMS AND CONDITIONS:
 
             <button
               onClick={handleInvest}
-              disabled={submitting || flocks.length === 0 || !agreementAccepted}
-              className="w-full py-3 md:py-3.5 bg-accent text-primary rounded-lg font-bold text-sm uppercase tracking-wider shadow-lg shadow-accent/20 hover:scale-[1.01] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              disabled={submitting || flocks.length === 0 || !agreementAccepted || effectiveQty === 0 || birdCount > maxCapacity}
+              className="w-full py-3 md:py-3.5 bg-accent text-primary rounded-md font-bold text-sm uppercase tracking-wider shadow-md shadow-accent/20 hover:scale-[1.01] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {submitting ? (
                 <>
@@ -597,7 +640,7 @@ TERMS AND CONDITIONS:
             </p>
 
             {/* Risk Disclaimer */}
-            <div className="mt-3 p-3 bg-amber-50/50 border border-amber-100 rounded-lg">
+            <div className="mt-3 p-3 bg-amber-50/50 border border-amber-100 rounded-md">
               <p className="text-[9px] text-amber-700 leading-relaxed">
                 <strong>⚠️ Risk Notice:</strong> Returns are not guaranteed and depend on actual farm performance. Your capital may be at risk. Financial loss from normal business operations is borne by the investor.
               </p>
