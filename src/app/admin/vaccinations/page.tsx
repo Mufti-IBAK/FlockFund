@@ -2,17 +2,9 @@
 
 import { useState, useEffect } from "react";
 
-export default function VaccinationsPage() {
+export default function AdminVaccinationsPage() {
   const [loading, setLoading] = useState(true);
   const [vaccinations, setVaccinations] = useState<any[]>([]);
-  const [flocks, setFlocks] = useState<any[]>([]);
-  const [showAdd, setShowAdd] = useState(false);
-  const [newVac, setNewVac] = useState({
-    flock_id: "",
-    vaccine_name: "",
-    scheduled_date: "",
-    notes: "",
-  });
 
   useEffect(() => {
     loadData();
@@ -22,51 +14,16 @@ export default function VaccinationsPage() {
     try {
       const { createClient } = await import("@/lib/supabase/client");
       const supabase = createClient();
-      const [vResult, fResult] = await Promise.all([
-        supabase
-          .from("vaccinations")
-          .select("*, flocks(flock_name, name)")
-          .order("scheduled_date", { ascending: true }),
-        supabase
-          .from("flocks")
-          .select("id, flock_name, name")
-          .eq("status", "active"),
-      ]);
-      setVaccinations(vResult.data || []);
-      setFlocks(fResult.data || []);
-      if (fResult.data && fResult.data.length > 0)
-        setNewVac((v) => ({ ...v, flock_id: fResult.data[0].id }));
+      const { data } = await supabase
+        .from("vaccinations")
+        .select("*, flocks(flock_name, name)")
+        .order("scheduled_date", { ascending: true });
+      
+      setVaccinations(data || []);
     } catch (err) {
       console.error(err);
     } finally {
       setLoading(false);
-    }
-  }
-
-  async function handleAdd(e: React.FormEvent) {
-    e.preventDefault();
-    try {
-      const { createClient } = await import("@/lib/supabase/client");
-      const supabase = createClient();
-      await supabase.from("vaccinations").insert(newVac);
-      setShowAdd(false);
-      loadData();
-    } catch (err) {
-      console.error(err);
-    }
-  }
-
-  async function handleAdministered(id: string) {
-    try {
-      const { createClient } = await import("@/lib/supabase/client");
-      const supabase = createClient();
-      await supabase
-        .from("vaccinations")
-        .update({ administered_date: new Date().toISOString().split("T")[0] })
-        .eq("id", id);
-      loadData();
-    } catch (err) {
-      console.error(err);
     }
   }
 
@@ -75,123 +32,43 @@ export default function VaccinationsPage() {
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-2xl font-heading font-extrabold text-primary tracking-tight">
-            Vaccination Schedule
+            Vaccination Monitoring
           </h1>
           <p className="text-slate-400 text-sm mt-1">
-            Manage and track vaccinations across all active flocks
+            Read-only overview of the vaccine schedules managed by the Farm Manager.
           </p>
         </div>
-        <button
-          onClick={() => setShowAdd(true)}
-          className="px-5 py-2.5 bg-primary text-white rounded-xl font-bold text-sm uppercase tracking-wider shadow-lg shadow-primary/20 hover:scale-[1.02] transition-all"
-        >
-          + Schedule Vaccine
-        </button>
       </div>
 
-      {showAdd && (
-        <div className="mb-8 bg-white rounded-2xl border border-slate-200 p-6 shadow-sm max-w-xl">
-          <h3 className="font-bold text-primary mb-4">
-            Schedule New Vaccination
-          </h3>
-          <form onSubmit={handleAdd} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-1">
-                <label className="text-[10px] font-bold text-slate-400 uppercase">
-                  Flock
-                </label>
-                <select
-                  value={newVac.flock_id}
-                  onChange={(e) =>
-                    setNewVac({ ...newVac, flock_id: e.target.value })
-                  }
-                  className="w-full bg-slate-50 border border-slate-200 rounded-lg py-2 px-3 text-sm font-bold"
-                >
-                  {flocks.map((f) => (
-                    <option key={f.id} value={f.id}>
-                      {f.flock_name || f.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="space-y-1">
-                <label className="text-[10px] font-bold text-slate-400 uppercase">
-                  Date
-                </label>
-                <input
-                  type="date"
-                  value={newVac.scheduled_date}
-                  onChange={(e) =>
-                    setNewVac({ ...newVac, scheduled_date: e.target.value })
-                  }
-                  className="w-full bg-slate-50 border border-slate-200 rounded-lg py-2 px-3 text-sm"
-                  required
-                />
-              </div>
-            </div>
-            <div className="space-y-1">
-              <label className="text-[10px] font-bold text-slate-400 uppercase">
-                Vaccine Name
-              </label>
-              <input
-                type="text"
-                placeholder="e.g. Gumboro (IBD)"
-                value={newVac.vaccine_name}
-                onChange={(e) =>
-                  setNewVac({ ...newVac, vaccine_name: e.target.value })
-                }
-                className="w-full bg-slate-50 border border-slate-200 rounded-lg py-2 px-3 text-sm font-bold"
-                required
-              />
-            </div>
-            <div className="flex gap-3 pt-2">
-              <button
-                type="button"
-                onClick={() => setShowAdd(false)}
-                className="flex-1 py-2 text-slate-400 font-bold text-xs uppercase"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                className="flex-1 py-2 bg-primary text-white rounded-lg font-bold text-xs uppercase shadow-md shadow-primary/10"
-              >
-                Schedule
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
-
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+      <div className="bg-white rounded-md border border-slate-200 shadow-sm overflow-hidden">
         {loading ? (
-          <div className="p-12 text-center animate-pulse text-slate-400">
-            Loading schedule...
+          <div className="p-12 text-center animate-pulse text-slate-400 font-bold">
+            Loading schedules...
           </div>
         ) : vaccinations.length === 0 ? (
-          <div className="p-12 text-center text-slate-400">
-            No vaccinations scheduled yet.
+          <div className="p-12 text-center text-slate-400 font-bold">
+            No vaccinations tracked yet.
           </div>
         ) : (
           <>
-            <div className="hidden md:block overflow-x-auto">
+            <div className="hidden lg:block overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="bg-slate-50 border-b border-slate-100">
                     <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                      Scheduled
+                      Schedule Details
                     </th>
                     <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                      Flock
+                      Target Flock
                     </th>
                     <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                      Vaccine
+                      Requested Funds
                     </th>
                     <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                      Status
+                      Outcome & Advice
                     </th>
                     <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider text-right">
-                      Action
+                      Status
                     </th>
                   </tr>
                 </thead>
@@ -199,40 +76,42 @@ export default function VaccinationsPage() {
                   {vaccinations.map((v) => (
                     <tr
                       key={v.id}
-                      className="hover:bg-slate-50/50 transition-all"
+                      className="hover:bg-slate-50/50 transition-all group"
                     >
-                      <td className="px-6 py-4 text-sm font-medium text-slate-600">
-                        {new Date(v.scheduled_date).toLocaleDateString()}
+                      <td className="px-6 py-4 text-sm">
+                        <p className="font-bold text-slate-700">{v.vaccine_name}</p>
+                        <p className="text-[10px] uppercase font-bold text-slate-400 mt-1">
+                          {new Date(v.scheduled_date).toLocaleDateString()}
+                        </p>
                       </td>
                       <td className="px-6 py-4 text-sm font-bold text-primary">
-                        {v.flocks?.flock_name || v.flocks?.name}
+                        {v.flocks?.flock_name || v.flocks?.name || "Unknown Flock"}
                       </td>
-                      <td className="px-6 py-4 text-sm font-bold text-slate-700">
-                        {v.vaccine_name}
+                      <td className="px-6 py-4 text-sm font-mono font-bold text-slate-600">
+                        {v.amount_requested ? `₦${Number(v.amount_requested).toLocaleString()}` : 'None'}
                       </td>
-                      <td className="px-6 py-4">
-                        {v.administered_date ? (
-                          <span className="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-600 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 w-fit">
-                            <span className="material-symbols-outlined text-[10px]">
-                              check
-                            </span>
-                            Administered{" "}
-                            {new Date(v.administered_date).toLocaleDateString()}
-                          </span>
+                      <td className="px-6 py-4 text-xs text-slate-500 max-w-xs">
+                        {v.outcome ? (
+                          <>
+                            <p><strong className="text-primary text-[10px] uppercase tracking-wider">Outcome:</strong> {v.outcome}</p>
+                            <p className="mt-1"><strong className="text-primary text-[10px] uppercase tracking-wider">Advice:</strong> {v.advice_to_keeper}</p>
+                          </>
                         ) : (
-                          <span className="px-2.5 py-1 rounded-full bg-amber-100 text-amber-600 text-[10px] font-bold uppercase tracking-wider w-fit block">
-                            Upcoming
-                          </span>
+                          <span className="italic text-slate-300">Pending Execution</span>
                         )}
                       </td>
                       <td className="px-6 py-4 text-right">
-                        {!v.administered_date && (
-                          <button
-                            onClick={() => handleAdministered(v.id)}
-                            className="px-3 py-1.5 bg-slate-900 text-white text-[10px] font-bold uppercase tracking-widest rounded-lg hover:scale-[1.05] transition-all"
-                          >
-                            Mark Done
-                          </button>
+                        {v.administered_date ? (
+                          <span className="px-2.5 py-1 rounded-md bg-emerald-100 text-emerald-600 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 w-fit ml-auto">
+                            <span className="material-symbols-outlined text-[10px]">
+                              check
+                            </span>
+                            Done {new Date(v.administered_date).toLocaleDateString()}
+                          </span>
+                        ) : (
+                          <span className="px-2.5 py-1 rounded-md bg-amber-100 text-amber-600 text-[10px] font-bold uppercase tracking-wider w-fit ml-auto block">
+                            Upcoming
+                          </span>
                         )}
                       </td>
                     </tr>
@@ -241,11 +120,12 @@ export default function VaccinationsPage() {
               </table>
             </div>
 
-            <div className="grid grid-cols-1 md:hidden gap-4 p-4">
+            {/* Mobile View */}
+            <div className="grid grid-cols-1 lg:hidden gap-4 p-4">
               {vaccinations.map((v) => (
                 <div
                   key={v.id}
-                  className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm flex flex-col gap-3 relative"
+                  className="bg-white rounded-md p-5 border border-slate-100 shadow-sm flex flex-col gap-3 relative"
                 >
                   <div className="flex justify-between items-start mb-2">
                     <div>
@@ -258,42 +138,44 @@ export default function VaccinationsPage() {
                     </div>
                     <div>
                       {v.administered_date ? (
-                        <span className="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-600 text-[9px] font-bold uppercase tracking-wider flex items-center gap-1">
-                          <span className="material-symbols-outlined text-[9px]">
-                            check
-                          </span>
-                          Done
+                        <span className="px-2.5 py-1 rounded-md bg-emerald-100 text-emerald-600 text-[9px] font-bold uppercase tracking-wider flex items-center gap-1">
+                          <span className="material-symbols-outlined text-[9px]">check</span> Done
                         </span>
                       ) : (
-                        <span className="px-2.5 py-1 rounded-full bg-amber-100 text-amber-600 text-[9px] font-bold uppercase tracking-wider block">
+                        <span className="px-2.5 py-1 rounded-md bg-amber-100 text-amber-600 text-[9px] font-bold uppercase tracking-wider block">
                           Upcoming
                         </span>
                       )}
                     </div>
                   </div>
 
-                  <div className="bg-slate-50 rounded-xl p-3">
+                  <div className="bg-slate-50 rounded-md p-3">
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">
                       Vaccine
                     </p>
                     <p className="text-sm font-bold text-slate-700">
                       {v.vaccine_name}
                     </p>
-                    {v.administered_date && (
-                      <p className="text-[10px] text-emerald-600 font-bold uppercase mt-1">
-                        Administered:{" "}
-                        {new Date(v.administered_date).toLocaleDateString()}
-                      </p>
-                    )}
+                    <p className="text-[10px] font-mono text-slate-500 font-bold mt-1 uppercase">
+                      Budget: {v.amount_requested ? `₦${Number(v.amount_requested).toLocaleString()}` : "N/A"}
+                    </p>
                   </div>
-
-                  {!v.administered_date && (
-                    <button
-                      onClick={() => handleAdministered(v.id)}
-                      className="w-full mt-2 py-3 bg-slate-900 text-white text-[10px] font-bold uppercase tracking-widest rounded-xl hover:scale-[1.02] transition-all"
-                    >
-                      Mark as Administered
-                    </button>
+                  
+                  {v.outcome && (
+                    <div className="bg-emerald-50 rounded-md p-3">
+                      <p className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest mb-1">
+                        Reported Outcome
+                      </p>
+                      <p className="text-xs font-medium text-emerald-900 mb-2">
+                        {v.outcome}
+                      </p>
+                      <p className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest mb-1">
+                        Keeper Advice
+                      </p>
+                      <p className="text-xs font-medium text-emerald-900">
+                        {v.advice_to_keeper}
+                      </p>
+                    </div>
                   )}
                 </div>
               ))}

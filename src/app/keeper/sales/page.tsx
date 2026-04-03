@@ -123,17 +123,31 @@ export default function KeeperSalesPage() {
                 </div>
                 
                 {(sale.keeper_status === 'pending' || !sale.keeper_status) ? (
-                  <button 
-                    disabled={updating === sale.id}
-                    onClick={() => updateStatus(sale.id, 'confirmed')}
-                    className="px-5 py-2.5 bg-accent text-primary text-[10px] font-bold uppercase tracking-[0.1em] rounded-xl shadow-lg shadow-accent/20 cursor-pointer hover:bg-accent/90 transition-all disabled:opacity-50"
-                  >
-                    {updating === sale.id ? 'PROCESSING...' : 'CONFIRM STOCK'}
-                  </button>
-                ) : (
-                  <span className="flex items-center gap-1 text-[10px] font-bold text-emerald-600 uppercase tracking-widest px-3 py-1.5 bg-emerald-50 rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <button 
+                      disabled={updating === sale.id}
+                      onClick={() => updateStatus(sale.id, 'rejected')}
+                      className="px-4 py-2 border border-rose-200 text-rose-600 text-[10px] bg-rose-50 font-bold uppercase tracking-[0.1em] rounded-md shadow-sm hover:bg-rose-100 transition-all disabled:opacity-50"
+                    >
+                      {updating === sale.id ? '...' : 'REJECT'}
+                    </button>
+                    <button 
+                      disabled={updating === sale.id}
+                      onClick={() => updateStatus(sale.id, 'confirmed')}
+                      className="px-5 py-2 bg-accent text-primary text-[10px] font-bold uppercase tracking-[0.1em] rounded-md shadow-lg shadow-accent/20 hover:bg-accent/90 transition-all disabled:opacity-50"
+                    >
+                      {updating === sale.id ? '...' : 'CONFIRM'}
+                    </button>
+                  </div>
+                ) : sale.keeper_status === 'confirmed' ? (
+                  <span className="flex items-center gap-1 text-[10px] font-bold text-emerald-600 uppercase tracking-widest px-3 py-1.5 bg-emerald-50 rounded-md">
                     <span className="material-symbols-outlined text-xs">check_circle</span>
                     Confirmed
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-1 text-[10px] font-bold text-rose-600 uppercase tracking-widest px-3 py-1.5 bg-rose-50 rounded-md">
+                    <span className="material-symbols-outlined text-xs">cancel</span>
+                    Rejected
                   </span>
                 )}
               </div>

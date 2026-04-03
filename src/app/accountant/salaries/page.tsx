@@ -42,7 +42,7 @@ export default function AccountantSalaries() {
       const { data } = await supabase
         .from("profiles")
         .select("id, full_name, email, role, bank_name, account_number, salary_amount")
-        .in("role", ["admin", "farm_manager", "keeper", "accountant", "sales_manager"])
+        .neq("role", "investor")
         .order("role", { ascending: true });
 
       setStaff(data || []);

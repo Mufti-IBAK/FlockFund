@@ -36,10 +36,16 @@ export default function AccountantPayments() {
         .eq("status", "processed")
         .order("created_at", { ascending: false });
 
-      // Fetch investor payouts
+      // Fetch investor payouts (withdrawals)
       const { data: payouts } = await supabase
-        .from("investor_payouts")
-        .select("id, withdrawable_amount, created_at, investments(profiles(full_name))")
+        .from("withdrawals")
+        .select("id, amount, processed_at, investor_id, profiles!withdrawals_investor_id_fkey(full_name, role)")
+        .order("processed_at", { ascending: false });
+
+      // Fetch staff payments
+      const { data: salaries } = await supabase
+        .from("staff_payments")
+        .select("id, amount, created_at, payment_month, payment_year, profiles!staff_payments_staff_id_fkey(full_name, role)")
         .order("created_at", { ascending: false });
 
       const combined = [
@@ -57,18 +63,31 @@ export default function AccountantPayments() {
           };
         }),
         ...(payouts || []).map((p: any) => {
-          const investment = Array.isArray(p.investments) ? p.investments[0] : p.investments;
-          const profile = investment && Array.isArray(investment.profiles) ? investment.profiles[0] : investment?.profiles;
+          const profile = Array.isArray(p.profiles) ? p.profiles[0] : p.profiles;
           
           return {
             id: p.id,
-            date: p.created_at,
-            amount: p.withdrawable_amount,
+            date: p.processed_at || new Date().toISOString(),
+            amount: p.amount,
             type: "Investor Payout",
             category: "Profit Sharing",
-            recipient: profile?.full_name,
-            role: "investor",
+            recipient: profile?.full_name || "Unknown Investor",
+            role: profile?.role || "investor",
             description: `Round Payout #${p.id.substring(0,8)}`
+          };
+        }),
+        ...(salaries || []).map((s: any) => {
+          const profile = Array.isArray(s.profiles) ? s.profiles[0] : s.profiles;
+          
+          return {
+            id: s.id,
+            date: s.created_at || new Date().toISOString(),
+            amount: s.amount,
+            type: "Salary Payment",
+            category: "Payroll",
+            recipient: profile?.full_name || "Staff",
+            role: profile?.role || "staff",
+            description: `Salary for ${s.payment_month} ${s.payment_year}`
           };
         })
       ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());

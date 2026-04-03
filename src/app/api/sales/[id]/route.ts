@@ -69,6 +69,28 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
       await supabaseAdmin.from('notifications').insert(notifs);
     }
   }
+  
+  if (data.keeper_status === 'rejected') {
+    const { data: managers } = await supabase
+      .from('profiles')
+      .select('id')
+      .in('role', ['admin', 'farm_manager']);
+      
+    if (managers && managers.length > 0) {
+      const titleStr = '⚠️ Sale Count Rejected';
+      const msgStr = `The Keeper rejected the reported sale count of ${data.is_manure ? 'manure' : data.amount_birds + ' birds'} by the Sales Manager. Please investigate.`;
+      
+      const notifs = managers.map(m => ({
+        user_id: m.id,
+        title: titleStr,
+        message: msgStr,
+        type: 'alert',
+        redirect_url: '/manager/sales'
+      }));
+      
+      await supabaseAdmin.from('notifications').insert(notifs);
+    }
+  }
 
   return NextResponse.json(data);
 }
