@@ -129,7 +129,9 @@ Proceed with real-time transfer?`;
       });
 
       const data = await res.json();
-      if (data.success) {
+      if (data.transfer_url) {
+        window.location.href = data.transfer_url;
+      } else if (data.success) {
         alert("Disbursement successful! The recipient has been notified.");
         loadApprovedRequests();
       } else {

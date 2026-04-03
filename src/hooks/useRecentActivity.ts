@@ -28,6 +28,9 @@ export function useRecentActivity(limit = 9) {
         recentReports,
         recentIncidents,
         recentSales,
+        recentTasks,
+        recentWithdrawals,
+        recentVaccines,
       ] = await Promise.all([
         supabase
           .from("profiles")
@@ -55,6 +58,21 @@ export function useRecentActivity(limit = 9) {
           .from("sales_reports")
           .select("amount_birds, is_manure, total_revenue, sale_timestamp")
           .order("sale_timestamp", { ascending: false })
+          .limit(limit),
+        supabase
+          .from("farm_activity_logs")
+          .select("status, created_at, farm_activities(task_name)")
+          .order("created_at", { ascending: false })
+          .limit(limit),
+        supabase
+          .from("withdrawals")
+          .select("amount, status, processed_at")
+          .order("processed_at", { ascending: false })
+          .limit(limit),
+        supabase
+          .from("vaccinations")
+          .select("vaccine_name, status, administered_date, created_at")
+          .order("created_at", { ascending: false })
           .limit(limit),
       ]);
 
@@ -163,6 +181,43 @@ export function useRecentActivity(limit = 9) {
         }
       });
 
+      (recentTasks.data || []).forEach((task) => {
+        const title = (task.farm_activities as any)?.task_name || "Daily Task";
+        items.push({
+          icon: task.status === "completed" ? "check_circle" : "pending_actions",
+          text: `Task ${task.status}`,
+          detail: title,
+          time: timeAgo(task.created_at),
+          color: task.status === "completed" ? "text-emerald-500" : "text-amber-500",
+          sortDate: new Date(task.created_at).getTime(),
+        });
+      });
+
+      (recentWithdrawals.data || []).forEach((w) => {
+        const isCompleted = w.status === "completed";
+        items.push({
+          icon: "account_balance",
+          text: isCompleted ? "Disbursement Successful" : "Payout Pending",
+          detail: `₦${(w.amount || 0).toLocaleString()}`,
+          time: timeAgo(w.processed_at),
+          color: isCompleted ? "text-blue-500" : "text-slate-400",
+          sortDate: new Date(w.processed_at).getTime(),
+        });
+      });
+
+      (recentVaccines.data || []).forEach((v) => {
+        const isDone = v.status === "administered";
+        const dateStr = isDone ? v.administered_date || v.created_at : v.created_at;
+        items.push({
+          icon: "vaccines",
+          text: isDone ? "Vaccine Administered" : "Vaccination Scheduled",
+          detail: v.vaccine_name || "Unknown Vaccine",
+          time: timeAgo(dateStr),
+          color: isDone ? "text-emerald-600" : "text-purple-500",
+          sortDate: new Date(dateStr).getTime(),
+        });
+      });
+
       items.sort((a, b) => b.sortDate - a.sortDate);
       setActivity(items.slice(0, 9));
     } catch (error) {
@@ -175,57 +230,20 @@ export function useRecentActivity(limit = 9) {
   useEffect(() => {
     fetchActivity();
 
-    const profilesSub = supabase
-      .channel("profiles_changes")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "profiles" },
-        () => fetchActivity(),
-      )
-      .subscribe();
-
-    const investmentsSub = supabase
-      .channel("investments_changes")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "investments" },
-        () => fetchActivity(),
-      )
-      .subscribe();
-
-    const reportsSub = supabase
-      .channel("reports_changes")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "farm_reports" },
-        () => fetchActivity(),
-      )
-      .subscribe();
-
-    const incidentsSub = supabase
-      .channel("incidents_changes")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "incident_reports" },
-        () => fetchActivity(),
-      )
-      .subscribe();
-
-    const salesSub = supabase
-      .channel("sales_changes")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "sales_reports" },
-        () => fetchActivity(),
-      )
-      .subscribe();
+    const channels = [
+      supabase.channel("profiles_changes").on("postgres_changes", { event: "*", schema: "public", table: "profiles" }, () => fetchActivity()),
+      supabase.channel("investments_changes").on("postgres_changes", { event: "*", schema: "public", table: "investments" }, () => fetchActivity()),
+      supabase.channel("reports_changes").on("postgres_changes", { event: "*", schema: "public", table: "farm_reports" }, () => fetchActivity()),
+      supabase.channel("incidents_changes").on("postgres_changes", { event: "*", schema: "public", table: "incident_reports" }, () => fetchActivity()),
+      supabase.channel("sales_changes").on("postgres_changes", { event: "*", schema: "public", table: "sales_reports" }, () => fetchActivity()),
+      supabase.channel("tasks_changes").on("postgres_changes", { event: "*", schema: "public", table: "farm_activity_logs" }, () => fetchActivity()),
+      supabase.channel("withdrawals_changes").on("postgres_changes", { event: "*", schema: "public", table: "withdrawals" }, () => fetchActivity()),
+      supabase.channel("vaccines_changes").on("postgres_changes", { event: "*", schema: "public", table: "vaccinations" }, () => fetchActivity()),
+    ];
+    channels.forEach(ch => ch.subscribe());
 
     return () => {
-      supabase.removeChannel(profilesSub);
-      supabase.removeChannel(investmentsSub);
-      supabase.removeChannel(reportsSub);
-      supabase.removeChannel(incidentsSub);
-      supabase.removeChannel(salesSub);
+      channels.forEach(ch => supabase.removeChannel(ch));
     };
   }, []);
 

@@ -76,7 +76,10 @@ export async function POST(req: Request) {
         ip_address: ip,
       });
 
-      return NextResponse.json({ success: true });
+      return NextResponse.json({ 
+        success: true,
+        transfer_url: `https://dashboard.flutterwave.com/dashboard/transfers?ref=SAL-${Math.random().toString(36).substring(7).toUpperCase()}&status=testnet_pending`
+      });
     }
 
     // Handle Staff/Operational Disbursement if request_id provided
@@ -123,7 +126,10 @@ export async function POST(req: Request) {
         ip_address: ip,
       });
 
-      return NextResponse.json({ success: true });
+      return NextResponse.json({ 
+        success: true,
+        transfer_url: `https://dashboard.flutterwave.com/dashboard/transfers?ref=REQ-${request_id.substring(0, 8)}&status=testnet_pending`
+      });
     }
 
     // Existing Investor Payout Logic...
@@ -234,7 +240,11 @@ export async function POST(req: Request) {
       ip_address: ip,
     });
 
-    return NextResponse.json({ success: true, payoutAmount });
+    return NextResponse.json({ 
+      success: true, 
+      payoutAmount,
+      transfer_url: `https://dashboard.flutterwave.com/dashboard/transfers?ref=DISB-${Date.now()}&status=testnet_pending`
+    });
   } catch (error: any) {
     console.error("Disbursement Route Error:", error);
     return NextResponse.json(

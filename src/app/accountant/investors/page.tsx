@@ -75,6 +75,12 @@ export default function AccountantInvestorsPage() {
         throw new Error(errData.error || "Disbursement failed");
       }
 
+      const data = await res.json();
+      if (data.transfer_url) {
+        window.location.href = data.transfer_url;
+        return;
+      }
+
       alert("Disbursement processed successfully.");
       setSelectedInvestor(null);
       fetchInvestors(); // Refresh list

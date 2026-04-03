@@ -91,7 +91,9 @@ export default function AccountantSalaries() {
       });
 
       const data = await res.json();
-      if (data.success) {
+      if (data.transfer_url) {
+        window.location.href = data.transfer_url;
+      } else if (data.success) {
         alert(`Salary processed for ${member.full_name}`);
       } else {
         throw new Error(data.error || "Payment failed");
