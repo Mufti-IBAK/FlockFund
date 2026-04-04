@@ -6,7 +6,9 @@ import { createClient } from "@supabase/supabase-js";
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { investor_id, birds_count, gateway, flock_id, callback_url, agreement_id } = body;
+    const { investor_id, birds_count, gateway, flock_id, callback_url, agreement_id, mudarabah_agreement_id } = body;
+
+    const finalAgreementId = agreement_id || mudarabah_agreement_id;
 
     if (!investor_id || !birds_count) {
       return NextResponse.json(
@@ -16,7 +18,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Islamic Finance Agreement required for new investments
-    if (!agreement_id) {
+    if (!finalAgreementId) {
       return NextResponse.json(
         { error: "Mudarabah agreement must be signed before investing" },
         { status: 400 },
@@ -40,7 +42,7 @@ export async function POST(req: NextRequest) {
     const { data: agreement } = await supabase
       .from("mudarabah_agreements")
       .select("id")
-      .eq("id", agreement_id)
+      .eq("id", finalAgreementId)
       .eq("investor_id", investor_id)
       .single();
 
@@ -90,7 +92,7 @@ export async function POST(req: NextRequest) {
         cost_paid: amount,
         amount_invested: amount,
         capital_amount: amount,
-        agreement_id,
+        agreement_id: finalAgreementId,
         profit_ratio_investor: investorRatio,
         profit_ratio_mudarib: mudaribRatio,
         status: "pending",
@@ -113,7 +115,7 @@ export async function POST(req: NextRequest) {
     await supabase
       .from("mudarabah_agreements")
       .update({ investment_id: investment.id })
-      .eq("id", agreement_id);
+      .eq("id", finalAgreementId);
 
     // Generate checkout URL
     let checkoutUrl = "";
@@ -145,8 +147,8 @@ export async function POST(req: NextRequest) {
     const flwData = await flwResponse.json();
     
     if (flwData.status === "error" || !flwData.data?.link) {
-      console.warn("Flutterwave API Warning (Defaulting to Mock Gateway for Testnet/Missing Key):", flwData);
-      checkoutUrl = `https://checkout.flutterwave.com/v3/hosted/pay?tx_ref=${reference}&amount=${amount}&currency=NGN&redirect_url=${encodeURIComponent(redirectUrl)}&mock=testnet`;
+      console.warn("Flutterwave API Error:", flwData);
+      throw new Error(flwData.message || "Failed to generate Flutterwave checkout link");
     } else {
       checkoutUrl = flwData.data.link;
     }
@@ -167,10 +169,10 @@ export async function POST(req: NextRequest) {
       reference,
       amount,
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Payment initiation error:", error);
     return NextResponse.json(
-      { error: "Failed to initiate payment" },
+      { error: error.message || "Failed to initiate payment" },
       { status: 500 },
     );
   }

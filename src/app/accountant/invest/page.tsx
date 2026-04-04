@@ -219,19 +219,19 @@ export default function InvestPage() {
           investor_id: user.id,
           birds_count: birdCount,
           gateway: "flutterwave",
-          email: user.email,
-          flock_id: selectedFlock,
-          mudarabah_agreement_id: agreementId,
-          callback_url: `${window.location.origin}${window.location.pathname.replace('/invest', '')}/payment/callback`,
-        }),
-      });
-
-      const data = await res.json();
-      if (data.checkout_url) {
-        window.location.href = data.checkout_url;
-      } else {
-        alert("Payment initiated! Reference: " + (data.reference || "N/A"));
-      }
+           email: user.email,
+           flock_id: selectedFlock,
+           agreement_id: agreementId,
+           callback_url: `${window.location.origin}${window.location.pathname.replace('/invest', '')}/payment/callback`,
+         }),
+       });
+ 
+       const data = await res.json();
+       if (res.ok && data.checkout_url) {
+         window.location.href = data.checkout_url;
+       } else {
+         alert(data.error || data.message || "Failed to initiate payment. Please try again.");
+       }
     } catch (err) {
       console.error(err);
       alert("Failed to initiate payment. Please try again.");
