@@ -92,13 +92,12 @@ export async function POST(req: NextRequest) {
         cost_paid: amount,
         amount_invested: amount,
         capital_amount: amount,
-        agreement_id: finalAgreementId,
+        mudarabah_agreement_id: finalAgreementId,
         profit_ratio_investor: investorRatio,
         profit_ratio_mudarib: mudaribRatio,
         status: "pending",
         round_count: 0,
         payment_gateway_used: "flutterwave",
-        payment_gateway: "flutterwave",
       })
       .select()
       .single();
