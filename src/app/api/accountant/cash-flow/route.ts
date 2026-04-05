@@ -74,6 +74,12 @@ export async function GET(req: Request) {
       .select("amount")
       .eq("status", "approved");
 
+    // d) Staff Payments (salaries)
+    const { data: staffPayments } = await supabaseAdmin
+      .from("staff_payments")
+      .select("id, amount, status, created_at")
+      .eq("status", "completed");
+
     const pendingFunds = (pendingRequests || []).reduce((sum, r) => sum + (r.amount || 0), 0);
 
     // d) Active Flocks
@@ -145,6 +151,17 @@ export async function GET(req: Request) {
         amount: wth.amount,
         date: wth.processed_at || new Date().toISOString(), // fallback if processed_at missing
         status: wth.status,
+      });
+    });
+
+    (staffPayments || []).forEach((pay) => {
+      ledger.push({
+        id: pay.id,
+        type: "OUTFLOW",
+        source: "Staff Salary / Payment",
+        amount: Number(pay.amount),
+        date: pay.created_at,
+        status: "completed",
       });
     });
 

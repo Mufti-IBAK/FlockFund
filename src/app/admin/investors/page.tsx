@@ -68,7 +68,6 @@ export default function AdminInvestorsPage() {
             birds_owned
           )
         `)
-        .eq("role", "investor")
         .order("created_at", { ascending: false });
 
       if (error) throw error;

@@ -21,6 +21,7 @@ const navItems = [
   { icon: "report_problem", label: "Incidents", href: "/admin/incidents" },
   { icon: "analytics", label: "Data", href: "/admin/data" },
   { icon: "forum", label: "Community", href: "/admin/community" },
+  { icon: "receipt_long", label: "Financial Ledger", href: "/admin/audit" },
   { icon: "settings", label: "Settings", href: "/admin/settings" },
 ];
 
