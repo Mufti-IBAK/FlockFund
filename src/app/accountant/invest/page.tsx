@@ -222,7 +222,7 @@ export default function InvestPage() {
            email: user.email,
            flock_id: selectedFlock,
            agreement_id: agreementId,
-           callback_url: `${window.location.origin}${window.location.pathname.replace('/invest', '')}/payment/callback`,
+           callback_url: `${window.location.origin}${window.location.pathname.replace(/\/invest$/, '')}/payment/callback`,
          }),
        });
  
