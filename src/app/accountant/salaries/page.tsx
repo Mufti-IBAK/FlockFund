@@ -39,13 +39,36 @@ export default function AccountantSalaries() {
     try {
       const { createClient } = await import("@/lib/supabase/client");
       const supabase = createClient();
-      const { data } = await supabase
+
+      // Fetch global salary settings
+      const { data: settingsData } = await supabase
+        .from("settings")
+        .select("salary_keeper, salary_manager, salary_sales_manager")
+        .single();
+
+      // Fetch staff profiles
+      const { data: profiles } = await supabase
         .from("profiles")
         .select("id, full_name, email, role, bank_name, account_number, salary_amount")
         .neq("role", "investor")
         .order("role", { ascending: true });
 
-      setStaff(data || []);
+      const enrichedStaff = (profiles || []).map((p: any) => {
+        let finalSalary = p.salary_amount;
+        
+        // Fallback to role-based salary if profile salary is not specifically set
+        if (!finalSalary || finalSalary === 0) {
+          if (p.role === "keeper") finalSalary = settingsData?.salary_keeper;
+          if (p.role === "manager") finalSalary = settingsData?.salary_manager;
+          if (p.role === "sales_manager") finalSalary = settingsData?.salary_sales_manager;
+          if (p.role === "accountant") finalSalary = settingsData?.salary_manager; // Use manager salary for accountant too as fallback
+          if (p.role === "admin") finalSalary = settingsData?.salary_manager; // Use manager salary for admin too
+        }
+
+        return { ...p, salary_amount: finalSalary || 0 };
+      });
+
+      setStaff(enrichedStaff);
     } catch (err) {
       console.error(err);
     } finally {

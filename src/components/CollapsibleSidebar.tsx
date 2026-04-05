@@ -89,11 +89,11 @@ export function CollapsibleSidebar({ navItems, roleLabel, basePath }: Props) {
         )}
       </div>
 
-      {/* Nav — no scroll, fit screen by reducing padding */}
+      {/* Nav — adds scroll for many items */}
       <div
-        className={`${collapsed && !mobileOpen ? "px-1.5" : "px-2"} mt-0.5 flex-1`}
+        className={`${collapsed && !mobileOpen ? "px-1.5" : "px-2"} mt-0.5 flex-1 overflow-y-auto scrollbar-hide`}
       >
-        <nav className="space-y-0.5">
+        <nav className="space-y-0.5 pb-4">
           {navItems.map((item) => {
             const isActive =
               pathname === item.href ||

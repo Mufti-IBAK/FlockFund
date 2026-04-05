@@ -63,12 +63,12 @@ export async function GET(req: Request) {
       account_number: p.profiles?.account_number,
       account_name: p.profiles?.account_name,
       flock_name: p.flocks?.flock_name,
-      amount_to_disburse: Number(p.amount_disbursed),
+      amount_to_disburse: Number(p.withdrawable_amount),
       capital_returned: Number(p.capital_returned),
       profit_shared: Number(p.profit_shared),
       mortality_loss: Number(p.mortality_loss),
       status: p.status,
-      payout_date: p.payout_date
+      payout_date: p.created_at
     }));
 
     return NextResponse.json({ payouts: enrichedPayouts });

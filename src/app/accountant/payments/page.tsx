@@ -10,6 +10,27 @@ export default function AccountantPayments() {
 
   useEffect(() => {
     loadTransactions();
+
+    // REALTIME SUBSCRIPTION
+    let supabase: any;
+    const setupRealtime = async () => {
+      const { createClient } = await import("@/lib/supabase/client");
+      supabase = createClient();
+      
+      const channel = supabase
+        .channel('accountant_payments')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'fund_requests' }, () => loadTransactions())
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'withdrawals' }, () => loadTransactions())
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'staff_payments' }, () => loadTransactions())
+        .subscribe();
+
+      return channel;
+    };
+
+    const channelPromise = setupRealtime();
+    return () => {
+      channelPromise.then(c => c?.unsubscribe());
+    };
   }, []);
 
   useEffect(() => {
@@ -29,23 +50,23 @@ export default function AccountantPayments() {
       const { createClient } = await import("@/lib/supabase/client");
       const supabase = createClient();
       
-      // Fetch processed fund requests
+      // Fetch processed OR pending fund requests
       const { data: requests } = await supabase
         .from("fund_requests")
-        .select("id, amount, category, description, created_at, profiles(full_name, role)")
-        .eq("status", "processed")
+        .select("id, amount, category, description, created_at, status, profiles(full_name, role)")
+        .in("status", ["processed", "approved", "pending"])
         .order("created_at", { ascending: false });
 
       // Fetch investor payouts (withdrawals)
       const { data: payouts } = await supabase
         .from("withdrawals")
-        .select("id, amount, processed_at, investor_id, profiles!withdrawals_investor_id_fkey(full_name, role)")
-        .order("processed_at", { ascending: false });
+        .select("id, amount, processed_at, created_at, status, investor_id, profiles!withdrawals_investor_id_fkey(full_name, role)")
+        .order("created_at", { ascending: false });
 
       // Fetch staff payments
       const { data: salaries } = await supabase
         .from("staff_payments")
-        .select("id, amount, created_at, payment_month, payment_year, profiles!staff_payments_staff_id_fkey(full_name, role)")
+        .select("id, amount, created_at, status, payment_month, payment_year, profiles!staff_payments_staff_id_fkey(full_name, role)")
         .order("created_at", { ascending: false });
 
       const combined = [
@@ -59,7 +80,8 @@ export default function AccountantPayments() {
             category: r.category,
             recipient: profile?.full_name,
             role: profile?.role,
-            description: r.description
+            description: r.description,
+            status: r.status
           };
         }),
         ...(payouts || []).map((p: any) => {
@@ -67,13 +89,14 @@ export default function AccountantPayments() {
           
           return {
             id: p.id,
-            date: p.processed_at || new Date().toISOString(),
+            date: p.processed_at || p.created_at || new Date().toISOString(),
             amount: p.amount,
             type: "Investor Payout",
             category: "Profit Sharing",
             recipient: profile?.full_name || "Unknown Investor",
             role: profile?.role || "investor",
-            description: `Round Payout #${p.id.substring(0,8)}`
+            description: `Round Payout #${p.id.substring(0,8)}`,
+            status: p.status
           };
         }),
         ...(salaries || []).map((s: any) => {
@@ -87,7 +110,8 @@ export default function AccountantPayments() {
             category: "Payroll",
             recipient: profile?.full_name || "Staff",
             role: profile?.role || "staff",
-            description: `Salary for ${s.payment_month} ${s.payment_year}`
+            description: `Salary for ${s.payment_month} ${s.payment_year}`,
+            status: s.status
           };
         })
       ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
@@ -102,14 +126,20 @@ export default function AccountantPayments() {
 
   return (
     <div ref={pageRef} className="max-w-6xl mx-auto">
-      <div className="mb-8 fade-in">
-        <h1 className="text-2xl font-heading font-extrabold text-primary tracking-tight">
-          Payment Transactions
-        </h1>
-        <p className="text-slate-400 text-sm mt-1">
-          Complete history of all disbursements, salary payments, and investor payouts.
-        </p>
-      </div>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-heading font-extrabold text-primary tracking-tight">
+              Payment Transactions
+            </h1>
+            <p className="text-slate-400 text-sm mt-1">
+              Complete history of all disbursements, salary payments, and investor payouts.
+            </p>
+          </div>
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-emerald-50 rounded-full border border-emerald-100/50">
+            <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
+            <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest">Live Sync Alpha</span>
+          </div>
+        </div>
 
       <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden fade-in">
         <div className="p-6 border-b border-slate-50 bg-slate-50/30 flex justify-between items-center">
@@ -168,8 +198,16 @@ export default function AccountantPayments() {
                       ₦{Number(tx.amount).toLocaleString()}
                     </td>
                     <td className="px-6 py-5">
-                      <span className="px-2 py-1 bg-emerald-50 text-emerald-600 text-[9px] font-bold uppercase rounded-lg border border-emerald-100">
-                        Processed
+                      <span className={`px-2 py-1 text-[9px] font-bold uppercase rounded-lg border flex items-center justify-center w-fit gap-1
+                        ${tx.status === 'completed' || tx.status === 'processed' 
+                          ? "bg-emerald-50 text-emerald-600 border-emerald-100" 
+                          : tx.status === 'failed' || tx.status === 'rejected'
+                          ? "bg-rose-50 text-rose-600 border-rose-100"
+                          : "bg-amber-50 text-amber-600 border-amber-100 animate-pulse"}`}>
+                        <span className="material-symbols-outlined text-[10px]">
+                          {tx.status === 'completed' || tx.status === 'processed' ? "check_circle" : tx.status === 'failed' || tx.status === 'rejected' ? "cancel" : "pending"}
+                        </span>
+                        {tx.status || 'Pending'}
                       </span>
                     </td>
                   </tr>

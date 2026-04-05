@@ -426,6 +426,42 @@ export default function AdminSettings() {
       </div>
 
       <div className="grid lg:grid-cols-2 gap-6">
+        {/* ── Operational Salaries ── */}
+        <SettingCard title="Operational Salaries" icon="payments">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+             <NumberField 
+                label="Keeper Salary (Monthly)" 
+                value={settings.salary_keeper} 
+                prefix="₦"
+                onChange={(v) => setSettings(s => ({ ...s, salary_keeper: v }))} 
+             />
+             <NumberField 
+                label="Manager Salary (Monthly)" 
+                value={settings.salary_manager} 
+                prefix="₦"
+                onChange={(v) => setSettings(s => ({ ...s, salary_manager: v }))} 
+             />
+             <NumberField 
+                label="Sales Manager Salary (Monthly)" 
+                value={settings.salary_sales_manager} 
+                prefix="₦"
+                onChange={(v) => setSettings(s => ({ ...s, salary_sales_manager: v }))} 
+             />
+             <div className="p-4 bg-emerald-50 rounded-2xl border border-emerald-100/50">
+                <p className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest mb-1.5">Mortality Profit Index</p>
+                <div className="flex items-center gap-3">
+                   <NumberField 
+                      label="Est. Profit/Bird" 
+                      value={settings.estimated_profit_per_bird} 
+                      prefix="₦"
+                      onChange={(v) => setSettings(s => ({ ...s, estimated_profit_per_bird: v }))} 
+                   />
+                </div>
+                <p className="text-[9px] text-emerald-800/40 mt-2 italic">* Used for loss calculation upon bird mortality.</p>
+             </div>
+          </div>
+        </SettingCard>
+
         {/* ── Cost Breakdown ── */}
         <SettingCard title="Cost Breakdown (per bird)" icon="calculate">
           <div className="space-y-4">
@@ -596,41 +632,6 @@ export default function AdminSettings() {
           </div>
         </SettingCard>
 
-        {/* ── Operational Salaries ── */}
-        <SettingCard title="Operational Salaries" icon="payments">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-             <NumberField 
-                label="Keeper Salary (Monthly)" 
-                value={settings.salary_keeper} 
-                prefix="₦"
-                onChange={(v) => setSettings(s => ({ ...s, salary_keeper: v }))} 
-             />
-             <NumberField 
-                label="Manager Salary (Monthly)" 
-                value={settings.salary_manager} 
-                prefix="₦"
-                onChange={(v) => setSettings(s => ({ ...s, salary_manager: v }))} 
-             />
-             <NumberField 
-                label="Sales Manager Salary (Monthly)" 
-                value={settings.salary_sales_manager} 
-                prefix="₦"
-                onChange={(v) => setSettings(s => ({ ...s, salary_sales_manager: v }))} 
-             />
-             <div className="p-4 bg-emerald-50 rounded-2xl border border-emerald-100/50">
-                <p className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest mb-1.5">Mortality Profit Index</p>
-                <div className="flex items-center gap-3">
-                   <NumberField 
-                      label="Est. Profit/Bird" 
-                      value={settings.estimated_profit_per_bird} 
-                      prefix="₦"
-                      onChange={(v) => setSettings(s => ({ ...s, estimated_profit_per_bird: v }))} 
-                   />
-                </div>
-                <p className="text-[9px] text-emerald-800/40 mt-2 italic">* Used for loss calculation upon bird mortality.</p>
-             </div>
-          </div>
-        </SettingCard>
 
         {/* ── Investment Rules ── */}
         <SettingCard title="Investment Rules" icon="rule">
