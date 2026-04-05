@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { RecentActivityFeed } from "@/components/RecentActivityFeed";
+import { Greeting } from "@/components/Greeting";
+import { useAuth } from "@/components/AuthProvider";
 
 interface FarmActivity {
   id: string;
@@ -33,7 +35,6 @@ export default function KeeperDashboard() {
         const supabase = createClient();
         
         const { data: { user } } = await supabase.auth.getUser();
-        if (user) setCurrentUser(user);
 
         const { data: flocks } = await supabase.from("flocks").select("id, name").eq("status", "active");
         if (flocks && flocks.length > 0) {
@@ -288,7 +289,7 @@ export default function KeeperDashboard() {
             })}
           </p>
           <h1 className="font-heading text-3xl font-bold text-white tracking-tight mb-1">
-            Good Morning, Keeper
+            {new Date().getHours() < 12 ? 'Good Morning' : new Date().getHours() < 17 ? 'Good Afternoon' : 'Good Evening'}, {profile?.full_name?.split(' ')[0] || 'Keeper'}
           </h1>
           <p className="text-white/40 text-sm">
             You have {tasks.filter((t) => t.status === "pending").length} tasks remaining today

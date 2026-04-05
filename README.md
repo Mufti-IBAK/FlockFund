@@ -1,90 +1,65 @@
-# FlockFund II — Premium Poultry Investment & Farm Management
+# 🐔 FlockFund II | Mudarabah Financial Ecosystem (2026 Edition)
 
-![FlockFund Landing](https://images.unsplash.com/photo-1548550023-2bdb3c5beed7?q=80&w=2070&auto=format&fit=crop)
-
-FlockFund II is a sophisticated, role-based investment platform designed to bridge the gap between urban investors and rural poultry farming. It provides a transparent, secure, and data-driven ecosystem for managing the entire poultry lifecycle—from procurement and daily health tracking to final sales and profit distribution.
+FlockFund II is a decentralized, Shariah-compliant livestock investment and farm management platform. Built on the **Mudarabah Al-Muqayyad** (Restricted Partnership) model, it bridges the gap between urban investors and rural poultry farming through real-time data transparency, automated financial settlement, and decentralized farm operations.
 
 ## 🚀 Key Features
 
-### 💎 For Investors
-- **Live Performance Tracking**: Real-time KPI dashboards showing flock health and estimated ROI.
-- **Micro-Investment Tiers**: Start with small units of birds and scale your portfolio.
-- **Secure Financials**: Integrated Flutterwave payments for investments and bank payouts for withdrawals.
-- **Gamification**: Earn badges and climb the leaderboard based on investment consistency and portfolio performance.
+### ⚖️ Mudarabah Settlement Engine
+*   **Proportional Payouts**: Automated calculation of Investor ROI based on bird ownership percentage.
+*   **70/30 Profit Split**: Dynamically configurable Profit Sharing Ratio (PSR) stored in secure 2026 Data Governance tables.
+*   **Mortality-Indexed Protection**: Intelligent loss management system that calculates biological risk and protects the Mudarabah agreement boundaries.
 
-### 🚜 For Farm Staff (Keepers & Managers)
-- **Daily Operational Logs**: Digitalized reporting for mortality, feed consumption, and house conditions.
-- **Vet Health Insights**: Diagnosis tagging and vaccination trackers to ensure high survival rates.
-- **FCR Analytics**: Automated Feed Conversion Ratio insights to optimize growth vs. cost.
-- **Secure Fund Requests**: Operational fund requests with transparent Admin approval and Accountant disbursement via automated bank transfers.
+### 💳 Automated Financial Disbursements
+*   **Flutterwave Integration**: Direct, verified bank transfers for investor payouts and staff salaries.
+*   **Two-Stage Verification**: Secure accountant reconciliation workflow (Draft -> Verified -> Disbursed) to ensure 100% financial accountability.
+*   **Audit Trail**: Immutable 2026 Compliance logging for all financial gateway events via `logAuditEvent`.
 
-### 🛡️ For Administrators & Accountants
-- **Global Settings Hub**: Dynamic ROI calculators, market price floor management, and configurable cost breakdowns.
-- **Financial Control**: Centralized approval for operational expenses and automated staff payouts via Flutterwave Transfers.
-- **Data Monetization**: Anonymized FCR and growth data insights prepared for industry analytics.
+### 🐄 Premium Farm Operations
+*   **Multi-Role Dashboards**: Specialized UIs for Admins, Accountants, Managers, Sales Managers, and Keepers.
+*   **Time-Aware UX**: Intelligent `Greeting` system with time-of-day logic and personalized biometric-linked profiles.
+*   **Real-Time Sync**: Postgres-level change listeners for instant synchronization across all organizational roles.
 
-## 🛠️ Tech Stack
+## 🛠️ Technology Stack
+*   **Framework**: Next.js 14+ (App Router)
+*   **Database**: Supabase (PostgreSQL with RLS)
+*   **Styling**: Premium Vanilla CSS + Tailwind (Design Tokens)
+*   **Animations**: GSAP 3.x (Smooth Transitions)
+*   **Payments**: Flutterwave v3 Transfer API
+*   **Governance**: 2026 Data Protection Standard (Log Auditing & RBAC)
 
-- **Framework**: [Next.js 15](https://nextjs.org/) (App Router, React 19)
-- **Database / Auth**: [Supabase](https://supabase.com/) (PostgreSQL + RLS Policies)
-- **Styling**: [Tailwind CSS](https://tailwindcss.com/)
-- **Animations**: [GSAP](https://gsap.com/) (ScrollTrigger, Timelines)
-- **Visuals**: [Three.js](https://threejs.org/) (3D Interactive Globe & Investment Visuals)
-- **Charts**: [Recharts](https://recharts.org/)
-- **Payments**: [Flutterwave](https://flutterwave.com/)
+## 📦 Getting Started
 
-## 📂 Project Structure
-
-```bash
-├── src/
-│   ├── app/                # Next.js App Router (Pages & API)
-│   │   ├── admin/          # Administrator Dashboard
-│   │   ├── accountant/     # Financial Management Hub
-│   │   ├── manager/        # Farm Operations Oversight
-│   │   ├── keeper/         # Daily Field Operations
-│   │   ├── investor/       # Investment Portfolio
-│   │   └── api/            # Payouts, Webhooks, Notifications
-│   ├── components/         # Reusable Premium UI Components
-│   ├── lib/                # Shared utilities & Supabase clients
-│   └── styles/             # Global themes & design tokens
-├── supabase/
-│   └── migrations/         # SQL schema & Security (RLS) policies
-└── .gemini/                # Assistant Knowledge & Task Tracking
+### 1. Environment Configuration
+Create a `.env.local` file with the following keys:
+```env
+NEXT_PUBLIC_SUPABASE_URL=...
+NEXT_PUBLIC_SUPABASE_ANON_KEY=...
+SUPABASE_SERVICE_ROLE_KEY=...
+FLUTTERWAVE_SECRET_KEY=...
+NEXT_PUBLIC_SITE_URL=...
 ```
 
-## ⚙️ Setup & Installation
+### 2. Installation
+```bash
+npm install
+```
 
-1. **Clone the Repository**:
-   ```bash
-   git clone https://github.com/Mufti-IBAK/FlockFund.git
-   cd FlockFund_II
-   ```
+### 3. Development
+```bash
+npm run dev
+```
 
-2. **Install Dependencies**:
-   ```bash
-   npm install
-   ```
+### 4. Production Build
+```bash
+npm run build
+```
 
-3. **Configure Environment Variables**:
-   Create a `.env.local` file with the following:
-   ```env
-   NEXT_PUBLIC_SUPABASE_URL=your_url
-   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_key
-   SUPABASE_SERVICE_ROLE_KEY=your_key
-   FLUTTERWAVE_SECRET_KEY=your_key
-   FLUTTERWAVE_PUBLIC_KEY=your_key
-   ```
-
-4. **Run Development Server**:
-   ```bash
-   npm run dev
-   ```
-
-## 🔒 Security & Roles
-FlockFund II utilizes strict **Row Level Security (RLS)** in PostgreSQL to ensure that:
-- **Keepers** only see their assigned flocks.
-- **Accountants** can only disburse funds after **Admin** approval.
-- **Investors** see only their own financial data and farm activity.
+## 📜 Organizational Structure
+*   **Admin**: Total system oversight, PSR settings, and flock initialization.
+*   **Accountant**: Financial reconciliation, ledger audits, and payout verification.
+*   **Manager**: Farm report oversight, incident management, and vet coordination.
+*   **Sales Manager**: Inventory sales, revenue reporting, and market price tracking.
+*   **Keeper**: Daily biological tasks, task verification, and emergency alerts.
 
 ---
-Built with ❤️ by [Mufti IBAK](https://github.com/Mufti-IBAK)
+*Built with ❤️ by the FlockFund Engineering Team*

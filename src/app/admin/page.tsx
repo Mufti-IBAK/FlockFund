@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { RecentActivityFeed } from "@/components/RecentActivityFeed";
 import { formatNaira } from "@/lib/utils";
+import { Greeting } from "@/components/Greeting";
+import { useAuth } from "@/components/AuthProvider";
 
 /* ── types ── */
 interface KPI {
@@ -16,6 +18,7 @@ interface KPI {
 }
 
 export default function AdminOverview() {
+  const { profile } = useAuth();
   const contentRef = useRef<HTMLDivElement>(null);
   const [kpis, setKpis] = useState<KPI[]>([]);
   const [loading, setLoading] = useState(true);
@@ -322,13 +325,8 @@ export default function AdminOverview() {
 
   return (
     <div ref={contentRef}>
-      <div className="mb-8">
-        <h1 className="text-2xl font-heading font-extrabold text-primary tracking-tight">
-          Admin Dashboard
-        </h1>
-        <p className="text-slate-400 text-sm mt-1">
-          System overview and management
-        </p>
+      <div className="mb-10">
+        <Greeting userName={profile?.full_name} role="Administrator" />
       </div>
 
       {/* KPI Grid */}

@@ -3,8 +3,11 @@
 import { useState, useEffect, useMemo } from "react";
 import gsap from "gsap";
 import { RecentActivityFeed } from "@/components/RecentActivityFeed";
+import { Greeting } from "@/components/Greeting";
+import { useAuth } from "@/components/AuthProvider";
 
 export default function AccountantOverview() {
+  const { profile } = useAuth();
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
     totalInflow: 0,
@@ -77,14 +80,7 @@ export default function AccountantOverview() {
   return (
     <div className="space-y-8 pb-12">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-heading font-extrabold text-primary tracking-tight">
-            Financial Control Center
-          </h1>
-          <p className="text-slate-400 text-sm mt-1">
-            Real-time reconciliation and net liquidity management.
-          </p>
-        </div>
+        <Greeting userName={profile?.full_name} role="Accountant" />
         
         <div className="bg-primary/5 border border-primary/10 px-6 py-3 rounded-2xl">
            <p className="text-[10px] font-bold text-primary uppercase tracking-widest mb-1">Estimated Net Liquidity</p>

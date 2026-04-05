@@ -39,48 +39,39 @@ export async function GET(req: Request) {
       );
     }
 
-    // 2. Fetch all investors using service role (bypasses RLS)
-    // In production, we would want to join `auth.users` to get actual email if not stored in profiles.
-    // For this demonstration, we query profiles and investments.
-    const { data: profiles, error: profilesError } = await supabaseAdmin
-      .from("profiles")
-      .select("id, full_name, role, bank_name, account_number, account_name")
-      .eq("role", "investor");
+    // 1. Fetch Payouts with status 'draft' or 'verified'
+    // This allows Accountants to see exactly what the Admin has settled.
+    const { data: payouts, error: payoutsError } = await supabaseAdmin
+      .from("investor_payouts")
+      .select(`
+        *,
+        profiles!inner(id, full_name, email, bank_name, account_number, account_name),
+        flocks!inner(flock_name)
+      `)
+      .in("status", ["draft", "verified"])
+      .order("payout_date", { ascending: false });
 
-    if (profilesError) throw profilesError;
+    if (payoutsError) throw payoutsError;
 
-    // 3. Fetch investments for aggregation
-    const { data: investments, error: investmentsError } = await supabaseAdmin
-      .from("investments")
-      .select("investor_id, birds_owned, cost_paid, status");
+    // 4. Map to standardized format for frontend
+    const enrichedPayouts = (payouts || []).map((p: any) => ({
+      id: p.id,
+      investor_id: p.investor_id,
+      full_name: p.profiles?.full_name,
+      email: p.profiles?.email,
+      bank_name: p.profiles?.bank_name,
+      account_number: p.profiles?.account_number,
+      account_name: p.profiles?.account_name,
+      flock_name: p.flocks?.flock_name,
+      amount_to_disburse: Number(p.amount_disbursed),
+      capital_returned: Number(p.capital_returned),
+      profit_shared: Number(p.profit_shared),
+      mortality_loss: Number(p.mortality_loss),
+      status: p.status,
+      payout_date: p.payout_date
+    }));
 
-    if (investmentsError) throw investmentsError;
-
-    // 4. Map and aggregate data
-    const enrichedInvestors = profiles.map((p) => {
-      const userInvestments = (investments || []).filter(
-        (i) => i.investor_id === p.id && i.status === "active"
-      );
-
-      const totalBirds = userInvestments.reduce(
-        (acc, curr) => acc + (curr.birds_owned || 0),
-        0
-      );
-      const totalInvested = userInvestments.reduce(
-        (acc, curr) => acc + (curr.cost_paid || 0),
-        0
-      );
-
-      return {
-        ...p,
-        email: "investor@flockfund.local", // placeholder since auth.users isn't joinable via rest directly without admin api
-        total_birds: totalBirds,
-        total_invested: totalInvested,
-        active_investments: userInvestments,
-      };
-    });
-
-    return NextResponse.json({ investors: enrichedInvestors });
+    return NextResponse.json({ payouts: enrichedPayouts });
   } catch (error: any) {
     console.error("Fetch Investors Route Error:", error);
     return NextResponse.json(

@@ -132,119 +132,93 @@ export async function POST(req: Request) {
       });
     }
 
-    // Existing Investor Payout Logic...
-    if (!investorId) {
-      return NextResponse.json(
-        { error: "Investor ID required" },
-        { status: 400 },
-      );
-    }
+    // Handle MUDARABAH/INVESTOR Payout
+    const { payoutId } = body;
+    if (payoutId) {
+      // 1. Fetch the Payout Record (Must be verified)
+      const { data: payout, error: payoutErr } = await supabaseAdmin
+        .from("investor_payouts")
+        .select(`
+          *,
+          profiles!inner(full_name, bank_name, account_number, bank_code)
+        `)
+        .eq("id", payoutId)
+        .single();
 
-    const { data: requestorProfile } = await supabaseAdmin
-      .from("profiles")
-      .select("role")
-      .eq("id", user.id)
-      .single();
+      if (payoutErr || !payout) throw new Error("Payout record not found");
+      if (payout.status !== 'verified') throw new Error("Payout must be verified by Accountant before disbursement.");
 
-    if (
-      !requestorProfile ||
-      !["accountant", "admin"].includes(requestorProfile.role)
-    ) {
-      return NextResponse.json(
-        { error: "Forbidden. Accountant access required." },
-        { status: 403 },
-      );
-    }
+      const investor = payout.profiles;
+      if (!investor.bank_name || !investor.account_number) throw new Error("Investor missing bank details.");
 
-    // 2. Fetch investor details
-    const { data: investor, error: invError } = await supabaseAdmin
-      .from("profiles")
-      .select("bank_name, account_number")
-      .eq("id", investorId)
-      .single();
+      // 2. Execute REAL Flutterwave Transfer
+      // Using Direct fetch to v3/transfers
+      const flutterwaveKey = process.env.FLUTTERWAVE_SECRET_KEY;
+      if (!flutterwaveKey) throw new Error("Payment Gateway Configuration Missing (Missing FW KEY).");
 
-    if (invError || !investor) {
-      return NextResponse.json(
-        { error: "Failed to locate investor profile" },
-        { status: 404 },
-      );
-    }
-
-    if (!investor.bank_name || !investor.account_number) {
-      return NextResponse.json(
-        { error: "Investor is missing required bank details" },
-        { status: 400 },
-      );
-    }
-
-    // 3. Calculate payout amount (simulate active investments + 15% ROI for demo purposes based on requirements)
-    const { data: investments } = await supabaseAdmin
-      .from("investments")
-      .select("cost_paid")
-      .eq("investor_id", investorId)
-      .eq("status", "active");
-
-    const totalInvested =
-      (investments || []).reduce(
-        (acc, curr) => acc + (curr.cost_paid || 0),
-        0,
-      ) || 0;
-
-    // In a real scenario, this involves complex `profit_cycles` math,
-    // but the task specifies showing investment + expected profit.
-    const expectedProfit = totalInvested * 0.15;
-    const payoutAmount = totalInvested + expectedProfit;
-
-    if (payoutAmount <= 0) {
-      return NextResponse.json(
-        { error: "No active funds to disburse" },
-        { status: 400 },
-      );
-    }
-
-    // 4. Record to `withdrawals` table to create a transaction log for cash outflow
-    const { error: insertError } = await supabaseAdmin
-      .from("withdrawals")
-      .insert({
-        investor_id: investorId,
-        amount: payoutAmount,
-        status: "completed",
-        payment_reference: `DISB-${Math.random().toString(36).substring(7).toUpperCase()}`,
-        processed_at: new Date().toISOString(),
+      const transferResponse = await fetch("https://api.flutterwave.com/v3/transfers", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${flutterwaveKey}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          account_bank: investor.bank_code || "044", // Default to common bank if code missing
+          account_number: investor.account_number,
+          amount: Number(payout.amount_disbursed),
+          currency: "NGN",
+          narration: `FlockFund Settlement: ${payout.flock_id?.substring(0, 8)}`,
+          reference: `DISB-${payoutId.substring(0, 8)}-${Date.now()}`,
+          callback_url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://flockfund.vercel.app'}/api/webhooks/flutterwave`
+        })
       });
 
-    if (insertError) {
-      console.error("Failed recording withdrawal:", insertError);
+      const fwData = await transferResponse.json();
+
+      if (fwData.status !== "success") {
+        await logAuditEvent({
+          action: "DISBURSEMENT_GATEWAY_ERROR",
+          actor_id: user.id,
+          target_id: payout.investor_id,
+          details: { error: fwData.message, payout_id: payoutId },
+          ip_address: ip,
+        });
+        throw new Error(`Flutterwave Error: ${fwData.message}`);
+      }
+
+      // 3. Record Successful/Pending Dispatch
+      const { error: updateErr } = await supabaseAdmin
+        .from("investor_payouts")
+        .update({ status: 'disbursed', payment_reference: fwData.data.reference })
+        .eq("id", payoutId);
+
+      if (updateErr) throw new Error("Gateway success but failed to update platform DB: " + updateErr.message);
+
+      // 4. Create Withdrawal Record
+      await supabaseAdmin.from("withdrawals").insert({
+        investor_id: payout.investor_id,
+        amount: payout.amount_disbursed,
+        status: "completed",
+        payment_reference: fwData.data.reference,
+        processed_at: new Date().toISOString()
+      });
 
       await logAuditEvent({
-        action: "DISBURSEMENT_FAILED",
+        action: "DISBURSEMENT_SUCCESS",
         actor_id: user.id,
-        target_id: investorId,
-        details: { error: insertError.message, amount: payoutAmount },
+        target_id: payout.investor_id,
+        details: { amount: payout.amount_disbursed, reference: fwData.data.reference },
         ip_address: ip,
       });
 
-      return NextResponse.json(
-        { error: "Failed to record transaction in database" },
-        { status: 500 },
-      );
+      return NextResponse.json({ 
+        success: true, 
+        payoutAmount: payout.amount_disbursed,
+        reference: fwData.data.reference
+      });
     }
 
-    // 5. In a real system, you'd trigger Flutterwave/Paystack API for the transfer here.
-    // Assuming success...
-    await logAuditEvent({
-      action: "DISBURSEMENT_COMPLETED",
-      actor_id: user.id,
-      target_id: investorId,
-      details: { amount: payoutAmount, reference: `DISB-...` },
-      ip_address: ip,
-    });
-
-    return NextResponse.json({ 
-      success: true, 
-      payoutAmount,
-      transfer_url: `https://dashboard.flutterwave.com/dashboard/transfers?ref=DISB-${Date.now()}&status=testnet_pending`
-    });
+    return NextResponse.json({ error: "No valid disbursement target (payoutId or request_id)" }, { status: 400 });
   } catch (error: any) {
     console.error("Disbursement Route Error:", error);
     return NextResponse.json(

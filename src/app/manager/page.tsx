@@ -3,8 +3,11 @@
 import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { RecentActivityFeed } from "@/components/RecentActivityFeed";
+import { Greeting } from "@/components/Greeting";
+import { useAuth } from "@/components/AuthProvider";
 
 export default function ManagerDashboard() {
+  const { profile } = useAuth();
   const [stats, setStats] = useState({
     pending: 0,
     approved: 0,
@@ -112,13 +115,8 @@ export default function ManagerDashboard() {
 
   return (
     <div ref={contentRef}>
-      <div className="mb-8">
-        <h1 className="text-2xl font-heading font-extrabold text-primary tracking-tight">
-          Farm Manager Dashboard
-        </h1>
-        <p className="text-slate-400 text-sm mt-1">
-          Monitor flock health and review keeper reports
-        </p>
+      <div className="mb-10">
+        <Greeting userName={profile?.full_name} role="Farm Manager" />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">

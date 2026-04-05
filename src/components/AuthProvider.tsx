@@ -7,42 +7,57 @@ import { createClient } from "@/lib/supabase/client";
 interface AuthContextType {
   isActive: boolean;
   isLoading: boolean;
+  user: any | null;
+  profile: any | null;
 }
 
 const AuthContext = createContext<AuthContextType>({
   isActive: false,
   isLoading: true,
+  user: null,
+  profile: null,
 });
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isActive, setIsActive] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [user, setUser] = useState<any | null>(null);
+  const [profile, setProfile] = useState<any | null>(null);
   const router = useRouter();
-  // Stabilize the client — useMemo prevents re-creation on re-renders
   const supabase = useMemo(() => createClient(), []);
 
+  const fetchProfile = async (userId: string) => {
+    const { data } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", userId)
+      .single();
+    setProfile(data);
+  };
+
   useEffect(() => {
-    // 1. Check initial active session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setIsActive(!!session);
+      setUser(session?.user || null);
+      if (session?.user) fetchProfile(session.user.id);
       setIsLoading(false);
     });
 
-    // 2. Listen to ongoing auth changes (Token Refresh, Sign Out, etc.)
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       setIsActive(!!session);
+      setUser(session?.user || null);
+      
+      if (session?.user) {
+        fetchProfile(session.user.id);
+      } else {
+        setProfile(null);
+      }
       
       if (event === "SIGNED_OUT") {
-        // Clear local storage / rogue cookies securely just in case
-        router.refresh(); // Tells Next.js to re-evaluate server components/middleware
+        router.refresh();
         router.push("/login");
-      }
-
-      if (event === "TOKEN_REFRESHED") {
-        // Token successfully rotated by Supabase client; server cookies will update via middleware on next request.
-        console.debug("Session token refreshed automatically.");
       }
     });
 
@@ -52,7 +67,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [router, supabase]);
 
   return (
-    <AuthContext.Provider value={{ isActive, isLoading }}>
+    <AuthContext.Provider value={{ isActive, isLoading, user, profile }}>
       {children}
     </AuthContext.Provider>
   );

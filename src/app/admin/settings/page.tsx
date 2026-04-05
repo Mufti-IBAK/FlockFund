@@ -25,6 +25,10 @@ interface Settings {
   package_basic_name: string;
   package_standard_name: string;
   package_premium_name: string;
+  salary_keeper: number;
+  salary_manager: number;
+  salary_sales_manager: number;
+  estimated_profit_per_bird: number;
 }
 
 const DEFAULT_SETTINGS: Settings = {
@@ -55,6 +59,10 @@ const DEFAULT_SETTINGS: Settings = {
   package_basic_name: "Basic",
   package_standard_name: "Standard",
   package_premium_name: "Premium",
+  salary_keeper: 45000,
+  salary_manager: 85000,
+  salary_sales_manager: 65000,
+  estimated_profit_per_bird: 1500,
 };
 
 function SettingCard({
@@ -251,6 +259,10 @@ export default function AdminSettings() {
             package_basic_name: data.package_basic_name ?? DEFAULT_SETTINGS.package_basic_name,
             package_standard_name: data.package_standard_name ?? DEFAULT_SETTINGS.package_standard_name,
             package_premium_name: data.package_premium_name ?? DEFAULT_SETTINGS.package_premium_name,
+            salary_keeper: data.salary_keeper ?? DEFAULT_SETTINGS.salary_keeper,
+            salary_manager: data.salary_manager ?? DEFAULT_SETTINGS.salary_manager,
+            salary_sales_manager: data.salary_sales_manager ?? DEFAULT_SETTINGS.salary_sales_manager,
+            estimated_profit_per_bird: data.estimated_profit_per_bird ?? DEFAULT_SETTINGS.estimated_profit_per_bird,
           });
         }
       } catch (err) {
@@ -581,6 +593,42 @@ export default function AdminSettings() {
                 Platform: {settings.flockfund_share_percentage}%
               </span>
             </div>
+          </div>
+        </SettingCard>
+
+        {/* ── Operational Salaries ── */}
+        <SettingCard title="Operational Salaries" icon="payments">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+             <NumberField 
+                label="Keeper Salary (Monthly)" 
+                value={settings.salary_keeper} 
+                prefix="₦"
+                onChange={(v) => setSettings(s => ({ ...s, salary_keeper: v }))} 
+             />
+             <NumberField 
+                label="Manager Salary (Monthly)" 
+                value={settings.salary_manager} 
+                prefix="₦"
+                onChange={(v) => setSettings(s => ({ ...s, salary_manager: v }))} 
+             />
+             <NumberField 
+                label="Sales Manager Salary (Monthly)" 
+                value={settings.salary_sales_manager} 
+                prefix="₦"
+                onChange={(v) => setSettings(s => ({ ...s, salary_sales_manager: v }))} 
+             />
+             <div className="p-4 bg-emerald-50 rounded-2xl border border-emerald-100/50">
+                <p className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest mb-1.5">Mortality Profit Index</p>
+                <div className="flex items-center gap-3">
+                   <NumberField 
+                      label="Est. Profit/Bird" 
+                      value={settings.estimated_profit_per_bird} 
+                      prefix="₦"
+                      onChange={(v) => setSettings(s => ({ ...s, estimated_profit_per_bird: v }))} 
+                   />
+                </div>
+                <p className="text-[9px] text-emerald-800/40 mt-2 italic">* Used for loss calculation upon bird mortality.</p>
+             </div>
           </div>
         </SettingCard>
 

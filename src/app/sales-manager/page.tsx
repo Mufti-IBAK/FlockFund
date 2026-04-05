@@ -3,6 +3,8 @@
 import { useEffect, useState, useRef } from "react";
 import gsap from "gsap";
 import { RecentActivityFeed } from "@/components/RecentActivityFeed";
+import { Greeting } from "@/components/Greeting";
+import { useAuth } from "@/components/AuthProvider";
 
 interface Stats {
   totalBirdsSold: number;
@@ -12,6 +14,7 @@ interface Stats {
 }
 
 export default function SalesManagerDashboard() {
+  const { profile } = useAuth();
   const [stats, setStats] = useState<Stats>({
     totalBirdsSold: 0,
     totalWeightSold: 0,
@@ -104,13 +107,8 @@ export default function SalesManagerDashboard() {
 
   return (
     <div ref={contentRef}>
-      <div className="mb-8">
-        <h1 className="text-2xl font-heading font-extrabold text-primary tracking-tight">
-          Sales Overview
-        </h1>
-        <p className="text-slate-400 text-sm mt-1">
-          Performance and revenue tracking for bird and manure sales
-        </p>
+      <div className="mb-10">
+        <Greeting userName={profile?.full_name} role="Sales Manager" />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
