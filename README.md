@@ -20,12 +20,18 @@ FlockFund II is a decentralized, Shariah-compliant livestock investment and farm
 *   **Real-Time Sync**: Postgres-level change listeners for instant synchronization across all organizational roles.
 
 ## 🛠️ Technology Stack
-*   **Framework**: Next.js 14+ (App Router)
-*   **Database**: Supabase (PostgreSQL with RLS)
+*   **Framework**: Next.js 15.x (App Router)
+*   **Database**: Supabase (PostgreSQL with Realtime)
 *   **Styling**: Premium Vanilla CSS + Tailwind (Design Tokens)
 *   **Animations**: GSAP 3.x (Smooth Transitions)
 *   **Payments**: Flutterwave v3 Transfer API
 *   **Governance**: 2026 Data Protection Standard (Log Auditing & RBAC)
+
+## ✨ Recent Finalization Upgrades
+*   **Live Sync Alpha**: Real-time transaction monitoring for accountants.
+*   **Intelligent Scrolling**: `scrollbar-hide` utility for premium, overflow-proof sidebars.
+*   **Enhanced Admin UI**: Grouped operational controls for Salaries and Mortality Profit Indices.
+*   **Type-Safe Build**: 100% resolution of development environment and production build path issues.
 
 ## 📦 Getting Started
 
