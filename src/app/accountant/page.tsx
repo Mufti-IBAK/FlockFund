@@ -35,6 +35,29 @@ export default function AccountantOverview() {
       }
     }
     fetchCashFlow();
+
+    // Set up Realtime listener
+    const setupRealtime = async () => {
+      const { createClient } = await import("@/lib/supabase/client");
+      const supabase = createClient();
+      
+      const channel = supabase
+        .channel('accountant_dashboard_sync')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'transactions' }, () => fetchCashFlow())
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'withdrawals' }, () => fetchCashFlow())
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'sales_reports' }, () => fetchCashFlow())
+        .subscribe();
+        
+      return channel;
+    };
+
+    const channelPromise = setupRealtime();
+    return () => {
+      channelPromise.then(ch => {
+        const { createClient } = require("@/lib/supabase/client");
+        createClient().removeChannel(ch);
+      });
+    };
   }, []);
 
   if (loading)

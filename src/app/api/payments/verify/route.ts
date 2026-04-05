@@ -53,34 +53,51 @@ export async function GET(req: NextRequest) {
 
       if (txStatus === 'successful') {
         // Activate the investment
-        const { data: investment } = await supabase
+        const { data: investment, error: invError } = await supabase
           .from('investments')
-          .update({ status: 'active' })
+          .update({ 
+            status: 'active',
+            payment_transaction_id: transactionId, // Update with the actual Flutterwave ID
+            payment_gateway: 'flutterwave'
+          })
           .or(`payment_reference.eq.${txTxRef},payment_transaction_id.eq.${txTxRef}`)
           .eq('status', 'pending')
           .select()
           .single();
 
-        // Update transactions table by inserting completed transaction
-        if (investment) {
-          try {
-            await supabase
-              .from('transactions')
-              .insert({
-                investor_id: investment.investor_id,
-                investment_id: investment.id,
-                type: 'investment',
-                amount: verifyData.data.amount,
-                status: 'completed',
-                gateway: 'flutterwave',
-                reference: txTxRef,
-                gateway_response: verifyData.data || {}
-              });
-          } catch { /* table may not exist */ }
+        if (invError) {
+          console.error('Failed to update investment status:', invError);
+          // Still try to find it if it was already updated or if it's already active
+          const { data: existing } = await supabase
+            .from('investments')
+            .select('*')
+            .or(`payment_reference.eq.${txTxRef},payment_transaction_id.eq.${txTxRef}`)
+            .single();
+            
+          if (!existing) {
+             return NextResponse.json({ success: false, message: 'Investment not found' });
+          }
         }
 
         // Award badge
         if (investment) {
+          // Record the transaction
+          const { error: txError } = await supabase
+            .from('transactions')
+            .insert({
+              investor_id: investment.investor_id,
+              investment_id: investment.id,
+              type: 'investment',
+              amount: verifyData.data.amount,
+              status: 'completed',
+              gateway: 'flutterwave',
+              reference: txTxRef,
+              gateway_response: verifyData.data || {}
+            });
+            
+          if (txError) console.error('Failed to record transaction:', txError);
+
+          // ... rest of badge logic
           const { data: badge } = await supabase
             .from('badges')
             .select('id')

@@ -64,8 +64,6 @@ export default function InvestorPortfolio() {
 
         if (reportRes.data && reportRes.data.length > 0) {
           const totalDead = reportRes.data.reduce((acc, r) => acc + (r.mortality_count || 0), 0);
-          // Just a simplistic visual health score: out of 1000 birds maybe 5 die -> 99.5%
-          // Using a baseline of 10000 birds for context if total_birds isn't available
           const assumedTotal = reportRes.data.reduce((acc, r) => acc + (r.total_birds || 5000), 0) || 50000;
           const score = Math.max(0, 100 - ((totalDead / assumedTotal) * 100));
           setHealthScore(score);
@@ -78,6 +76,28 @@ export default function InvestorPortfolio() {
       }
     }
     load();
+
+    // Set up Realtime listener
+    const setupRealtime = async () => {
+      const { createClient } = await import("@/lib/supabase/client");
+      const supabase = createClient();
+      
+      const channel = supabase
+        .channel('investor_dashboard_sync')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'investments' }, () => load())
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'settings' }, () => load())
+        .subscribe();
+        
+      return channel;
+    };
+
+    const channelPromise = setupRealtime();
+    return () => {
+      channelPromise.then(ch => {
+        const { createClient } = require("@/lib/supabase/client");
+        createClient().removeChannel(ch);
+      });
+    };
   }, []);
 
   useEffect(() => {

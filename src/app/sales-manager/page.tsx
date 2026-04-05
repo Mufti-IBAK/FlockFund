@@ -59,6 +59,27 @@ export default function SalesManagerDashboard() {
       }
     }
     fetchStats();
+
+    // Set up Realtime listener
+    const setupRealtime = async () => {
+      const { createClient } = await import("@/lib/supabase/client");
+      const supabase = createClient();
+      
+      const channel = supabase
+        .channel('sales_dashboard_sync')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'sales_reports' }, () => fetchStats())
+        .subscribe();
+        
+      return channel;
+    };
+
+    const channelPromise = setupRealtime();
+    return () => {
+      channelPromise.then(ch => {
+        const { createClient } = require("@/lib/supabase/client");
+        createClient().removeChannel(ch);
+      });
+    };
   }, []);
 
   useEffect(() => {

@@ -34,6 +34,28 @@ export default function ManagerDashboard() {
       }
     }
     load();
+
+    // Set up Realtime listener
+    const setupRealtime = async () => {
+      const { createClient } = await import("@/lib/supabase/client");
+      const supabase = createClient();
+      
+      const channel = supabase
+        .channel('manager_dashboard_sync')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'farm_reports' }, () => load())
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'flocks' }, () => load())
+        .subscribe();
+        
+      return channel;
+    };
+
+    const channelPromise = setupRealtime();
+    return () => {
+      channelPromise.then(ch => {
+        const { createClient } = require("@/lib/supabase/client");
+        createClient().removeChannel(ch);
+      });
+    };
   }, []);
 
   useEffect(() => {

@@ -245,6 +245,30 @@ export default function AdminOverview() {
       }
     }
     load();
+
+    // Set up Realtime listener
+    const setupRealtime = async () => {
+      const { createClient } = await import("@/lib/supabase/client");
+      const supabase = createClient();
+      
+      const channel = supabase
+        .channel('admin_dashboard_sync')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'investments' }, () => load())
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, () => load())
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'sales_reports' }, () => load())
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'farm_reports' }, () => load())
+        .subscribe();
+        
+      return channel;
+    };
+
+    const channelPromise = setupRealtime();
+    return () => {
+      channelPromise.then(ch => {
+        const { createClient } = require("@/lib/supabase/client");
+        createClient().removeChannel(ch);
+      });
+    };
   }, []);
 
   /* ── GSAP entrance ── */

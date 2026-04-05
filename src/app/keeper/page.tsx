@@ -47,6 +47,32 @@ export default function KeeperDashboard() {
       }
     }
     loadInitialData();
+
+    // Set up Realtime listener
+    const setupRealtime = async () => {
+      const { createClient } = await import("@/lib/supabase/client");
+      const supabase = createClient();
+      
+      const channel = supabase
+        .channel('keeper_dashboard_sync')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'farm_activity_logs' }, () => {
+           const { data: { user } } = JSON.parse(localStorage.getItem('sb-auth-token') || '{}'); // Quick way to get user if available, or just fetch again
+           // Better: just trigger the existing loadInitialData or fetchTasks
+           loadInitialData();
+        })
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'flocks' }, () => loadInitialData())
+        .subscribe();
+        
+      return channel;
+    };
+
+    const channelPromise = setupRealtime();
+    return () => {
+      channelPromise.then(ch => {
+        const { createClient } = require("@/lib/supabase/client");
+        createClient().removeChannel(ch);
+      });
+    };
   }, []);
 
   async function fetchTasks(userId?: string) {
