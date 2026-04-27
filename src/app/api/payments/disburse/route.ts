@@ -217,7 +217,7 @@ export async function POST(req: Request) {
         investor_id: payout.investor_id,
         amount: payout.amount_disbursed,
         status: "completed",
-        payment_reference: fwData.data.reference,
+        payment_reference: psData.data.reference,
         processed_at: new Date().toISOString()
       });
 
@@ -232,7 +232,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ 
         success: true, 
         payoutAmount: payout.amount_disbursed,
-        reference: fwData.data.reference
+        reference: psData.data.reference
       });
     }
 
