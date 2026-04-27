@@ -3,7 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 
 // POST /api/payments/payout
 // Body: { investor_id, amount, withdrawal_id }
-// Initiates a bank transfer to the investor's saved bank account via Flutterwave
+// Initiates a bank transfer to the investor's saved bank account via Paystack
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
@@ -70,31 +70,50 @@ export async function POST(req: NextRequest) {
 
     const reference = `FF-WD-${(withdrawal_id || investor_id).slice(0, 8)}-${Date.now()}`;
 
-    // Initiate Flutterwave Transfer
-    const transferRes = await fetch('https://api.flutterwave.com/v3/transfers', {
+    // ─── Paystack Transfer Flow ───
+    
+    // 1. Create Transfer Recipient
+    const recipientRes = await fetch('https://api.paystack.co/transferrecipient', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${process.env.FLUTTERWAVE_SECRET_KEY}`,
+        'Authorization': `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        account_bank: bankCode,
+        type: "nuban",
+        name: profile.account_name,
         account_number: profile.account_number,
-        amount,
-        currency: 'NGN',
-        narration: `FlockFund withdrawal - ${reference}`,
-        reference,
-        beneficiary_name: profile.account_name,
-        meta: {
-          investor_id,
-          withdrawal_id: withdrawal_id || null,
-        },
+        bank_code: bankCode,
+        currency: "NGN",
+      }),
+    });
+
+    const recipientData = await recipientRes.json();
+    if (!recipientData.status) {
+      return NextResponse.json({ error: `Failed to create transfer recipient: ${recipientData.message}` }, { status: 400 });
+    }
+
+    const recipientCode = recipientData.data.recipient_code;
+
+    // 2. Initiate Transfer
+    const transferRes = await fetch('https://api.paystack.co/transfer', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        source: "balance",
+        amount: amount * 100, // Paystack uses kobo
+        recipient: recipientCode,
+        reason: `FlockFund withdrawal - ${reference}`,
+        reference: reference
       }),
     });
 
     const transferData = await transferRes.json();
 
-    if (transferData.status === 'success') {
+    if (transferData.status) {
       // Update withdrawal record
       if (withdrawal_id) {
         await supabase.from('withdrawals').update({

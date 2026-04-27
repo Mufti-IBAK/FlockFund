@@ -218,7 +218,7 @@ export default function InvestPage() {
         body: JSON.stringify({
           investor_id: user.id,
           birds_count: birdCount,
-          gateway: "flutterwave",
+          gateway: "paystack",
            email: user.email,
            flock_id: selectedFlock,
            agreement_id: agreementId,
@@ -376,31 +376,31 @@ export default function InvestPage() {
             </p>
           </div>
 
-          {/* Payment gateway — only Flutterwave active */}
+          {/* Payment gateway — only Paystack active */}
           <div className="fade-in bg-white rounded-md border border-slate-200/80 p-4 md:p-5">
             <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-3">
               Payment Method
             </label>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              {/* Flutterwave — active */}
+              {/* Paystack — active */}
               <div className="p-4 rounded-md border-2 border-accent bg-accent/5">
                 <span className="material-symbols-outlined text-xl mb-2 text-accent">
-                  credit_card
+                  account_balance
                 </span>
-                <p className="text-sm font-bold text-primary">Flutterwave</p>
-                <p className="text-[10px] text-slate-400">Cards, Bank, USSD</p>
+                <p className="text-sm font-bold text-primary">Paystack</p>
+                <p className="text-[10px] text-slate-400">Cards, Bank Transfer, USSD</p>
                 <span className="inline-block mt-2 text-[9px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-sm uppercase tracking-wider">
                   Active
                 </span>
               </div>
-              {/* Paystack — unavailable */}
+              {/* Flutterwave — unavailable */}
               <div className="p-4 rounded-md border-2 border-slate-200 bg-slate-50/50 opacity-60 cursor-not-allowed relative">
                 <span className="material-symbols-outlined text-xl mb-2 text-slate-300">
-                  account_balance
+                  credit_card
                 </span>
-                <p className="text-sm font-bold text-slate-400">Paystack</p>
+                <p className="text-sm font-bold text-slate-400">Flutterwave</p>
                 <p className="text-[10px] text-slate-300">
-                  Cards, Bank Transfer
+                  Cards, Bank, USSD
                 </p>
                 <span className="inline-block mt-2 text-[9px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-sm uppercase tracking-wider">
                   Unavailable
@@ -599,7 +599,7 @@ TERMS AND CONDITIONS:
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-slate-400">Gateway</span>
-                <span className="font-bold text-primary">Flutterwave</span>
+                <span className="font-bold text-primary">Paystack</span>
               </div>
               <div className="h-px bg-slate-100" />
               <div className="flex justify-between text-base">
@@ -636,7 +636,7 @@ TERMS AND CONDITIONS:
             </button>
 
             <p className="text-[10px] text-slate-300 text-center mt-3">
-              Shariah-compliant investment • Secure payment via Flutterwave
+              Shariah-compliant investment • Secure payment via Paystack
             </p>
 
             {/* Risk Disclaimer */}

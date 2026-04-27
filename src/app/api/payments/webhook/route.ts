@@ -7,50 +7,73 @@ import crypto from "crypto";
 // Idempotent: checks if investment is already active before processing
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
+    const rawBody = await req.text();
+    const body = JSON.parse(rawBody);
 
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!,
     );
 
-    // ─── Verify webhook hash ───
-    const secretHash = process.env.FLUTTERWAVE_WEBHOOK_HASH;
-    const receivedHash = req.headers.get("verif-hash");
-    if (secretHash && receivedHash !== secretHash) {
-      return NextResponse.json({ error: "Invalid hash" }, { status: 401 });
+    // ─── Determine Gateway ───
+    const flwSignature = req.headers.get("verif-hash");
+    const paystackSignature = req.headers.get("x-paystack-signature");
+    let gateway: "flutterwave" | "paystack" = "flutterwave";
+
+    if (paystackSignature) {
+      gateway = "paystack";
+      const hash = crypto
+        .createHmac("sha512", process.env.PAYSTACK_SECRET_KEY!)
+        .update(rawBody)
+        .digest("hex");
+      if (hash !== paystackSignature) {
+        return NextResponse.json({ error: "Invalid Paystack signature" }, { status: 401 });
+      }
+    } else {
+      const secretHash = process.env.FLUTTERWAVE_WEBHOOK_HASH;
+      if (secretHash && flwSignature !== secretHash) {
+        return NextResponse.json({ error: "Invalid Flutterwave hash" }, { status: 401 });
+      }
     }
 
-    const reference = body.data?.tx_ref || "";
-    const investmentId = body.data?.meta?.investment_id || "";
-    const flwTransactionId = body.data?.id;
-
-    if (!reference && !investmentId) {
-      return NextResponse.json(
-        { error: "No reference found" },
-        { status: 400 },
-      );
-    }
-
-    // ─── Verify transaction with Flutterwave ───
+    let reference = "";
+    let investmentId = "";
+    let gatewayTransactionId = "";
     let verified = false;
     let paymentFailed = false;
-    let verifyData: Record<string, unknown> = {};
+    let gatewayResponse: Record<string, unknown> = {};
 
-    if (flwTransactionId) {
-      const verifyRes = await fetch(
-        `https://api.flutterwave.com/v3/transactions/${flwTransactionId}/verify`,
-        {
-          headers: {
-            Authorization: `Bearer ${process.env.FLUTTERWAVE_SECRET_KEY}`,
+    if (gateway === "flutterwave") {
+      reference = body.data?.tx_ref || "";
+      investmentId = body.data?.meta?.investment_id || "";
+      gatewayTransactionId = body.data?.id;
+
+      if (gatewayTransactionId) {
+        const verifyRes = await fetch(
+          `https://api.flutterwave.com/v3/transactions/${gatewayTransactionId}/verify`,
+          {
+            headers: {
+              Authorization: `Bearer ${process.env.FLUTTERWAVE_SECRET_KEY}`,
+            },
           },
-        },
-      );
-      verifyData = await verifyRes.json();
-      const txStatus = (verifyData as { data?: { status?: string } })?.data
-        ?.status;
-      verified = txStatus === "successful";
-      paymentFailed = txStatus === "failed" || txStatus === "cancelled";
+        );
+        gatewayResponse = await verifyRes.json();
+        const txStatus = (gatewayResponse as { data?: { status?: string } })?.data?.status;
+        verified = txStatus === "successful";
+        paymentFailed = txStatus === "failed" || txStatus === "cancelled";
+      }
+    } else if (gateway === "paystack") {
+      if (body.event === "charge.success") {
+        reference = body.data?.reference || "";
+        investmentId = body.data?.metadata?.investment_id || "";
+        gatewayTransactionId = body.data?.id?.toString() || reference;
+        verified = true;
+        gatewayResponse = body.data;
+      } else if (body.event?.includes("failed")) {
+        paymentFailed = true;
+        reference = body.data?.reference || "";
+        investmentId = body.data?.metadata?.investment_id || "";
+      }
     }
 
     // ─── Find the investment ───
@@ -93,9 +116,9 @@ export async function POST(req: NextRequest) {
           type: "investment",
           amount: investment.amount_invested || investment.cost_paid,
           status: "completed",
-          gateway: "flutterwave",
+          gateway: gateway,
           reference: reference,
-          gateway_response: verifyData,
+          gateway_response: gatewayResponse,
         });
       } catch {
         /* table may not exist */

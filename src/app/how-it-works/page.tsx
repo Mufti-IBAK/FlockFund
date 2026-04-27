@@ -230,7 +230,7 @@ export default function HowItWorks() {
       description: `Browse active flock cycles and choose your investment package — ${basicName} (${basicQty} birds), ${stdName} (${stdQty} birds), or ${premName} (${premQty} birds). The cost-per-bird is dynamically calculated based on current Day-Old Chick (DOC) prices, feed costs, and overhead. You can also multiply quantities. Pay securely through your preferred gateway.`,
       details: [
         `Investment packages: ${basicName} (₦${((basicQty * costPerBird) / 1000).toFixed(0)}K), ${stdName} (₦${((stdQty * costPerBird) / 1000).toFixed(0)}K), or ${premName} (₦${((premQty * costPerBird) / 1000).toFixed(0)}K)`,
-        "Pay via Flutterwave, Paystack, or PayPal",
+        "Pay via Paystack, Flutterwave, or PayPal",
         "System generates Investment ID, MoU contract, and timeline",
         "Investment goes active immediately upon payment confirmation",
       ],
@@ -255,7 +255,7 @@ export default function HowItWorks() {
         `Profit = (Revenue − Cost) × ${investorShare}% — calculated automatically`,
         "Credited directly to your FlockFund wallet",
         "20% minimum reinvestment (lower lock-in = higher liquidity)",
-        "Withdraw to your bank via Flutterwave Transfer",
+        "Withdraw to your bank via Paystack Transfer",
       ],
     },
   ];

@@ -15,7 +15,7 @@ const steps = [
   {
     num: "02",
     title: "Fund Your Investment",
-    desc: "Browse active flocks, choose your bird count (units of 10, 20, or 30), and pay securely via Flutterwave, Paystack, or PayPal. Your investment is active once payment is confirmed.",
+    desc: "Browse active flocks, choose your bird count (units of 10, 20, or 30), and pay securely via Paystack. Your investment is active once payment is confirmed.",
     icon: "payments",
     color: "from-accent to-amber-500",
   },
@@ -84,7 +84,7 @@ const faqs = [
   },
   {
     q: "How do I withdraw my earnings?",
-    a: "Profits are credited to your in-app wallet instantly upon sale confirmation. You can withdraw to any Nigerian bank account via our Flutterwave integration.",
+    a: "Profits are credited to your in-app wallet instantly upon sale confirmation. You can withdraw to any Nigerian bank account via our Paystack integration.",
   },
 ];
 
@@ -141,7 +141,7 @@ export default function HowToInvestPage() {
     if (s.num === "02")
       return {
         ...s,
-        desc: `Browse active flocks, choose your bird count (units of ${minBirds}, ${minBirds * 2}, or ${minBirds * 3}), and pay securely via Flutterwave, Paystack, or PayPal. Your investment is active once payment is confirmed.`,
+        desc: `Browse active flocks, choose your bird count (units of ${minBirds}, ${minBirds * 2}, or ${minBirds * 3}), and pay securely via Paystack. Your investment is active once payment is confirmed.`,
       };
     if (s.num === "04")
       return {
@@ -193,7 +193,7 @@ export default function HowToInvestPage() {
     },
     {
       q: "How do I withdraw my earnings?",
-      a: "Profits are credited to your in-app wallet instantly upon sale confirmation. You can withdraw to any Nigerian bank account via our Flutterwave integration.",
+      a: "Profits are credited to your in-app wallet instantly upon sale confirmation. You can withdraw to any Nigerian bank account via our Paystack integration.",
     },
   ];
 

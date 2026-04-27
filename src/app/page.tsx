@@ -371,7 +371,7 @@ export default function HomePage() {
               {
                 step: "02",
                 title: "Fund Your Birds",
-                desc: "Pay via Flutterwave, Paystack, or PayPal. Your investment is securely recorded on the ledger.",
+                desc: "Pay via Paystack, Flutterwave, or PayPal. Your investment is securely recorded on the ledger.",
                 icon: "account_balance_wallet",
                 gradient: "from-accent/10 to-amber-500/10",
               },
@@ -448,7 +448,7 @@ export default function HomePage() {
               {
                 icon: "account_balance_wallet",
                 title: "Multi-Gateway Payments",
-                desc: "Flutterwave, Paystack, PayPal — invest and withdraw with ease.",
+                desc: "Paystack, Flutterwave, PayPal — invest and withdraw with ease.",
               },
               {
                 icon: "recycling",

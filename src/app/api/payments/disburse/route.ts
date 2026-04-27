@@ -78,7 +78,7 @@ export async function POST(req: Request) {
 
       return NextResponse.json({ 
         success: true,
-        transfer_url: `https://dashboard.flutterwave.com/dashboard/transfers?ref=SAL-${Math.random().toString(36).substring(7).toUpperCase()}&status=testnet_pending`
+        transfer_url: `https://dashboard.paystack.com/#/transfers`
       });
     }
 
@@ -128,7 +128,7 @@ export async function POST(req: Request) {
 
       return NextResponse.json({ 
         success: true,
-        transfer_url: `https://dashboard.flutterwave.com/dashboard/transfers?ref=REQ-${request_id.substring(0, 8)}&status=testnet_pending`
+        transfer_url: `https://dashboard.paystack.com/#/transfers`
       });
     }
 
@@ -151,45 +151,63 @@ export async function POST(req: Request) {
       const investor = payout.profiles;
       if (!investor.bank_name || !investor.account_number) throw new Error("Investor missing bank details.");
 
-      // 2. Execute REAL Flutterwave Transfer
-      // Using Direct fetch to v3/transfers
-      const flutterwaveKey = process.env.FLUTTERWAVE_SECRET_KEY;
-      if (!flutterwaveKey) throw new Error("Payment Gateway Configuration Missing (Missing FW KEY).");
+      // 2. Execute REAL Paystack Transfer
+      const paystackKey = process.env.PAYSTACK_SECRET_KEY;
+      if (!paystackKey) throw new Error("Payment Gateway Configuration Missing (Missing PS KEY).");
 
-      const transferResponse = await fetch("https://api.flutterwave.com/v3/transfers", {
+      const reference = `DISB-${payoutId.substring(0, 8)}-${Date.now()}`;
+
+      // 2a. Create Transfer Recipient
+      const recipientRes = await fetch("https://api.paystack.co/transferrecipient", {
         method: "POST",
         headers: {
-          "Authorization": `Bearer ${flutterwaveKey}`,
+          "Authorization": `Bearer ${paystackKey}`,
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          account_bank: investor.bank_code || "044", // Default to common bank if code missing
+          type: "nuban",
+          name: investor.full_name,
           account_number: investor.account_number,
-          amount: Number(payout.amount_disbursed),
-          currency: "NGN",
-          narration: `FlockFund Settlement: ${payout.flock_id?.substring(0, 8)}`,
-          reference: `DISB-${payoutId.substring(0, 8)}-${Date.now()}`,
-          callback_url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://flockfund.vercel.app'}/api/webhooks/flutterwave`
+          bank_code: investor.bank_code || "044",
+          currency: "NGN"
+        })
+      });
+      const recipientData = await recipientRes.json();
+      if (!recipientData.status) throw new Error(`Paystack Recipient Error: ${recipientData.message}`);
+
+      // 2b. Initiate Transfer
+      const transferResponse = await fetch("https://api.paystack.co/transfer", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${paystackKey}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          source: "balance",
+          amount: Math.round(Number(payout.amount_disbursed) * 100),
+          recipient: recipientData.data.recipient_code,
+          reason: `FlockFund Settlement: ${payout.flock_id?.substring(0, 8)}`,
+          reference: reference
         })
       });
 
-      const fwData = await transferResponse.json();
+      const psData = await transferResponse.json();
 
-      if (fwData.status !== "success") {
+      if (!psData.status) {
         await logAuditEvent({
           action: "DISBURSEMENT_GATEWAY_ERROR",
           actor_id: user.id,
           target_id: payout.investor_id,
-          details: { error: fwData.message, payout_id: payoutId },
+          details: { error: psData.message, payout_id: payoutId },
           ip_address: ip,
         });
-        throw new Error(`Flutterwave Error: ${fwData.message}`);
+        throw new Error(`Paystack Error: ${psData.message}`);
       }
 
       // 3. Record Successful/Pending Dispatch
       const { error: updateErr } = await supabaseAdmin
         .from("investor_payouts")
-        .update({ status: 'disbursed', payment_reference: fwData.data.reference })
+        .update({ status: 'disbursed', payment_reference: psData.data.reference })
         .eq("id", payoutId);
 
       if (updateErr) throw new Error("Gateway success but failed to update platform DB: " + updateErr.message);
@@ -207,7 +225,7 @@ export async function POST(req: Request) {
         action: "DISBURSEMENT_SUCCESS",
         actor_id: user.id,
         target_id: payout.investor_id,
-        details: { amount: payout.amount_disbursed, reference: fwData.data.reference },
+        details: { amount: payout.amount_disbursed, reference: psData.data.reference },
         ip_address: ip,
       });
 

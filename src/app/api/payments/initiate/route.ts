@@ -25,10 +25,13 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Only allow Flutterwave
-    if (gateway && gateway !== "flutterwave") {
+    // Allowed gateways
+    const allowedGateways = ["flutterwave", "paystack"];
+    const activeGateway = gateway || "paystack"; // Default to paystack
+
+    if (!allowedGateways.includes(activeGateway)) {
       return NextResponse.json(
-        { error: "Only Flutterwave gateway is currently active" },
+        { error: `Gateway ${activeGateway} is not supported` },
         { status: 400 },
       );
     }
@@ -97,7 +100,7 @@ export async function POST(req: NextRequest) {
         profit_ratio_mudarib: mudaribRatio,
         status: "pending",
         round_count: 0,
-        payment_gateway_used: "flutterwave",
+        payment_gateway_used: activeGateway,
       })
       .select()
       .single();
@@ -123,33 +126,68 @@ export async function POST(req: NextRequest) {
       callback_url ||
       `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/investor/payment/callback`;
 
-    // Flutterwave Standard Payment
-    const flwResponse = await fetch("https://api.flutterwave.com/v3/payments", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${process.env.FLUTTERWAVE_SECRET_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        tx_ref: reference,
-        amount,
-        currency: "NGN",
-        redirect_url: redirectUrl,
-        customer: { email: body.email || "investor@flockfund.com" },
-        customizations: {
-          title: "FlockFund Investment",
-          description: `Purchase ${birds_count} birds`,
+    if (activeGateway === "flutterwave") {
+      // Flutterwave Standard Payment
+      const flwResponse = await fetch("https://api.flutterwave.com/v3/payments", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${process.env.FLUTTERWAVE_SECRET_KEY}`,
+          "Content-Type": "application/json",
         },
-        meta: { investment_id: investment.id },
-      }),
-    });
-    const flwData = await flwResponse.json();
-    
-    if (flwData.status === "error" || !flwData.data?.link) {
-      console.warn("Flutterwave API Error:", flwData);
-      throw new Error(flwData.message || "Failed to generate Flutterwave checkout link");
-    } else {
-      checkoutUrl = flwData.data.link;
+        body: JSON.stringify({
+          tx_ref: reference,
+          amount,
+          currency: "NGN",
+          redirect_url: redirectUrl,
+          customer: { email: body.email || "investor@flockfund.com" },
+          customizations: {
+            title: "FlockFund Investment",
+            description: `Purchase ${birds_count} birds`,
+          },
+          meta: { investment_id: investment.id },
+        }),
+      });
+      const flwData = await flwResponse.json();
+      
+      if (flwData.status === "error" || !flwData.data?.link) {
+        console.warn("Flutterwave API Error:", flwData);
+        throw new Error(flwData.message || "Failed to generate Flutterwave checkout link");
+      } else {
+        checkoutUrl = flwData.data.link;
+      }
+    } else if (activeGateway === "paystack") {
+      // Paystack Initialize Transaction
+      const paystackResponse = await fetch("https://api.paystack.co/transaction/initialize", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          reference: reference,
+          amount: amount * 100, // Paystack uses kobo
+          email: body.email || "investor@flockfund.com",
+          callback_url: redirectUrl,
+          metadata: {
+            investment_id: investment.id,
+            custom_fields: [
+              {
+                display_name: "Investment ID",
+                variable_name: "investment_id",
+                value: investment.id
+              }
+            ]
+          },
+        }),
+      });
+      const paystackData = await paystackResponse.json();
+
+      if (!paystackData.status || !paystackData.data?.authorization_url) {
+        console.warn("Paystack API Error:", paystackData);
+        throw new Error(paystackData.message || "Failed to generate Paystack checkout link");
+      } else {
+        checkoutUrl = paystackData.data.authorization_url;
+      }
     }
 
     // Store the payment reference

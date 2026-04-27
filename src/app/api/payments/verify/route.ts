@@ -6,12 +6,13 @@ import { createClient } from '@supabase/supabase-js';
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
-    const transactionId = searchParams.get('transaction_id');
-    const txRef = searchParams.get('tx_ref');
+    const transactionId = searchParams.get('transaction_id'); // Flutterwave
+    const txRef = searchParams.get('tx_ref'); // Flutterwave
+    const reference = searchParams.get('reference'); // Paystack
     const status = searchParams.get('status');
 
-    if (!transactionId && !txRef) {
-      return NextResponse.json({ error: 'Missing transaction_id or tx_ref' }, { status: 400 });
+    if (!transactionId && !txRef && !reference) {
+      return NextResponse.json({ error: 'Missing transaction identifier' }, { status: 400 });
     }
 
     const supabase = createClient(
@@ -21,11 +22,12 @@ export async function GET(req: NextRequest) {
 
     // If status from URL is 'cancelled', mark as failed
     if (status === 'cancelled') {
-      if (txRef) {
+      const searchRef = txRef || reference;
+      if (searchRef) {
         await supabase
           .from('investments')
           .update({ status: 'failed' })
-          .or(`payment_reference.eq.${txRef},payment_transaction_id.eq.${txRef}`)
+          .or(`payment_reference.eq.${searchRef},payment_transaction_id.eq.${searchRef}`)
           .eq('status', 'pending');
       }
 
@@ -36,114 +38,133 @@ export async function GET(req: NextRequest) {
       });
     }
 
-    // Verify with Flutterwave
+    // ─── GATEWAY SPECIFIC VERIFICATION ───
+    let isSuccessful = false;
+    let finalAmount = 0;
+    let finalCurrency = 'NGN';
+    let finalReference = txRef || reference || '';
+    let finalTransactionId = transactionId || reference || '';
+    let gatewayUsed = '';
+    let gatewayResponse: any = {};
+
     if (transactionId) {
+      // Flutterwave Verification
+      gatewayUsed = 'flutterwave';
       const verifyRes = await fetch(
         `https://api.flutterwave.com/v3/transactions/${transactionId}/verify`,
         {
-          headers: {
-            Authorization: `Bearer ${process.env.FLUTTERWAVE_SECRET_KEY}`,
-          },
+          headers: { Authorization: `Bearer ${process.env.FLUTTERWAVE_SECRET_KEY}` },
         }
       );
-      const verifyData = await verifyRes.json();
+      gatewayResponse = await verifyRes.json();
+      isSuccessful = gatewayResponse?.data?.status === 'successful';
+      finalAmount = gatewayResponse?.data?.amount || 0;
+      finalCurrency = gatewayResponse?.data?.currency || 'NGN';
+      finalReference = gatewayResponse?.data?.tx_ref || finalReference;
+    } else if (reference) {
+      // Paystack Verification
+      gatewayUsed = 'paystack';
+      const verifyRes = await fetch(
+        `https://api.paystack.co/transaction/verify/${reference}`,
+        {
+          headers: { Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}` },
+        }
+      );
+      gatewayResponse = await verifyRes.json();
+      isSuccessful = gatewayResponse?.status && gatewayResponse?.data?.status === 'success';
+      finalAmount = (gatewayResponse?.data?.amount || 0) / 100; // Paystack is in kobo
+      finalCurrency = gatewayResponse?.data?.currency || 'NGN';
+      finalReference = gatewayResponse?.data?.reference || finalReference;
+    }
 
-      const txStatus = verifyData?.data?.status;
-      const txTxRef = verifyData?.data?.tx_ref || txRef;
+    if (isSuccessful) {
+      // Activate the investment
+      const { data: investment, error: invError } = await supabase
+        .from('investments')
+        .update({ 
+          status: 'active',
+          payment_transaction_id: finalTransactionId,
+          payment_gateway: gatewayUsed
+        })
+        .or(`payment_reference.eq.${finalReference},payment_transaction_id.eq.${finalReference}`)
+        .eq('status', 'pending')
+        .select()
+        .single();
 
-      if (txStatus === 'successful') {
-        // Activate the investment
-        const { data: investment, error: invError } = await supabase
+      if (invError) {
+        console.error('Failed to update investment status:', invError);
+        // Still try to find it if it was already updated
+        const { data: existing } = await supabase
           .from('investments')
-          .update({ 
-            status: 'active',
-            payment_transaction_id: transactionId, // Update with the actual Flutterwave ID
-            payment_gateway: 'flutterwave'
-          })
-          .or(`payment_reference.eq.${txTxRef},payment_transaction_id.eq.${txTxRef}`)
-          .eq('status', 'pending')
-          .select()
+          .select('*')
+          .or(`payment_reference.eq.${finalReference},payment_transaction_id.eq.${finalReference}`)
+          .single();
+          
+        if (!existing) {
+            return NextResponse.json({ success: false, message: 'Investment not found' });
+        }
+      }
+
+      if (investment) {
+        // Record the transaction
+        await supabase.from('transactions').insert({
+          investor_id: investment.investor_id,
+          investment_id: investment.id,
+          type: 'investment',
+          amount: finalAmount,
+          status: 'completed',
+          gateway: gatewayUsed,
+          reference: finalReference,
+          gateway_response: gatewayResponse.data || {}
+        });
+
+        // Award badge logic
+        const { data: badge } = await supabase
+          .from('badges')
+          .select('id')
+          .or('name.eq.Early Bird,name.eq.First Investment')
+          .limit(1)
           .single();
 
-        if (invError) {
-          console.error('Failed to update investment status:', invError);
-          // Still try to find it if it was already updated or if it's already active
-          const { data: existing } = await supabase
-            .from('investments')
-            .select('*')
-            .or(`payment_reference.eq.${txTxRef},payment_transaction_id.eq.${txTxRef}`)
-            .single();
-            
-          if (!existing) {
-             return NextResponse.json({ success: false, message: 'Investment not found' });
-          }
-        }
-
-        // Award badge
-        if (investment) {
-          // Record the transaction
-          const { error: txError } = await supabase
-            .from('transactions')
-            .insert({
-              investor_id: investment.investor_id,
-              investment_id: investment.id,
-              type: 'investment',
-              amount: verifyData.data.amount,
-              status: 'completed',
-              gateway: 'flutterwave',
-              reference: txTxRef,
-              gateway_response: verifyData.data || {}
-            });
-            
-          if (txError) console.error('Failed to record transaction:', txError);
-
-          // ... rest of badge logic
-          const { data: badge } = await supabase
-            .from('badges')
+        if (badge) {
+          const { data: existingBadge } = await supabase
+            .from('investor_badges')
             .select('id')
-            .or('name.eq.Early Bird,name.eq.First Investment')
-            .limit(1)
+            .eq('investor_id', investment.investor_id)
+            .eq('badge_id', badge.id)
             .single();
 
-          if (badge) {
-            const { data: existing } = await supabase
-              .from('investor_badges')
-              .select('id')
-              .eq('investor_id', investment.investor_id)
-              .eq('badge_id', badge.id)
-              .single();
-
-            if (!existing) {
-              await supabase.from('investor_badges').insert({
-                investor_id: investment.investor_id,
-                badge_id: badge.id,
-              });
-            }
+          if (!existingBadge) {
+            await supabase.from('investor_badges').insert({
+              investor_id: investment.investor_id,
+              badge_id: badge.id,
+            });
           }
         }
-
-        return NextResponse.json({
-          success: true,
-          status: 'successful',
-          investment_id: investment?.id,
-          amount: verifyData?.data?.amount,
-          currency: verifyData?.data?.currency,
-        });
-      } else {
-        // Failed or pending from Flutterwave
-        if (txTxRef) {
-          await supabase
-            .from('investments')
-            .update({ status: txStatus === 'pending' ? 'pending' : 'failed' })
-            .or(`payment_reference.eq.${txTxRef},payment_transaction_id.eq.${txTxRef}`);
-        }
-
-        return NextResponse.json({
-          success: false,
-          status: txStatus || 'failed',
-          message: `Payment ${txStatus || 'failed'}`,
-        });
       }
+
+      return NextResponse.json({
+        success: true,
+        status: 'successful',
+        investment_id: investment?.id,
+        amount: finalAmount,
+        currency: finalCurrency,
+      });
+    } else {
+      // Failed or pending
+      const txStatus = gatewayResponse?.data?.status || 'failed';
+      if (finalReference) {
+        await supabase
+          .from('investments')
+          .update({ status: txStatus === 'pending' ? 'pending' : 'failed' })
+          .or(`payment_reference.eq.${finalReference},payment_transaction_id.eq.${finalReference}`);
+      }
+
+      return NextResponse.json({
+        success: false,
+        status: txStatus,
+        message: `Payment ${txStatus}`,
+      });
     }
 
     return NextResponse.json({ error: 'Could not verify payment' }, { status: 400 });

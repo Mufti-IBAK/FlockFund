@@ -721,36 +721,49 @@ export default function AdminSettings() {
         {/* ── Payment Gateways ── */}
         <SettingCard title="Payment Gateways" icon="credit_card">
           <div className="space-y-3">
-            {["flutterwave", "paystack", "paypal"].map((gw) => (
-              <label
-                key={gw}
-                className={`flex items-center gap-4 p-4 rounded-xl border cursor-pointer transition-all duration-300 ${
-                  settings.enabled_gateways.includes(gw)
-                    ? "border-accent bg-accent/5 shadow-sm"
-                    : "border-slate-200 hover:border-slate-300"
-                }`}
-              >
-                <input
-                  type="checkbox"
-                  checked={settings.enabled_gateways.includes(gw)}
-                  onChange={(e) => {
-                    const next = e.target.checked
-                      ? [...settings.enabled_gateways, gw]
-                      : settings.enabled_gateways.filter((x) => x !== gw);
-                    setSettings((s) => ({ ...s, enabled_gateways: next }));
-                  }}
-                  className="w-4 h-4 text-accent accent-accent rounded"
-                />
-                <span className="font-bold text-sm text-primary capitalize">
-                  {gw}
-                </span>
-                {settings.enabled_gateways.includes(gw) && (
-                  <span className="ml-auto text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-accent/20 text-amber-700">
-                    Enabled
-                  </span>
-                )}
-              </label>
-            ))}
+            {["paystack", "flutterwave", "paypal"].map((gw) => {
+              const isActive = gw === "paystack";
+              const isDeactivated = gw === "flutterwave";
+              
+              return (
+                <label
+                  key={gw}
+                  className={`flex items-center gap-4 p-4 rounded-xl border cursor-pointer transition-all duration-300 ${
+                    settings.enabled_gateways.includes(gw)
+                      ? "border-accent bg-accent/5 shadow-sm"
+                      : "border-slate-200 hover:border-slate-300"
+                  } ${isDeactivated ? "opacity-60" : ""}`}
+                >
+                  <input
+                    type="checkbox"
+                    checked={settings.enabled_gateways.includes(gw)}
+                    onChange={(e) => {
+                      const next = e.target.checked
+                        ? [...settings.enabled_gateways, gw]
+                        : settings.enabled_gateways.filter((x) => x !== gw);
+                      setSettings((s) => ({ ...s, enabled_gateways: next }));
+                    }}
+                    className="w-4 h-4 text-accent accent-accent rounded"
+                  />
+                  <div className="flex flex-col">
+                    <span className="font-bold text-sm text-primary capitalize">
+                      {gw}
+                    </span>
+                    {isDeactivated && (
+                      <span className="text-[10px] text-rose-500 font-medium">Deactivated as per migration</span>
+                    )}
+                    {isActive && (
+                      <span className="text-[10px] text-emerald-600 font-medium">Primary Gateway</span>
+                    )}
+                  </div>
+                  {settings.enabled_gateways.includes(gw) && (
+                    <span className="ml-auto text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-accent/20 text-amber-700">
+                      Enabled
+                    </span>
+                  )}
+                </label>
+              );
+            })}
           </div>
         </SettingCard>
 
