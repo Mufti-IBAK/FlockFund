@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
+import { createClient } from "@/lib/supabase/server";
 
 const MUDARABAH_AGREEMENT_TEMPLATE = `
 MUDARABAH AL-MUQAYYADA (RESTRICTED MUDARABAH) AGREEMENT
@@ -78,10 +78,23 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    );
+    const supabase = await createClient();
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+      return NextResponse.json(
+        { error: "Unauthorized. Please log in to sign the agreement." },
+        { status: 401 },
+      );
+    }
+
+    // Verify investor_id matches the authenticated user
+    if (user.id !== investor_id) {
+      return NextResponse.json(
+        { error: "Security mismatch. You can only sign for your own account." },
+        { status: 403 },
+      );
+    }
 
     // Capture metadata
     const ipAddress =
