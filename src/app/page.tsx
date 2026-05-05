@@ -89,6 +89,28 @@ export default function HomePage() {
   const stepsRef = useRef<HTMLElement>(null);
   const ctaRef = useRef<HTMLElement>(null);
 
+  const [stats, setStats] = useState({
+    totalBirdsFunded: 0,
+    activeInvestors: 0,
+    totalReturns: 0,
+    clientSatisfaction: 98,
+  });
+
+  useEffect(() => {
+    async function fetchStats() {
+      try {
+        const res = await fetch("/api/stats");
+        const data = await res.json();
+        if (data && !data.error) {
+          setStats(data);
+        }
+      } catch (err) {
+        console.error("Failed to fetch stats:", err);
+      }
+    }
+    fetchStats();
+  }, []);
+
   useEffect(() => {
     const ctx = gsap.context(() => {
 
@@ -284,28 +306,28 @@ export default function HomePage() {
         <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 text-center relative z-10">
           {[
             {
-              value: 15000,
+              value: stats.totalBirdsFunded,
               suffix: "+",
               prefix: "",
               label: "Birds Funded",
               icon: "egg_alt",
             },
             {
-              value: 500,
+              value: stats.activeInvestors,
               suffix: "+",
               prefix: "",
               label: "Active Investors",
               icon: "group",
             },
             {
-              value: 2500,
-              suffix: "M",
+              value: stats.totalReturns > 1000000 ? stats.totalReturns / 1000000 : stats.totalReturns,
+              suffix: stats.totalReturns > 1000000 ? "M" : "",
               prefix: "₦",
               label: "Total Returns",
               icon: "trending_up",
             },
             {
-              value: 98,
+              value: stats.clientSatisfaction,
               suffix: "%",
               prefix: "",
               label: "Client Satisfaction",
@@ -371,7 +393,7 @@ export default function HomePage() {
               {
                 step: "02",
                 title: "Fund Your Birds",
-                desc: "Pay via Paystack, Flutterwave, or PayPal. Your investment is securely recorded on the ledger.",
+                desc: "Pay securely via Paystack, or use Flutterwave and PayPal. Your investment is immediately recorded on the digital ledger.",
                 icon: "account_balance_wallet",
                 gradient: "from-accent/10 to-amber-500/10",
               },
@@ -448,7 +470,7 @@ export default function HomePage() {
               {
                 icon: "account_balance_wallet",
                 title: "Multi-Gateway Payments",
-                desc: "Paystack, Flutterwave, PayPal — invest and withdraw with ease.",
+                desc: "Paystack (Primary), Flutterwave, PayPal — invest and withdraw with ease.",
               },
               {
                 icon: "recycling",

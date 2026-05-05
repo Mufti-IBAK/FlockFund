@@ -232,7 +232,7 @@ export default function ReturnsPage() {
   const stdName = settings?.package_standard_name || "Standard";
   const premName = settings?.package_premium_name || "Premium";
 
-  const costPerBird = settings?.cost_per_bird || 3700;
+  const costPerBird = settings?.cost_per_bird || 4250;
   const targetPrice = settings?.selling_price_per_bird || 10000;
   const investorShare = (settings?.investor_share_percentage || 30) / 100;
 

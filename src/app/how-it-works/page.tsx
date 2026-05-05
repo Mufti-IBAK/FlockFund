@@ -26,7 +26,7 @@ const steps = [
       "Browse active flock cycles and choose your investment package. The cost-per-package is dynamically calculated based on current Day-Old Chick (DOC) prices, feed costs, and overhead. Pay securely through your preferred gateway.",
     details: [
       "Investment packages configured dynamically by the farm settings",
-      "Pay via Flutterwave, Paystack, or PayPal",
+      "Pay via Paystack, Flutterwave, or PayPal",
       "System generates Investment ID, MoU contract, and timeline",
       "Investment goes active immediately upon payment confirmation",
     ],
@@ -65,12 +65,12 @@ const steps = [
     num: "05",
     title: "Profit Distribution & Reinvestment",
     description:
-      "After the sale, under our Islamic Finance model (Mudarabah Al-Muqayyada), your capital is returned first. Verified costs are deducted, and the remaining net profit is split 70/30 — 70% to FlockFund, 30% to investors. Your share is credited to your wallet, where you can reinvest for compounding growth or withdraw to your bank account.",
+      "After the sale, under our Islamic Finance model (Mudarabah Al-Muqayyada), your capital is returned first. Verified costs are deducted, and the remaining net profit is split based on current settings — e.g. 70% to FlockFund, 30% to investors. Your share is credited to your wallet, where you can reinvest for compounding growth or withdraw to your bank account.",
     details: [
-      "Profit = (Revenue − Cost) × 70% — calculated automatically",
+      "Profit = (Revenue − Cost) × Share% — calculated automatically",
       "Credited directly to your FlockFund wallet",
       "20% minimum reinvestment (lower lock-in = higher liquidity)",
-      "Withdraw to your bank via Flutterwave Transfer",
+      "Withdraw to your bank via Paystack Transfer",
     ],
     icon: "rocket_launch",
     gradient: "from-rose-500 to-pink-600",
@@ -116,6 +116,32 @@ const roles = [
     ],
     icon: "agriculture",
     color: "bg-amber-500",
+  },
+  {
+    role: "Accountant",
+    desc: "Financial officers responsible for auditing farm expenses, managing payroll, and verifying platform liquidity.",
+    features: [
+      "Expense auditing",
+      "Payroll management",
+      "Financial reporting",
+      "Tax reconciliation",
+      "Liquidity monitoring",
+    ],
+    icon: "account_balance",
+    color: "bg-blue-500",
+  },
+  {
+    role: "Sales Manager",
+    desc: "Commercial leads who manage off-take agreements, wholesale distributions, and retail market pricing.",
+    features: [
+      "Inventory management",
+      "Wholesale agreements",
+      "Retail pricing strategy",
+      "Market trend analysis",
+      "Buyer relations",
+    ],
+    icon: "shopping_cart",
+    color: "bg-rose-500",
   },
   {
     role: "Admin",

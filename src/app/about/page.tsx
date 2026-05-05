@@ -85,10 +85,31 @@ const careers = [
 ];
 
 export default function AboutPage() {
-  console.log("[AboutPage] Component Mounting");
   const pageRef = useRef<HTMLDivElement>(null);
   const [settings, setSettings] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+
+  const [stats, setStats] = useState({
+    totalBirdsFunded: 0,
+    activeInvestors: 0,
+    totalReturns: 0,
+    clientSatisfaction: 98,
+  });
+
+  useEffect(() => {
+    async function fetchStats() {
+      try {
+        const res = await fetch("/api/stats");
+        const data = await res.json();
+        if (data && !data.error) {
+          setStats(data);
+        }
+      } catch (err) {
+        console.error("Failed to fetch stats:", err);
+      }
+    }
+    fetchStats();
+  }, []);
 
   useEffect(() => {
     async function load() {
@@ -210,8 +231,55 @@ export default function AboutPage() {
         </div>
       </div>
 
+      {/* Platform Stats */}
+      <div className="bg-white py-16 px-6 border-b border-slate-100">
+        <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+          {[
+            {
+              value: stats.totalBirdsFunded,
+              suffix: "+",
+              label: "Birds Funded",
+              icon: "egg_alt",
+            },
+            {
+              value: stats.activeInvestors,
+              suffix: "+",
+              label: "Active Investors",
+              icon: "group",
+            },
+            {
+              value: stats.totalReturns > 1000000 ? stats.totalReturns / 1000000 : stats.totalReturns,
+              suffix: stats.totalReturns > 1000000 ? "M" : "",
+              prefix: "₦",
+              label: "Total Returns",
+              icon: "trending_up",
+            },
+            {
+              value: stats.clientSatisfaction,
+              suffix: "%",
+              label: "Client Satisfaction",
+              icon: "verified",
+            },
+          ].map((s) => (
+            <div key={s.label} className="stat-card">
+              <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center mx-auto mb-3">
+                <span className="material-symbols-outlined text-accent text-lg">
+                  {s.icon}
+                </span>
+              </div>
+              <p className="font-mono text-2xl md:text-3xl font-bold text-primary tracking-tighter">
+                {s.prefix}{s.value.toLocaleString()}{s.suffix}
+              </p>
+              <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest mt-1">
+                {s.label}
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* Competitive Advantage Ribbon */}
-      <div className="bg-charcoal py-14 px-6 relative overflow-hidden mt-12">
+      <div className="bg-charcoal py-14 px-6 relative overflow-hidden">
         <div className="absolute inset-0 bg-[url('/grain.png')] opacity-10 pointer-events-none" />
         <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6 relative z-10">
           {dynamicAdvantages.map((a) => (
