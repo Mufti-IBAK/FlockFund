@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import gsap from "gsap";
+import SignatureModal from "@/components/SignatureModal";
 
 interface Flock {
   id: string;
@@ -50,6 +51,8 @@ export default function InvestPage() {
   const [signingAgreement, setSigningAgreement] = useState(false);
   const [showFullAgreement, setShowFullAgreement] = useState(false);
   const [qty, setQty] = useState(1);
+  const [showSignModal, setShowSignModal] = useState(false);
+  const [signError, setSignError] = useState("");
   const pageRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -143,16 +146,9 @@ export default function InvestPage() {
   const birdCount = selectedBirdsPerPkg * effectiveQty;
   const totalCost = birdCount * costPerBird;
 
-  async function handleSignAgreement() {
-    const userName = prompt("Confirm Signatory Name (must match your profile):");
-    const userEmail = prompt("Confirm Signatory Email:");
-
-    if (!userName || !userEmail) {
-      alert("Verification cancelled.");
-      return;
-    }
-
+  async function handleSignAgreement(name: string, email: string) {
     setSigningAgreement(true);
+    setSignError("");
     try {
       const { createClient } = await import("@/lib/supabase/client");
       const supabase = createClient();
@@ -161,9 +157,9 @@ export default function InvestPage() {
 
       const { data: profile } = await supabase.from("profiles").select("full_name").eq("id", user.id).single();
 
-      if (userEmail.toLowerCase() !== user.email?.toLowerCase() || 
-          userName.toLowerCase() !== profile?.full_name?.toLowerCase()) {
-        alert("Verification failed. Name or Email does not match your account record.");
+      if (email.toLowerCase() !== user.email?.toLowerCase() || 
+          name.toLowerCase() !== profile?.full_name?.toLowerCase()) {
+        setSignError("Verification failed. Name or Email does not match your account record. Please check your profile.");
         setSigningAgreement(false);
         return;
       }
@@ -177,12 +173,13 @@ export default function InvestPage() {
       if (data.success) {
         setAgreementId(data.agreement_id);
         setAgreementAccepted(true);
+        setShowSignModal(false);
       } else {
-        alert("Failed to sign agreement. Please try again.");
+        setSignError(data.error || "Failed to sign agreement. Please try again.");
       }
     } catch (err) {
       console.error(err);
-      alert("Failed to sign agreement.");
+      setSignError("A connection error occurred. Please try again.");
     }
     setSigningAgreement(false);
   }
@@ -549,21 +546,11 @@ TERMS AND CONDITIONS:
                 </div>
               ) : (
                 <button
-                  onClick={handleSignAgreement}
-                  disabled={signingAgreement}
-                  className="w-full py-3 bg-emerald-600 text-white rounded-md font-bold text-xs uppercase tracking-wider hover:bg-emerald-700 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                  onClick={() => setShowSignModal(true)}
+                  className="w-full py-3 bg-emerald-600 text-white rounded-md font-bold text-xs uppercase tracking-wider hover:bg-emerald-700 transition-all flex items-center justify-center gap-2"
                 >
-                  {signingAgreement ? (
-                    <>
-                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                      Signing...
-                    </>
-                  ) : (
-                    <>
-                      <span className="material-symbols-outlined text-sm">draw</span>
-                      I Accept — Sign Agreement
-                    </>
-                  )}
+                  <span className="material-symbols-outlined text-sm">draw</span>
+                  I Accept — Sign Agreement
                 </button>
               )}
             </div>
@@ -648,6 +635,13 @@ TERMS AND CONDITIONS:
           </div>
         </div>
       </div>
+      <SignatureModal
+        isOpen={showSignModal}
+        onClose={() => setShowSignModal(false)}
+        onSign={handleSignAgreement}
+        isSigning={signingAgreement}
+        error={signError}
+      />
     </div>
   );
 }
