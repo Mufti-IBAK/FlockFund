@@ -7,7 +7,7 @@
  * This is distinct from /api/user/switch-role which lets
  * an admin switch their OWN role for dashboard previewing.
  */
-import { createClient } from '@supabase/supabase-js';
+import { createClient } from '@/lib/supabase/server';
 
 const VALID_ROLES = ['admin', 'farm_manager', 'accountant', 'keeper', 'investor', 'sales_manager'];
 
@@ -32,15 +32,7 @@ export async function POST(req: Request) {
       return Response.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // ── Verify caller is an admin ──
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-    if (!supabaseUrl || !supabaseServiceKey) {
-      return Response.json({ error: "Server missing Supabase environment variables." }, { status: 500 });
-    }
-
-    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
+    const supabaseAdmin = await createClient();
 
     const { data: callerProfile, error: callerError } = await supabaseAdmin
       .from('profiles')
