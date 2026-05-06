@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { createClient } from '@/lib/supabase/server';
 
 // GET /api/payments/verify?transaction_id=xxx&tx_ref=xxx
 // Called by the callback page after redirect from Flutterwave
@@ -15,10 +15,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Missing transaction identifier' }, { status: 400 });
     }
 
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    );
+    const supabase = await createClient();
 
     // If status from URL is 'cancelled', mark as failed
     if (status === 'cancelled') {

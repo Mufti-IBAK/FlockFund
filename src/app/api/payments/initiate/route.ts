@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
+import { createClient } from "@/lib/supabase/server";
 
 // POST /api/payments/initiate
 // Body: { investor_id, birds_count, gateway: 'flutterwave', email, flock_id, agreement_id }
@@ -36,10 +36,22 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    );
+    const supabase = await createClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return NextResponse.json(
+        { error: "Unauthorized. Please log in to continue." },
+        { status: 401 },
+      );
+    }
+
+    if (user.id !== investor_id) {
+      return NextResponse.json(
+        { error: "Security mismatch. You can only initiate payments for your own account." },
+        { status: 403 },
+      );
+    }
 
     // Verify the agreement exists
     const { data: agreement } = await supabase
